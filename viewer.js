@@ -157,18 +157,19 @@ export function Viewer() {
   controls.target.set(0, 2, 0);
 
   // LIGHTS
-  const ambient = new THREE.AmbientLight(0xffffff, 0.28);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
   scene.add(ambient);
 
-  const hemi = new THREE.HemisphereLight(0xf8fbff, 0xe9e1d4, 0.70);
+  const hemi = new THREE.HemisphereLight(0xf8fbff, 0xe9e1d4, 0.80);
   scene.add(hemi);
 
   const sun = new THREE.DirectionalLight(0xfff3e3, 2.2);
-  sun.position.set(28, 34, 18);
+  sun.position.set(30, 12, 20);
   sun.castShadow = true;
   sun.shadow.mapSize.set(4096, 4096);
   sun.shadow.bias = -0.00005;
   sun.shadow.normalBias = 0.02;
+  sun.intensity = 1.4;
   scene.add(sun);
 
   const fill = new THREE.DirectionalLight(0xe7eef9, 0.45);
@@ -181,7 +182,7 @@ export function Viewer() {
 
   const groundShadowCatcher = new THREE.Mesh(
     new THREE.PlaneGeometry(1000, 1000),
-    new THREE.ShadowMaterial({ opacity: 0.16 })
+    new THREE.ShadowMaterial({ opacity: 0.08 })
   );
   groundShadowCatcher.rotation.x = -Math.PI / 2;
   groundShadowCatcher.receiveShadow = true;
