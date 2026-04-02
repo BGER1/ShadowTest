@@ -30,11 +30,15 @@ export function Viewer() {
 
   if (!wrapper) throw new Error("Missing #viewerCanvasWrapper");
 
-  const BUILDING_URL =
-    "./models/Testche.glb";
+  // =========================
+  // CONFIG
+  // =========================
 
-  // Replace with your own .hdr/.exr once uploaded somewhere public.
-  // Leave empty string to skip HDRI.
+  // Am besten lokal aus GitHub Pages laden, z. B. ./models/Testche_final.glb
+  const BUILDING_URL = "./models/Testche.glb";
+
+  // Optional: HDRI / EXR für realistischere Environment-Beleuchtung.
+  // Wenn du noch keins hast, leer lassen: ""
   const ENV_URL = "";
 
   const SHEET_ID = "1wp3hwv9EFidEjsW-FdtniqcdWx_H-VQe_LcrQhelf3k";
@@ -42,15 +46,8 @@ export function Viewer() {
   const SHEET_URL =
     `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
 
-  let units = [
-    { key: "TOP1", number: "Top1", floor: "EG", size: "68 m²", price: "€ 289.000", status: "free", rooms: "2", orientation: "Süd-West", outdoor: "Terrasse 14 m²", plan: "" },
-    { key: "TOP2", number: "Top2", floor: "1. OG", size: "74 m²", price: "€ 315.000", status: "reserved", rooms: "3", orientation: "Süd", outdoor: "Balkon 8 m²", plan: "" },
-    { key: "TOP3", number: "Top3", floor: "2. OG", size: "81 m²", price: "€ 349.000", status: "free", rooms: "3", orientation: "Süd-Ost", outdoor: "Loggia 7 m²", plan: "" },
-    { key: "TOP4", number: "Top4", floor: "3. OG", size: "90 m²", price: "€ 389.000", status: "free", rooms: "4", orientation: "West", outdoor: "Balkon 11 m²", plan: "" },
-    { key: "TOP5", number: "Top5", floor: "4. OG", size: "112 m²", price: "Verkauft", status: "sold", rooms: "4", orientation: "Süd-West", outdoor: "Dachterrasse 28 m²", plan: "" }
-  ];
-
-  let showOnlyAvailable = false;
+  const AUTO_ROTATE_DELAY_MS = 10000;
+  const AUTO_ROTATE_START_DELAY_MS = 1200;
 
   const STATUS_COLOR = {
     free: new THREE.Color(0x1f9d55),
@@ -64,8 +61,28 @@ export function Viewer() {
     sold: "Verkauft"
   };
 
-  const AUTO_ROTATE_DELAY_MS = 10000;
-  const AUTO_ROTATE_START_DELAY_MS = 1200;
+  let units = [
+    { key: "TOP1", number: "Top1", floor: "EG", size: "68 m²", price: "€ 289.000", status: "free", rooms: "2", orientation: "Süd-West", outdoor: "Terrasse 14 m²", plan: "" },
+    { key: "TOP2", number: "Top2", floor: "1. OG", size: "74 m²", price: "€ 315.000", status: "reserved", rooms: "3", orientation: "Süd", outdoor: "Balkon 8 m²", plan: "" },
+    { key: "TOP3", number: "Top3", floor: "2. OG", size: "81 m²", price: "€ 349.000", status: "free", rooms: "3", orientation: "Süd-Ost", outdoor: "Loggia 7 m²", plan: "" },
+    { key: "TOP4", number: "Top4", floor: "3. OG", size: "90 m²", price: "€ 389.000", status: "free", rooms: "4", orientation: "West", outdoor: "Balkon 11 m²", plan: "" },
+    { key: "TOP5", number: "Top5", floor: "4. OG", size: "112 m²", price: "Verkauft", status: "sold", rooms: "4", orientation: "Süd-West", outdoor: "Dachterrasse 28 m²", plan: "" }
+  ];
+
+  let showOnlyAvailable = false;
+  let idleTimer = null;
+
+  let root = null;
+  let pickMeshes = [];
+  const unitGroups = new Map();
+
+  let hoveredKey = null;
+  let selectedKey = null;
+  const overlayClones = new Map();
+
+  // =========================
+  // HELPERS
+  // =========================
 
   function normalizeUnitKey(value) {
     const raw = String(value || "").trim().toUpperCase();
@@ -74,7 +91,6 @@ export function Viewer() {
     const match = raw.match(/^TOP(\d+)$/);
     if (match) return `TOP${match[1]}`;
     if (/^\d+$/.test(raw)) return `TOP${raw}`;
-
     return "";
   }
 
@@ -118,9 +134,26 @@ export function Viewer() {
     setSectionOpen(detailsSection, !detailsSection.classList.contains("is-open"));
   });
 
-  // SCENE
+  function setAutoRotate(enabled) {
+    controls.autoRotate = enabled;
+  }
+
+  function scheduleAutoRotateRestart(delay = AUTO_ROTATE_DELAY_MS) {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => setAutoRotate(true), delay);
+  }
+
+  function onUserInteraction() {
+    setAutoRotate(false);
+    scheduleAutoRotateRestart(AUTO_ROTATE_DELAY_MS);
+  }
+
+  // =========================
+  // SCENE / CAMERA / RENDERER
+  // =========================
+
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf5f5f3);
+  scene.background = new THREE.Color(0xf5f4f1);
 
   const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 5000);
 
@@ -131,63 +164,16 @@ export function Viewer() {
   });
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
   wrapper.appendChild(renderer.domElement);
 
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
   pmremGenerator.compileEquirectangularShader();
-
-  // CONTROLS
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.08;
-  controls.rotateSpeed = 0.78;
-  controls.minDistance = 4;
-  controls.maxDistance = 120;
-  controls.maxPolarAngle = Math.PI / 2 - 0.03;
-  controls.minPolarAngle = 0.22;
-  controls.screenSpacePanning = false;
-  controls.autoRotate = false;
-  controls.autoRotateSpeed = 0.55;
-  controls.target.set(0, 2, 0);
-
-  // LIGHTS
-  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
-  scene.add(ambient);
-
-  const hemi = new THREE.HemisphereLight(0xf8fbff, 0xe9e1d4, 0.80);
-  scene.add(hemi);
-
-  const sun = new THREE.DirectionalLight(0xfff3e3, 2.2);
-  sun.position.set(30, 12, 20);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(4096, 4096);
-  sun.shadow.bias = -0.00005;
-  sun.shadow.normalBias = 0.02;
-  sun.intensity = 1.4;
-  scene.add(sun);
-
-  const fill = new THREE.DirectionalLight(0xe7eef9, 0.45);
-  fill.position.set(-16, 12, -14);
-  scene.add(fill);
-
-  const kick = new THREE.DirectionalLight(0xf6efe6, 0.22);
-  kick.position.set(8, 8, -18);
-  scene.add(kick);
-
-  const groundShadowCatcher = new THREE.Mesh(
-    new THREE.PlaneGeometry(1000, 1000),
-    new THREE.ShadowMaterial({ opacity: 0.08 })
-  );
-  groundShadowCatcher.rotation.x = -Math.PI / 2;
-  groundShadowCatcher.receiveShadow = true;
-  groundShadowCatcher.position.y = -0.03;
-  scene.add(groundShadowCatcher);
 
   function resize() {
     const w = wrapper.clientWidth;
@@ -200,23 +186,73 @@ export function Viewer() {
   window.addEventListener("resize", resize);
   resize();
 
-  let idleTimer = null;
+  // =========================
+  // CONTROLS
+  // =========================
 
-  function setAutoRotate(enabled) {
-    controls.autoRotate = enabled;
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.rotateSpeed = 0.8;
+  controls.minDistance = 4;
+  controls.maxDistance = 120;
+  controls.maxPolarAngle = Math.PI / 2 - 0.03;
+  controls.minPolarAngle = 0.22;
+  controls.screenSpacePanning = false;
+  controls.autoRotate = false;
+  controls.autoRotateSpeed = 0.55;
+
+  // =========================
+  // LIGHTING
+  // =========================
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambient);
+
+  const hemi = new THREE.HemisphereLight(0xeaf3ff, 0xd6c7b2, 0.9);
+  scene.add(hemi);
+
+  const sun = new THREE.DirectionalLight(0xfff1df, 2.2);
+  sun.position.set(30, 12, 18);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(4096, 4096);
+  sun.shadow.bias = -0.00005;
+  sun.shadow.normalBias = 0.02;
+  scene.add(sun);
+
+  const fill = new THREE.DirectionalLight(0xdfe8f5, 0.45);
+  fill.position.set(-20, 10, -15);
+  scene.add(fill);
+
+  const groundShadowCatcher = new THREE.Mesh(
+    new THREE.PlaneGeometry(1000, 1000),
+    new THREE.ShadowMaterial({ opacity: 0.08 })
+  );
+  groundShadowCatcher.rotation.x = -Math.PI / 2;
+  groundShadowCatcher.receiveShadow = true;
+  groundShadowCatcher.position.y = -0.03;
+  scene.add(groundShadowCatcher);
+
+  // =========================
+  // ENVIRONMENT
+  // =========================
+
+  async function loadEnvironment() {
+    if (!ENV_URL) return;
+
+    const rgbeLoader = new RGBELoader();
+    const hdrTexture = await rgbeLoader.loadAsync(ENV_URL);
+    hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+    const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
+    scene.environment = envMap;
+
+    hdrTexture.dispose();
   }
 
-  function scheduleAutoRotateRestart(delay = AUTO_ROTATE_DELAY_MS) {
-    if (idleTimer) clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      setAutoRotate(true);
-    }, delay);
-  }
-
-  function onUserInteraction() {
-    setAutoRotate(false);
-    scheduleAutoRotateRestart(AUTO_ROTATE_DELAY_MS);
-  }
+  // =========================
+  // DATA
+  // =========================
 
   async function fetchSheetData() {
     if (!SHEET_ID) return units;
@@ -279,59 +315,21 @@ export function Viewer() {
     }
   }
 
-  // LOADER
+  // =========================
+  // GLTF LOADERS
+  // =========================
+
   const gltfLoader = new GLTFLoader();
   const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/");
   gltfLoader.setDRACOLoader(dracoLoader);
 
-  let root = null;
-  let pickMeshes = [];
-  const unitGroups = new Map();
-
-  let hoveredKey = null;
-  let selectedKey = null;
-  const overlayClones = new Map();
-
-  function collectUnitGroups() {
-    unitGroups.clear();
-
-    const allowedKeys = new Set(units.map((u) => normalizeUnitKey(u.key)));
-
-    root.traverse((obj) => {
-      const key = unitKeyFromName(obj.name);
-      if (!key) return;
-      if (!allowedKeys.has(key)) return;
-      if (!unitGroups.has(key)) {
-        unitGroups.set(key, obj);
-      }
-    });
-
-    console.log("Unit groups found:", [...unitGroups.keys()]);
-  }
-
   function tuneMaterial(material) {
     if (!material) return;
 
-    material.needsUpdate = true;
-
-    // Keep baked colors stable.
-    if ("metalness" in material) {
-      material.metalness = Math.min(material.metalness ?? 0, 0.15);
-    }
-
-    if ("roughness" in material) {
-      material.roughness = Math.max(material.roughness ?? 0.85, 0.78);
-    }
-
-    // PBR materials benefit from environment light.
-    if ("envMapIntensity" in material) {
-      material.envMapIntensity = 0.55;
-    }
-
-    if ("transparent" in material && material.transparent) {
-      material.depthWrite = false;
-    }
+    if ("metalness" in material) material.metalness = 0.0;
+    if ("roughness" in material) material.roughness = Math.max(material.roughness ?? 0.85, 0.78);
+    if ("envMapIntensity" in material) material.envMapIntensity = 0.45;
 
     if ("map" in material && material.map) {
       material.map.colorSpace = THREE.SRGBColorSpace;
@@ -341,9 +339,11 @@ export function Viewer() {
       material.emissiveMap.colorSpace = THREE.SRGBColorSpace;
     }
 
-    if ("normalScale" in material && material.normalScale) {
-      material.normalScale.set(1, 1);
+    if ("transparent" in material && material.transparent) {
+      material.depthWrite = false;
     }
+
+    material.needsUpdate = true;
   }
 
   function tuneMesh(mesh) {
@@ -356,6 +356,104 @@ export function Viewer() {
       tuneMaterial(mesh.material);
     }
   }
+
+  function collectUnitGroups() {
+    unitGroups.clear();
+
+    const allowedKeys = new Set(units.map((u) => normalizeUnitKey(u.key)));
+
+    root.traverse((obj) => {
+      const key = unitKeyFromName(obj.name);
+      if (!key) return;
+      if (!allowedKeys.has(key)) return;
+      if (!unitGroups.has(key)) unitGroups.set(key, obj);
+    });
+
+    console.log("Unit groups found:", [...unitGroups.keys()]);
+  }
+
+  function fitCamera(object) {
+    const box = new THREE.Box3().setFromObject(object);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+
+    camera.position.set(
+      center.x + maxDim * 0.55,
+      center.y + maxDim * 0.22,
+      center.z + maxDim * 0.72
+    );
+
+    controls.target.set(center.x, center.y + size.y * 0.14, center.z);
+    controls.update();
+
+    controls.minDistance = Math.max(4, maxDim * 0.28);
+    controls.maxDistance = Math.max(20, maxDim * 4.8);
+
+    const shadowRange = Math.max(size.x, size.z) * 0.9;
+    sun.shadow.camera.left = -shadowRange;
+    sun.shadow.camera.right = shadowRange;
+    sun.shadow.camera.top = shadowRange;
+    sun.shadow.camera.bottom = -shadowRange;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = Math.max(120, size.y * 10);
+
+    sun.target.position.copy(center);
+    scene.add(sun.target);
+
+    groundShadowCatcher.position.y = box.min.y - 0.025;
+  }
+
+  function loadModel(url) {
+    return new Promise((resolve, reject) => {
+      if (loaderEl) loaderEl.style.display = "block";
+      if (loaderInfo) loaderInfo.textContent = "Loading…";
+
+      gltfLoader.load(
+        url,
+        (gltf) => {
+          root = gltf.scene;
+          window.root = root;
+          pickMeshes = [];
+
+          root.traverse((o) => {
+            if (o.isMesh) {
+              pickMeshes.push(o);
+              tuneMesh(o);
+            }
+          });
+
+          scene.add(root);
+          collectUnitGroups();
+          fitCamera(root);
+
+          if (loaderEl) loaderEl.style.display = "none";
+          if (loaderInfo) loaderInfo.textContent = "";
+
+          resolve(root);
+        },
+        (ev) => {
+          if (!loaderInfo) return;
+          if (ev.total && ev.total > 0) {
+            const p = Math.min(99, Math.round((ev.loaded / ev.total) * 100));
+            loaderInfo.textContent = `Loading… ${p}%`;
+          } else {
+            loaderInfo.textContent = "Loading…";
+          }
+        },
+        (err) => {
+          console.error(err);
+          if (loaderEl) loaderEl.style.display = "none";
+          if (loaderInfo) loaderInfo.textContent = "Fehler beim Laden.";
+          reject(err);
+        }
+      );
+    });
+  }
+
+  // =========================
+  // OVERLAYS
+  // =========================
 
   function clearOverlayGroup(key) {
     const normalized = normalizeUnitKey(key);
@@ -371,9 +469,7 @@ export function Viewer() {
   }
 
   function clearAllOverlays() {
-    for (const key of Array.from(overlayClones.keys())) {
-      clearOverlayGroup(key);
-    }
+    for (const key of Array.from(overlayClones.keys())) clearOverlayGroup(key);
   }
 
   function addOverlayGroup(key, tintColor, opacity = 0.45) {
@@ -406,9 +502,6 @@ export function Viewer() {
       const overlay = new THREE.Mesh(child.geometry, overlayMaterial);
       overlay.userData.__isOverlay = true;
       overlay.renderOrder = 999;
-      overlay.position.set(0, 0, 0);
-      overlay.rotation.set(0, 0, 0);
-      overlay.scale.set(1, 1, 1);
 
       child.add(overlay);
       clones.push(overlay);
@@ -417,14 +510,23 @@ export function Viewer() {
     overlayClones.set(normalized, clones);
   }
 
+  function updateTableRowStates() {
+    const rows = infoRows?.querySelectorAll("tr[data-key]");
+    if (!rows) return;
+
+    rows.forEach((row) => {
+      const key = normalizeUnitKey(row.getAttribute("data-key"));
+      row.classList.toggle("is-active", key === normalizeUnitKey(selectedKey));
+      row.classList.toggle("is-hover", key === normalizeUnitKey(hoveredKey));
+    });
+  }
+
   function refreshVisualState() {
     clearAllOverlays();
 
     if (showOnlyAvailable) {
       units.forEach((u) => {
-        if (u.status === "free") {
-          addOverlayGroup(u.key, STATUS_COLOR.free, 0.36);
-        }
+        if (u.status === "free") addOverlayGroup(u.key, STATUS_COLOR.free, 0.36);
       });
     }
 
@@ -442,23 +544,16 @@ export function Viewer() {
       const shouldShowHovered = !showOnlyAvailable || unit?.status === "free";
       if (shouldShowHovered) {
         const color = STATUS_COLOR[unit?.status] || new THREE.Color(0x3399ff);
-        addOverlayGroup(hoveredKey, color, 0.50);
+        addOverlayGroup(hoveredKey, color, 0.5);
       }
     }
 
     updateTableRowStates();
   }
 
-  function updateTableRowStates() {
-    const rows = infoRows?.querySelectorAll("tr[data-key]");
-    if (!rows) return;
-
-    rows.forEach((row) => {
-      const key = normalizeUnitKey(row.getAttribute("data-key"));
-      row.classList.toggle("is-active", key === normalizeUnitKey(selectedKey));
-      row.classList.toggle("is-hover", key === normalizeUnitKey(hoveredKey));
-    });
-  }
+  // =========================
+  // TABLE / DETAILS
+  // =========================
 
   function renderTable() {
     if (!infoRows) return;
@@ -527,6 +622,18 @@ export function Viewer() {
     }
   }
 
+  async function selectUnit(key) {
+    selectedKey = normalizeUnitKey(key);
+    renderTable();
+    showDetails(getUnitByKey(selectedKey));
+    refreshVisualState();
+
+    setSectionOpen(overviewSection, false);
+    setSectionOpen(detailsSection, true);
+
+    await flyCameraToGroup(selectedKey, 900);
+  }
+
   function flyCameraToGroup(key, ms = 900) {
     const group = unitGroups.get(normalizeUnitKey(key));
     if (!group) return Promise.resolve();
@@ -575,110 +682,34 @@ export function Viewer() {
     });
   }
 
-  async function selectUnit(key) {
-    selectedKey = normalizeUnitKey(key);
-    renderTable();
-    showDetails(getUnitByKey(selectedKey));
+  function updateAvailabilityButton() {
+    if (!availabilityToggle) return;
+    availabilityToggle.classList.toggle("is-active", showOnlyAvailable);
+    availabilityToggle.textContent = showOnlyAvailable
+      ? "Alle Wohnungen anzeigen"
+      : "Nur verfügbare Wohnungen anzeigen";
+  }
+
+  availabilityToggle?.addEventListener("click", () => {
+    showOnlyAvailable = !showOnlyAvailable;
+    hoveredKey = null;
+
+    if (showOnlyAvailable) {
+      const selected = getUnitByKey(selectedKey);
+      if (selected && selected.status !== "free") {
+        selectedKey = null;
+        showDetails(null);
+      }
+    }
+
     refreshVisualState();
+    updateAvailabilityButton();
+    onUserInteraction();
+  });
 
-    setSectionOpen(overviewSection, false);
-    setSectionOpen(detailsSection, true);
-
-    await flyCameraToGroup(selectedKey, 900);
-  }
-
-  function fitCamera(object) {
-    const box = new THREE.Box3().setFromObject(object);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-
-    camera.position.set(
-      center.x + maxDim * 0.55,
-      center.y + maxDim * 0.22,
-      center.z + maxDim * 0.72
-    );
-
-    controls.target.set(center.x, center.y + size.y * 0.14, center.z);
-    controls.update();
-
-    controls.minDistance = Math.max(4, maxDim * 0.28);
-    controls.maxDistance = Math.max(20, maxDim * 4.8);
-
-    const shadowRange = Math.max(size.x, size.z) * 0.9;
-    sun.shadow.camera.left = -shadowRange;
-    sun.shadow.camera.right = shadowRange;
-    sun.shadow.camera.top = shadowRange;
-    sun.shadow.camera.bottom = -shadowRange;
-    sun.shadow.camera.near = 1;
-    sun.shadow.camera.far = Math.max(120, size.y * 10);
-    sun.target.position.copy(center);
-    scene.add(sun.target);
-
-    groundShadowCatcher.position.y = box.min.y - 0.025;
-  }
-
-  function applyEnvironment(texture) {
-    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-    scene.environment = envMap;
-    texture.dispose();
-  }
-
-  async function loadEnvironment() {
-    if (!ENV_URL) return;
-
-    const rgbeLoader = new RGBELoader();
-    const hdrTexture = await rgbeLoader.loadAsync(ENV_URL);
-    applyEnvironment(hdrTexture);
-  }
-
-  function loadModel(url) {
-    return new Promise((resolve, reject) => {
-      if (loaderEl) loaderEl.style.display = "block";
-      if (loaderInfo) loaderInfo.textContent = "Loading…";
-
-      gltfLoader.load(
-        url,
-        (gltf) => {
-          root = gltf.scene;
-          window.root = root;
-          pickMeshes = [];
-
-          root.traverse((o) => {
-            if (o.isMesh) {
-              pickMeshes.push(o);
-              tuneMesh(o);
-            }
-          });
-
-          scene.add(root);
-          collectUnitGroups();
-          fitCamera(root);
-
-          if (loaderEl) loaderEl.style.display = "none";
-          if (loaderInfo) loaderInfo.textContent = "";
-
-          resolve(root);
-        },
-        (ev) => {
-          if (loaderInfo) {
-            if (ev.total && ev.total > 0) {
-              const p = Math.min(99, Math.round((ev.loaded / ev.total) * 100));
-              loaderInfo.textContent = `Loading… ${p}%`;
-            } else {
-              loaderInfo.textContent = "Loading…";
-            }
-          }
-        },
-        (err) => {
-          console.error(err);
-          if (loaderEl) loaderEl.style.display = "none";
-          if (loaderInfo) loaderInfo.textContent = "Fehler beim Laden.";
-          reject(err);
-        }
-      );
-    });
-  }
+  // =========================
+  // RAYCAST
+  // =========================
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
@@ -780,30 +811,9 @@ export function Viewer() {
     await selectUnit(key);
   });
 
-  function updateAvailabilityButton() {
-    if (!availabilityToggle) return;
-    availabilityToggle.classList.toggle("is-active", showOnlyAvailable);
-    availabilityToggle.textContent = showOnlyAvailable
-      ? "Alle Wohnungen anzeigen"
-      : "Nur verfügbare Wohnungen anzeigen";
-  }
-
-  availabilityToggle?.addEventListener("click", () => {
-    showOnlyAvailable = !showOnlyAvailable;
-    hoveredKey = null;
-
-    if (showOnlyAvailable) {
-      const selected = getUnitByKey(selectedKey);
-      if (selected && selected.status !== "free") {
-        selectedKey = null;
-        showDetails(null);
-      }
-    }
-
-    refreshVisualState();
-    updateAvailabilityButton();
-    onUserInteraction();
-  });
+  // =========================
+  // INIT / ANIMATE
+  // =========================
 
   async function init() {
     renderTable();
