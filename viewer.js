@@ -31,7 +31,7 @@ export function Viewer() {
   if (!wrapper) throw new Error("Missing #viewerCanvasWrapper");
 
   const BUILDING_URL =
-    "https://dhhvajuaoebokmqswxad.supabase.co/storage/v1/object/public/models/Testche.glb";
+    "./models/Testche.glb";
 
   // Replace with your own .hdr/.exr once uploaded somewhere public.
   // Leave empty string to skip HDRI.
