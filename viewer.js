@@ -34,11 +34,9 @@ export function Viewer() {
   // CONFIG
   // =========================
 
-  // Am besten lokal aus GitHub Pages laden, z. B. ./models/Testche_final.glb
   const BUILDING_URL = "./models/Testche.glb";
 
-  // Optional: HDRI / EXR für realistischere Environment-Beleuchtung.
-  // Wenn du noch keins hast, leer lassen: ""
+  // Optional HDRI. Leave empty if you do not use one.
   const ENV_URL = "";
 
   const SHEET_ID = "1wp3hwv9EFidEjsW-FdtniqcdWx_H-VQe_LcrQhelf3k";
@@ -88,15 +86,19 @@ export function Viewer() {
     const raw = String(value || "").trim().toUpperCase();
     if (!raw) return "";
 
-    const match = raw.match(/^TOP(\d+)$/);
+    const match = raw.match(/TOP[\s_.-]*(\d+)/);
     if (match) return `TOP${match[1]}`;
+
     if (/^\d+$/.test(raw)) return `TOP${raw}`;
+
     return "";
   }
 
+  // More flexible than the old function.
+  // Detects: TOP1, Top1, TOP 1, TOP_1, TOP-1, TOP1.001, TOP1_mesh, etc.
   function unitKeyFromName(nameRaw) {
     const raw = String(nameRaw || "").trim().toUpperCase();
-    const match = raw.match(/^TOP(\d+)$/);
+    const match = raw.match(/TOP[\s_.-]*(\d+)/);
     return match ? `TOP${match[1]}` : "";
   }
 
@@ -153,7 +155,7 @@ export function Viewer() {
   // =========================
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf5f4f1);
+  scene.background = new THREE.Color(0xffffff);
 
   const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 5000);
 
@@ -165,10 +167,14 @@ export function Viewer() {
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.08;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  // Cleaner color output for baked GLB textures.
+  // This avoids ACES/Filmic making whites look grey/darker.
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.toneMappingExposure = 1;
+
+  // Shadows disabled to remove the long shadow behind the building.
+  renderer.shadowMap.enabled = false;
 
   wrapper.appendChild(renderer.domElement);
 
@@ -206,32 +212,25 @@ export function Viewer() {
   // LIGHTING
   // =========================
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  // Soft even lighting. No shadow casting.
+  const ambient = new THREE.AmbientLight(0xffffff, 1.25);
   scene.add(ambient);
 
-  const hemi = new THREE.HemisphereLight(0xeaf3ff, 0xd6c7b2, 0.9);
+  const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 1.0);
   scene.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xfff1df, 2.2);
+  const sun = new THREE.DirectionalLight(0xffffff, 0.8);
   sun.position.set(30, 12, 18);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(4096, 4096);
-  sun.shadow.bias = -0.00005;
-  sun.shadow.normalBias = 0.02;
+  sun.castShadow = false;
   scene.add(sun);
 
-  const fill = new THREE.DirectionalLight(0xdfe8f5, 0.45);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.45);
   fill.position.set(-20, 10, -15);
+  fill.castShadow = false;
   scene.add(fill);
 
-  const groundShadowCatcher = new THREE.Mesh(
-    new THREE.PlaneGeometry(1000, 1000),
-    new THREE.ShadowMaterial({ opacity: 0.08 })
-  );
-  groundShadowCatcher.rotation.x = -Math.PI / 2;
-  groundShadowCatcher.receiveShadow = true;
-  groundShadowCatcher.position.y = -0.03;
-  scene.add(groundShadowCatcher);
+  // Removed old groundShadowCatcher.
+  // That was the large invisible plane receiving the long shadow.
 
   // =========================
   // ENVIRONMENT
@@ -329,7 +328,7 @@ export function Viewer() {
 
     if ("metalness" in material) material.metalness = 0.0;
     if ("roughness" in material) material.roughness = Math.max(material.roughness ?? 0.85, 0.78);
-    if ("envMapIntensity" in material) material.envMapIntensity = 0.45;
+    if ("envMapIntensity" in material) material.envMapIntensity = 0.25;
 
     if ("map" in material && material.map) {
       material.map.colorSpace = THREE.SRGBColorSpace;
@@ -347,8 +346,9 @@ export function Viewer() {
   }
 
   function tuneMesh(mesh) {
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    // Shadows disabled for clean white background and no long shadow.
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
 
     if (Array.isArray(mesh.material)) {
       mesh.material.forEach(tuneMaterial);
@@ -366,10 +366,24 @@ export function Viewer() {
       const key = unitKeyFromName(obj.name);
       if (!key) return;
       if (!allowedKeys.has(key)) return;
+
+      // Keep the first matching object for each TOP.
+      // Usually this is the parent/group. If only the mesh exists, that is also fine.
       if (!unitGroups.has(key)) unitGroups.set(key, obj);
     });
 
     console.log("Unit groups found:", [...unitGroups.keys()]);
+
+    if (unitGroups.size === 0) {
+      console.warn("No TOP groups found. Check the GLB object names in the console output below.");
+    }
+  }
+
+  function logObjectNames() {
+    console.log("All object names in GLB:");
+    root.traverse((o) => {
+      if (o.name) console.log(o.name);
+    });
   }
 
   function fitCamera(object) {
@@ -389,19 +403,6 @@ export function Viewer() {
 
     controls.minDistance = Math.max(4, maxDim * 0.28);
     controls.maxDistance = Math.max(20, maxDim * 4.8);
-
-    const shadowRange = Math.max(size.x, size.z) * 0.9;
-    sun.shadow.camera.left = -shadowRange;
-    sun.shadow.camera.right = shadowRange;
-    sun.shadow.camera.top = shadowRange;
-    sun.shadow.camera.bottom = -shadowRange;
-    sun.shadow.camera.near = 1;
-    sun.shadow.camera.far = Math.max(120, size.y * 10);
-
-    sun.target.position.copy(center);
-    scene.add(sun.target);
-
-    groundShadowCatcher.position.y = box.min.y - 0.025;
   }
 
   function loadModel(url) {
@@ -424,6 +425,8 @@ export function Viewer() {
           });
 
           scene.add(root);
+
+          logObjectNames();
           collectUnitGroups();
           fitCamera(root);
 
@@ -485,6 +488,11 @@ export function Viewer() {
         originals.push(child);
       }
     });
+
+    // If the matched object itself is a mesh, group.traverse should already catch it.
+    if (group.isMesh && group.geometry && !group.userData.__isOverlay && !originals.includes(group)) {
+      originals.push(group);
+    }
 
     const clones = [];
 
@@ -599,26 +607,31 @@ export function Viewer() {
 
     detailsCard?.classList.remove("is-hidden");
 
-    detailsTitle.textContent = unit.number || "—";
-    detailsBadge.className = `badge ${unit.status}`;
-    detailsBadge.textContent = STATUS_LABEL[unit.status] || unit.status;
+    if (detailsTitle) detailsTitle.textContent = unit.number || "—";
 
-    detailsSize.textContent = unit.size || "—";
-    detailsPrice.textContent = unit.price || "—";
-    detailsRooms.textContent = unit.rooms || "—";
-    detailsFloor.textContent = unit.floor || "—";
-    detailsOrientation.textContent = unit.orientation || "—";
-    detailsOutdoor.textContent = unit.outdoor || "—";
+    if (detailsBadge) {
+      detailsBadge.className = `badge ${unit.status}`;
+      detailsBadge.textContent = STATUS_LABEL[unit.status] || unit.status;
+    }
+
+    if (detailsSize) detailsSize.textContent = unit.size || "—";
+    if (detailsPrice) detailsPrice.textContent = unit.price || "—";
+    if (detailsRooms) detailsRooms.textContent = unit.rooms || "—";
+    if (detailsFloor) detailsFloor.textContent = unit.floor || "—";
+    if (detailsOrientation) detailsOrientation.textContent = unit.orientation || "—";
+    if (detailsOutdoor) detailsOutdoor.textContent = unit.outdoor || "—";
 
     const planUrl = resolvePlanUrl(unit.plan);
-    if (planUrl) {
-      detailsPlan.src = planUrl;
-      detailsPlan.classList.remove("is-hidden");
-      detailsPlanEmpty.style.display = "none";
-    } else {
-      detailsPlan.removeAttribute("src");
-      detailsPlan.classList.add("is-hidden");
-      detailsPlanEmpty.style.display = "block";
+    if (detailsPlan && detailsPlanEmpty) {
+      if (planUrl) {
+        detailsPlan.src = planUrl;
+        detailsPlan.classList.remove("is-hidden");
+        detailsPlanEmpty.style.display = "none";
+      } else {
+        detailsPlan.removeAttribute("src");
+        detailsPlan.classList.add("is-hidden");
+        detailsPlanEmpty.style.display = "block";
+      }
     }
   }
 
@@ -722,11 +735,14 @@ export function Viewer() {
 
   function findKeyByWalkingParents(obj) {
     let cur = obj;
-    while (cur && cur !== root) {
+
+    while (cur) {
       const key = unitKeyFromName(cur.name);
       if (key) return key;
+      if (cur === root) break;
       cur = cur.parent;
     }
+
     return null;
   }
 
@@ -739,15 +755,19 @@ export function Viewer() {
     const hits = raycaster.intersectObjects(pickMeshes, true);
 
     if (!hits.length) {
-      hoveredKey = null;
-      refreshVisualState();
+      if (hoveredKey !== null) {
+        hoveredKey = null;
+        refreshVisualState();
+      }
       return;
     }
 
     const key = findKeyByWalkingParents(hits[0].object);
     if (!key) {
-      hoveredKey = null;
-      refreshVisualState();
+      if (hoveredKey !== null) {
+        hoveredKey = null;
+        refreshVisualState();
+      }
       return;
     }
 
