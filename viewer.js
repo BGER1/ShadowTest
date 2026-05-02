@@ -11,6 +11,9 @@ export function Viewer() {
   const infoRows = document.getElementById("infoRows");
   const availabilityToggle = document.getElementById("availabilityToggle");
 
+  const navigatorStart = document.getElementById("navigatorStart");
+  const startNavigatorBtn = document.getElementById("startNavigatorBtn");
+
   const overviewSection = document.getElementById("overviewSection");
   const detailsSection = document.getElementById("detailsSection");
   const overviewHeader = document.getElementById("overviewHeader");
@@ -30,13 +33,7 @@ export function Viewer() {
 
   if (!wrapper) throw new Error("Missing #viewerCanvasWrapper");
 
-  // =========================
-  // CONFIG
-  // =========================
-
   const BUILDING_URL = "./models/Testche.glb";
-
-  // Optional HDRI. Leave empty if you do not use one.
   const ENV_URL = "";
 
   const SHEET_ID = "1wp3hwv9EFidEjsW-FdtniqcdWx_H-VQe_LcrQhelf3k";
@@ -69,33 +66,23 @@ export function Viewer() {
 
   let showOnlyAvailable = false;
   let idleTimer = null;
-
   let root = null;
   let pickMeshes = [];
   const unitGroups = new Map();
-
   let hoveredKey = null;
   let selectedKey = null;
   const overlayClones = new Map();
-
-  // =========================
-  // HELPERS
-  // =========================
+  let hasStarted = false;
 
   function normalizeUnitKey(value) {
     const raw = String(value || "").trim().toUpperCase();
     if (!raw) return "";
-
     const match = raw.match(/TOP[\s_.-]*(\d+)/);
     if (match) return `TOP${match[1]}`;
-
     if (/^\d+$/.test(raw)) return `TOP${raw}`;
-
     return "";
   }
 
-  // More flexible than the old function.
-  // Detects: TOP1, Top1, TOP 1, TOP_1, TOP-1, TOP1.001, TOP1_mesh, etc.
   function unitKeyFromName(nameRaw) {
     const raw = String(nameRaw || "").trim().toUpperCase();
     const match = raw.match(/TOP[\s_.-]*(\d+)/);
@@ -146,13 +133,10 @@ export function Viewer() {
   }
 
   function onUserInteraction() {
+    if (!hasStarted) return;
     setAutoRotate(false);
     scheduleAutoRotateRestart(AUTO_ROTATE_DELAY_MS);
   }
-
-  // =========================
-  // SCENE / CAMERA / RENDERER
-  // =========================
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xffffff);
@@ -167,13 +151,8 @@ export function Viewer() {
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-  // Cleaner color output for baked GLB textures.
-  // This avoids ACES/Filmic making whites look grey/darker.
   renderer.toneMapping = THREE.NoToneMapping;
   renderer.toneMappingExposure = 1;
-
-  // Shadows disabled to remove the long shadow behind the building.
   renderer.shadowMap.enabled = false;
 
   wrapper.appendChild(renderer.domElement);
@@ -182,8 +161,8 @@ export function Viewer() {
   pmremGenerator.compileEquirectangularShader();
 
   function resize() {
-    const w = wrapper.clientWidth;
-    const h = wrapper.clientHeight;
+    const w = wrapper.clientWidth || 1;
+    const h = wrapper.clientHeight || 1;
     renderer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
@@ -192,11 +171,8 @@ export function Viewer() {
   window.addEventListener("resize", resize);
   resize();
 
-  // =========================
-  // CONTROLS
-  // =========================
-
   const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enabled = false;
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.rotateSpeed = 0.8;
@@ -208,11 +184,6 @@ export function Viewer() {
   controls.autoRotate = false;
   controls.autoRotateSpeed = 0.55;
 
-  // =========================
-  // LIGHTING
-  // =========================
-
-  // Soft even lighting. No shadow casting.
   const ambient = new THREE.AmbientLight(0xffffff, 1.25);
   scene.add(ambient);
 
@@ -229,13 +200,6 @@ export function Viewer() {
   fill.castShadow = false;
   scene.add(fill);
 
-  // Removed old groundShadowCatcher.
-  // That was the large invisible plane receiving the long shadow.
-
-  // =========================
-  // ENVIRONMENT
-  // =========================
-
   async function loadEnvironment() {
     if (!ENV_URL) return;
 
@@ -248,10 +212,6 @@ export function Viewer() {
 
     hdrTexture.dispose();
   }
-
-  // =========================
-  // DATA
-  // =========================
 
   async function fetchSheetData() {
     if (!SHEET_ID) return units;
@@ -273,6 +233,7 @@ export function Viewer() {
       const cols = (data.table?.cols || []).map((c) =>
         String(c.label || c.id || "").trim().toLowerCase()
       );
+
       const rows = data.table?.rows || [];
 
       const parsed = rows
@@ -314,10 +275,6 @@ export function Viewer() {
     }
   }
 
-  // =========================
-  // GLTF LOADERS
-  // =========================
-
   const gltfLoader = new GLTFLoader();
   const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/");
@@ -346,7 +303,6 @@ export function Viewer() {
   }
 
   function tuneMesh(mesh) {
-    // Shadows disabled for clean white background and no long shadow.
     mesh.castShadow = false;
     mesh.receiveShadow = false;
 
@@ -366,9 +322,6 @@ export function Viewer() {
       const key = unitKeyFromName(obj.name);
       if (!key) return;
       if (!allowedKeys.has(key)) return;
-
-      // Keep the first matching object for each TOP.
-      // Usually this is the parent/group. If only the mesh exists, that is also fine.
       if (!unitGroups.has(key)) unitGroups.set(key, obj);
     });
 
@@ -437,6 +390,7 @@ export function Viewer() {
         },
         (ev) => {
           if (!loaderInfo) return;
+
           if (ev.total && ev.total > 0) {
             const p = Math.min(99, Math.round((ev.loaded / ev.total) * 100));
             loaderInfo.textContent = `Loading… ${p}%`;
@@ -453,10 +407,6 @@ export function Viewer() {
       );
     });
   }
-
-  // =========================
-  // OVERLAYS
-  // =========================
 
   function clearOverlayGroup(key) {
     const normalized = normalizeUnitKey(key);
@@ -483,13 +433,13 @@ export function Viewer() {
     clearOverlayGroup(normalized);
 
     const originals = [];
+
     group.traverse((child) => {
       if (child.isMesh && child.geometry && !child.userData.__isOverlay) {
         originals.push(child);
       }
     });
 
-    // If the matched object itself is a mesh, group.traverse should already catch it.
     if (group.isMesh && group.geometry && !group.userData.__isOverlay && !originals.includes(group)) {
       originals.push(group);
     }
@@ -541,6 +491,7 @@ export function Viewer() {
     if (selectedKey) {
       const unit = getUnitByKey(selectedKey);
       const shouldShowSelected = !showOnlyAvailable || unit?.status === "free";
+
       if (shouldShowSelected) {
         const color = STATUS_COLOR[unit?.status] || new THREE.Color(0x3399ff);
         addOverlayGroup(selectedKey, color, 0.28);
@@ -550,6 +501,7 @@ export function Viewer() {
     if (hoveredKey) {
       const unit = getUnitByKey(hoveredKey);
       const shouldShowHovered = !showOnlyAvailable || unit?.status === "free";
+
       if (shouldShowHovered) {
         const color = STATUS_COLOR[unit?.status] || new THREE.Color(0x3399ff);
         addOverlayGroup(hoveredKey, color, 0.5);
@@ -558,10 +510,6 @@ export function Viewer() {
 
     updateTableRowStates();
   }
-
-  // =========================
-  // TABLE / DETAILS
-  // =========================
 
   function renderTable() {
     if (!infoRows) return;
@@ -579,18 +527,22 @@ export function Viewer() {
     }).join("");
 
     const rows = infoRows.querySelectorAll("tr[data-key]");
+
     rows.forEach((row) => {
       row.addEventListener("mouseenter", () => {
+        if (!hasStarted) return;
         hoveredKey = normalizeUnitKey(row.getAttribute("data-key"));
         refreshVisualState();
       });
 
       row.addEventListener("mouseleave", () => {
+        if (!hasStarted) return;
         hoveredKey = null;
         refreshVisualState();
       });
 
       row.addEventListener("click", async () => {
+        if (!hasStarted) return;
         onUserInteraction();
         await selectUnit(row.getAttribute("data-key"));
       });
@@ -622,6 +574,7 @@ export function Viewer() {
     if (detailsOutdoor) detailsOutdoor.textContent = unit.outdoor || "—";
 
     const planUrl = resolvePlanUrl(unit.plan);
+
     if (detailsPlan && detailsPlanEmpty) {
       if (planUrl) {
         detailsPlan.src = planUrl;
@@ -697,6 +650,7 @@ export function Viewer() {
 
   function updateAvailabilityButton() {
     if (!availabilityToggle) return;
+
     availabilityToggle.classList.toggle("is-active", showOnlyAvailable);
     availabilityToggle.textContent = showOnlyAvailable
       ? "Alle Wohnungen anzeigen"
@@ -704,11 +658,14 @@ export function Viewer() {
   }
 
   availabilityToggle?.addEventListener("click", () => {
+    if (!hasStarted) return;
+
     showOnlyAvailable = !showOnlyAvailable;
     hoveredKey = null;
 
     if (showOnlyAvailable) {
       const selected = getUnitByKey(selectedKey);
+
       if (selected && selected.status !== "free") {
         selectedKey = null;
         showDetails(null);
@@ -719,10 +676,6 @@ export function Viewer() {
     updateAvailabilityButton();
     onUserInteraction();
   });
-
-  // =========================
-  // RAYCAST
-  // =========================
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
@@ -747,6 +700,7 @@ export function Viewer() {
   }
 
   function onPointerMove(e) {
+    if (!hasStarted) return;
     if (!root) return;
 
     setPointerFromEvent(e);
@@ -763,6 +717,7 @@ export function Viewer() {
     }
 
     const key = findKeyByWalkingParents(hits[0].object);
+
     if (!key) {
       if (hoveredKey !== null) {
         hoveredKey = null;
@@ -780,14 +735,24 @@ export function Viewer() {
   }
 
   renderer.domElement.addEventListener("pointermove", onPointerMove);
+
   renderer.domElement.addEventListener("pointerleave", () => {
+    if (!hasStarted) return;
     hoveredKey = null;
     refreshVisualState();
   });
 
   controls.addEventListener("start", onUserInteraction);
-  renderer.domElement.addEventListener("wheel", onUserInteraction, { passive: true });
-  renderer.domElement.addEventListener("pointerdown", onUserInteraction);
+
+  renderer.domElement.addEventListener("wheel", () => {
+    if (!hasStarted) return;
+    onUserInteraction();
+  }, { passive: true });
+
+  renderer.domElement.addEventListener("pointerdown", () => {
+    if (!hasStarted) return;
+    onUserInteraction();
+  });
 
   const clickState = {
     downX: 0,
@@ -800,6 +765,8 @@ export function Viewer() {
   const CLICK_MAX_MS = 450;
 
   renderer.domElement.addEventListener("pointerdown", (e) => {
+    if (!hasStarted) return;
+
     clickState.isDown = true;
     clickState.downX = e.clientX;
     clickState.downY = e.clientY;
@@ -807,7 +774,9 @@ export function Viewer() {
   });
 
   renderer.domElement.addEventListener("pointerup", async (e) => {
+    if (!hasStarted) return;
     if (!clickState.isDown) return;
+
     clickState.isDown = false;
 
     const dx = e.clientX - clickState.downX;
@@ -831,16 +800,15 @@ export function Viewer() {
     await selectUnit(key);
   });
 
-  // =========================
-  // INIT / ANIMATE
-  // =========================
-
   async function init() {
+    if (root) return;
+
     renderTable();
     showDetails(null);
     updateAvailabilityButton();
 
     await fetchSheetData();
+
     renderTable();
     updateAvailabilityButton();
 
@@ -848,6 +816,7 @@ export function Viewer() {
     await loadModel(BUILDING_URL);
 
     if (loaderInfo) loaderInfo.textContent = "Loading… 100%";
+
     setTimeout(() => {
       if (loaderEl) loaderEl.style.display = "none";
       if (loaderInfo) loaderInfo.textContent = "";
@@ -859,9 +828,28 @@ export function Viewer() {
     }, AUTO_ROTATE_START_DELAY_MS);
   }
 
+  startNavigatorBtn?.addEventListener("click", async () => {
+    if (hasStarted) return;
+
+    hasStarted = true;
+
+    if (navigatorStart) navigatorStart.style.display = "none";
+
+    wrapper.style.display = "block";
+    resize();
+
+    controls.enabled = true;
+
+    await init();
+  });
+
   function animate() {
     requestAnimationFrame(animate);
-    controls.update();
+
+    if (hasStarted) {
+      controls.update();
+    }
+
     renderer.render(scene, camera);
   }
 
