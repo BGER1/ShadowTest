@@ -2,10 +2,56 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <title>Wohnungsfinder</title>
+  <title>Wohnungsnavigator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <link rel="stylesheet" href="./viewer.css" />
+
+  <style>
+    .viewer-area {
+      position: relative;
+    }
+
+    #viewerCanvasWrapper {
+      display: none;
+    }
+
+    .navigator-start {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(rgba(20, 20, 20, 0.45), rgba(20, 20, 20, 0.45)),
+        url("./startbild.jpg");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .navigator-start-content {
+      text-align: center;
+      color: white;
+    }
+
+    .navigator-start-title {
+      font-size: 30px;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    #startNavigatorBtn {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 32px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      background: white;
+      color: #111;
+    }
+  </style>
 
   <script type="importmap">
   {
@@ -19,6 +65,13 @@
 <body>
   <div class="app">
     <div class="viewer-area">
+      <div id="navigatorStart" class="navigator-start">
+        <div class="navigator-start-content">
+          <div class="navigator-start-title">3D-Wohnungsnavigator</div>
+          <button id="startNavigatorBtn">Starten</button>
+        </div>
+      </div>
+
       <div id="viewerCanvasWrapper"></div>
 
       <button id="availabilityToggle" class="availability-toggle">
@@ -32,10 +85,6 @@
     </div>
 
     <aside class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Wohnungsfinder</div>
-      </div>
-
       <div class="panel-section section-collapsible is-open" id="overviewSection">
         <div class="section-header" id="overviewHeader">
           <span>Wohnungsübersicht</span>
