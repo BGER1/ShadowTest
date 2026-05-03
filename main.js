@@ -1,3 +1,4 @@
 import { Viewer } from "./viewer.js";
 
-Viewer();
+const viewer = Viewer();
+viewer.init();
