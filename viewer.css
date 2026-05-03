@@ -1,3 +1,71 @@
+/* ---------- LAYOUT ---------- */
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.viewer-area {
+  position: relative;
+  flex: 1;
+}
+
+#viewerCanvasWrapper {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- SIDEBAR ---------- */
+
+#sidePanel {
+  width: 360px;
+  background: white;
+  display: none; /* 🔥 versteckt am Anfang */
+}
+
+/* ---------- OVERLAY ---------- */
+
+.navigator-start {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  background: rgba(40,40,40,0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navigator-start-content {
+  text-align: center;
+}
+
+/* ---------- BUTTON ---------- */
+
+#startNavigatorBtn {
+  padding: 16px 34px;
+  border-radius: 999px;
+  border: none;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  background: white;
+  color: #111;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  transition: all 0.2s ease;
+}
+
+#startNavigatorBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.3);
+}
 :root {
   --bg: #ffffff;
   --panel-bg: #ffffff;
