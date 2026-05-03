@@ -1,1 +1,124 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Wohnungsnavigator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
+  <link rel="stylesheet" href="./viewer.css" />
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+
+<body>
+
+  <!-- 🔥 FULLSCREEN OVERLAY -->
+  <div id="navigatorStart" class="navigator-start">
+    <div class="navigator-start-content">
+      <button id="startNavigatorBtn">
+        3D-Wohnungsnavigator starten
+      </button>
+    </div>
+  </div>
+
+  <div class="app">
+
+    <div class="viewer-area">
+      <div id="viewerCanvasWrapper"></div>
+
+      <button id="availabilityToggle" class="availability-toggle">
+        Nur verfügbare Wohnungen anzeigen
+      </button>
+
+      <div class="loader" id="loader">
+        <div class="loader-text" id="loaderInfo">Loading…</div>
+        <div class="loader-spinner"></div>
+      </div>
+    </div>
+
+    <!-- 🔥 SIDEBAR (initial hidden via CSS) -->
+    <aside class="panel" id="sidePanel">
+      <div class="panel-section section-collapsible is-open" id="overviewSection">
+        <div class="section-header" id="overviewHeader">
+          <span>Wohnungsübersicht</span>
+          <span class="section-arrow">▾</span>
+        </div>
+
+        <div class="section-body">
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Nummer</th>
+                <th>Etage</th>
+                <th>Größe</th>
+                <th>Preis</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="infoRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel-section section-collapsible" id="detailsSection">
+        <div class="section-header" id="detailsHeader">
+          <span>Details</span>
+          <span class="section-arrow">▾</span>
+        </div>
+
+        <div class="section-body">
+          <div id="detailsCard" class="details-card is-hidden">
+            <div class="details-top">
+              <div class="details-title" id="detailsTitle">Wohnung</div>
+              <div id="detailsBadge" class="badge">Status</div>
+            </div>
+
+            <div class="details-grid">
+              <div class="detail-item">
+                <div class="detail-label">Größe</div>
+                <div class="detail-value" id="detailsSize">—</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Preis</div>
+                <div class="detail-value" id="detailsPrice">—</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Zimmer</div>
+                <div class="detail-value" id="detailsRooms">—</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Etage</div>
+                <div class="detail-value" id="detailsFloor">—</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Ausrichtung</div>
+                <div class="detail-value" id="detailsOrientation">—</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Freifläche</div>
+                <div class="detail-value" id="detailsOutdoor">—</div>
+              </div>
+            </div>
+
+            <div class="plan-wrap">
+              <div class="detail-label">Grundriss</div>
+              <img id="detailsPlan" class="details-plan is-hidden" />
+              <div id="detailsPlanEmpty">Kein Grundriss hinterlegt.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script type="module" src="./main.js"></script>
+
+</body>
+</html>
