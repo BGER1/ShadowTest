@@ -13,6 +13,7 @@ export function Viewer() {
 
   const navigatorStart = document.getElementById("navigatorStart");
   const startNavigatorBtn = document.getElementById("startNavigatorBtn");
+  const sidePanel = document.getElementById("sidePanel");
 
   const overviewSection = document.getElementById("overviewSection");
   const detailsSection = document.getElementById("detailsSection");
@@ -72,14 +73,22 @@ export function Viewer() {
   let hoveredKey = null;
   let selectedKey = null;
   const overlayClones = new Map();
+
   let hasStarted = false;
+  let hasLoaded = false;
+
+  if (sidePanel) sidePanel.style.display = "none";
+  if (availabilityToggle) availabilityToggle.style.display = "none";
 
   function normalizeUnitKey(value) {
     const raw = String(value || "").trim().toUpperCase();
     if (!raw) return "";
+
     const match = raw.match(/TOP[\s_.-]*(\d+)/);
     if (match) return `TOP${match[1]}`;
+
     if (/^\d+$/.test(raw)) return `TOP${raw}`;
+
     return "";
   }
 
@@ -124,10 +133,12 @@ export function Viewer() {
   });
 
   function setAutoRotate(enabled) {
+    if (!hasStarted) return;
     controls.autoRotate = enabled;
   }
 
   function scheduleAutoRotateRestart(delay = AUTO_ROTATE_DELAY_MS) {
+    if (!hasStarted) return;
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(() => setAutoRotate(true), delay);
   }
@@ -590,12 +601,15 @@ export function Viewer() {
 
   async function selectUnit(key) {
     selectedKey = normalizeUnitKey(key);
+
+    if (sidePanel) sidePanel.style.display = "block";
+
+    setSectionOpen(overviewSection, true);
+    setSectionOpen(detailsSection, true);
+
     renderTable();
     showDetails(getUnitByKey(selectedKey));
     refreshVisualState();
-
-    setSectionOpen(overviewSection, false);
-    setSectionOpen(detailsSection, true);
 
     await flyCameraToGroup(selectedKey, 900);
   }
@@ -801,11 +815,15 @@ export function Viewer() {
   });
 
   async function init() {
-    if (root) return;
+    if (hasLoaded) return;
+    hasLoaded = true;
 
     renderTable();
     showDetails(null);
     updateAvailabilityButton();
+
+    if (sidePanel) sidePanel.style.display = "none";
+    if (availabilityToggle) availabilityToggle.style.display = "none";
 
     await fetchSheetData();
 
@@ -821,26 +839,22 @@ export function Viewer() {
       if (loaderEl) loaderEl.style.display = "none";
       if (loaderInfo) loaderInfo.textContent = "";
     }, 120);
-
-    setTimeout(() => {
-      setAutoRotate(true);
-      scheduleAutoRotateRestart(AUTO_ROTATE_DELAY_MS);
-    }, AUTO_ROTATE_START_DELAY_MS);
   }
 
-  startNavigatorBtn?.addEventListener("click", async () => {
+  startNavigatorBtn?.addEventListener("click", () => {
     if (hasStarted) return;
 
     hasStarted = true;
 
     if (navigatorStart) navigatorStart.style.display = "none";
-
-    wrapper.style.display = "block";
-    resize();
+    if (availabilityToggle) availabilityToggle.style.display = "block";
 
     controls.enabled = true;
 
-    await init();
+    setTimeout(() => {
+      setAutoRotate(true);
+      scheduleAutoRotateRestart(AUTO_ROTATE_DELAY_MS);
+    }, AUTO_ROTATE_START_DELAY_MS);
   });
 
   function animate() {
