@@ -364,48 +364,49 @@ body {
 }
 
 @media (max-width: 1080px) {
-  .panel {
-    position: absolute;
-    right: 0;
-    top: 0;
-    left: auto;
-    bottom: auto;
-
-    width: 40%;
-    min-width: 0;
-    max-width: 40%;
-
-    height: 100%;
-
-    border-left: 1px solid var(--border);
-    border-top: none;
-
-    padding: 10px;
-  }
-
-  .info-table {
+  .section-header {
     font-size: 10px;
-  }
-
-  .info-table thead th,
-  .info-table tbody td {
-    padding: 7px 4px;
-  }
-}
-
-  .availability-toggle {
-    left: 12px;
-    bottom: 12px;
-    font-size: 12px;
-    padding: 10px 12px;
+    padding: 10px 8px;
+    letter-spacing: 0.03em;
   }
 
   .details-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 
   .detail-item {
-    padding: 9px 10px;
+    padding: 7px 8px;
+  }
+
+  .detail-label {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+
+  .detail-value {
+    font-size: 12px;
+  }
+
+  /* Mobile: nur Größe, Preis, Zimmer anzeigen */
+  .details-grid .detail-item:nth-child(4),
+  .details-grid .detail-item:nth-child(5),
+  .details-grid .detail-item:nth-child(6) {
+    display: none;
+  }
+
+  .details-title {
+    font-size: 15px;
+  }
+
+  .badge {
+    font-size: 9px;
+    padding: 3px 7px;
+    min-height: 20px;
+  }
+
+  .plan-wrap {
+    padding: 8px;
+    margin-top: 8px;
   }
 }
