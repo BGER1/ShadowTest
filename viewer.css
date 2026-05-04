@@ -368,8 +368,12 @@ body {
     position: absolute;
     right: 0;
     top: 0;
+    left: auto;
+    bottom: auto;
 
-    width: 320px;   /* etwas schmaler für mobile */
+    width: 30vw;
+    min-width: 280px;
+    max-width: 360px;
     height: 100%;
 
     border-left: 1px solid var(--border);
