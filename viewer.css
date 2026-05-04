@@ -364,15 +364,52 @@ body {
 }
 
 @media (max-width: 1080px) {
+  .panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    left: auto;
+    bottom: auto;
+
+    width: 40%;
+    max-width: 40%;
+    min-width: 0;
+
+    height: 100%;
+    padding: 10px;
+  }
+
   .section-header {
     font-size: 10px;
     padding: 10px 8px;
     letter-spacing: 0.03em;
   }
 
+  .info-table {
+    font-size: 10px;
+  }
+
+  .info-table th:nth-child(2),
+  .info-table td:nth-child(2),
+  .info-table th:nth-child(5),
+  .info-table td:nth-child(5) {
+    display: none;
+  }
+
+  .info-table thead th,
+  .info-table tbody td {
+    padding: 7px 4px;
+  }
+
   .details-grid {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .details-grid .detail-item:nth-child(4),
+  .details-grid .detail-item:nth-child(5),
+  .details-grid .detail-item:nth-child(6) {
+    display: none;
   }
 
   .detail-item {
@@ -386,13 +423,6 @@ body {
 
   .detail-value {
     font-size: 12px;
-  }
-
-  /* Mobile: nur Größe, Preis, Zimmer anzeigen */
-  .details-grid .detail-item:nth-child(4),
-  .details-grid .detail-item:nth-child(5),
-  .details-grid .detail-item:nth-child(6) {
-    display: none;
   }
 
   .details-title {
