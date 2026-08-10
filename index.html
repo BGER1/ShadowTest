@@ -8,6 +8,7 @@
   <title>Wohnungsnavigator</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -39,11 +40,12 @@
     .viewer-area {
       position: relative;
       flex: 1;
-      height: 100vh;
       min-width: 0;
-      background: #111;
+      height: 100vh;
       overflow: hidden;
+      background: #111;
     }
+
 
     /* =========================================================
        ORBIT VIEWER
@@ -72,28 +74,40 @@
       cursor: grabbing;
     }
 
+
     /* =========================================================
        BLURRED BACKGROUND
 
-       This is the same current orbit image,
-       enlarged and blurred behind the sharp image.
+       Same photo as the current frame.
+       It fills the entire viewer.
+
+       Because the sharp image below is smaller and positioned
+       lower, the blur remains especially visible at the top
+       as an extended sky/background area.
     ========================================================= */
 
     #orbitBackground {
       position: absolute;
 
-      inset: -40px;
+      inset: -45px;
 
-      width: calc(100% + 80px);
-      height: calc(100% + 80px);
+      width: calc(100% + 90px);
+      height: calc(100% + 90px);
 
       object-fit: cover;
-      object-position: center;
 
-      filter: blur(28px);
-      transform: scale(1.08);
+      /*
+        Important:
+        Bias background upward slightly so the blurred
+        area above the image mostly comes from the sky.
+      */
+      object-position: center 25%;
 
-      opacity: 0.92;
+      filter: blur(30px);
+
+      transform: scale(1.09);
+
+      opacity: 0.95;
 
       pointer-events: none;
 
@@ -102,11 +116,19 @@
       -webkit-user-drag: none;
     }
 
+
     /* =========================================================
        SHARP MAIN IMAGE
 
-       86% means the image is slightly zoomed out,
-       leaving about 7% blurred border on each side.
+       Main photo is:
+       - 86% wide
+       - 84% high
+       - only 4% from top
+       - centered horizontally
+
+       Result:
+       less border on top of the sharp photo itself,
+       while the overall composition gives more sky space.
     ========================================================= */
 
     #orbitImage {
@@ -116,10 +138,15 @@
       top: 7%;
 
       width: 86%;
-      height: 86%;
+      height: 84%;
 
       object-fit: contain;
-      object-position: center;
+
+      /*
+        Keep actual photo slightly lower inside its area,
+        so we don't unnecessarily cut off its sky.
+      */
+      object-position: center center;
 
       pointer-events: none;
 
@@ -128,8 +155,36 @@
       -webkit-user-drag: none;
 
       box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.18);
+        0 8px 28px rgba(0, 0, 0, 0.15);
     }
+
+
+    /* =========================================================
+       SOFT EDGE
+
+       Creates a more natural transition around the photo.
+    ========================================================= */
+
+    #orbitImage {
+      -webkit-mask-image:
+        linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.96) 0%,
+          rgba(0,0,0,1) 5%,
+          rgba(0,0,0,1) 94%,
+          rgba(0,0,0,0.95) 100%
+        );
+
+      mask-image:
+        linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.96) 0%,
+          rgba(0,0,0,1) 5%,
+          rgba(0,0,0,1) 94%,
+          rgba(0,0,0,0.95) 100%
+        );
+    }
+
 
     /* =========================================================
        DRAG HINT
@@ -139,15 +194,11 @@
       position: absolute;
 
       left: 50%;
-      bottom: 30px;
+      bottom: 28px;
 
       transform: translateX(-50%);
 
       z-index: 10;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
 
       padding: 10px 18px;
 
@@ -176,6 +227,7 @@
         translateY(10px);
     }
 
+
     /* =========================================================
        FRAME INDICATOR
     ========================================================= */
@@ -183,8 +235,8 @@
     .frame-indicator {
       position: absolute;
 
-      left: 20px;
       top: 20px;
+      left: 20px;
 
       z-index: 10;
 
@@ -192,7 +244,7 @@
 
       border-radius: 8px;
 
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.48);
       color: white;
 
       font-size: 13px;
@@ -202,6 +254,7 @@
 
       pointer-events: none;
     }
+
 
     /* =========================================================
        AVAILABILITY BUTTON
@@ -246,6 +299,7 @@
       color: white;
     }
 
+
     /* =========================================================
        LOADER
     ========================================================= */
@@ -277,17 +331,20 @@
 
       border-radius: 50%;
 
-      border: 4px solid rgba(255, 255, 255, 0.2);
+      border: 4px solid rgba(255,255,255,0.2);
       border-top-color: white;
 
       animation: loaderSpin 0.8s linear infinite;
     }
 
     @keyframes loaderSpin {
+
       to {
         transform: rotate(360deg);
       }
+
     }
+
 
     /* =========================================================
        SIDEBAR
@@ -306,10 +363,11 @@
       border-left: 1px solid #ddd;
 
       box-shadow:
-        -4px 0 20px rgba(0, 0, 0, 0.08);
+        -4px 0 20px rgba(0,0,0,0.08);
 
       z-index: 30;
     }
+
 
     /* =========================================================
        COLLAPSIBLE SECTIONS
@@ -359,15 +417,14 @@
       display: block;
     }
 
+
     /* =========================================================
        APARTMENT TABLE
     ========================================================= */
 
     .info-table {
       width: 100%;
-
       border-collapse: collapse;
-
       font-size: 13px;
     }
 
@@ -407,6 +464,7 @@
       background: #e9e9e9;
     }
 
+
     /* =========================================================
        STATUS
     ========================================================= */
@@ -433,6 +491,7 @@
     .status-verkauft {
       background: #d34a4a;
     }
+
 
     /* =========================================================
        DETAILS
@@ -524,8 +583,7 @@
 
       margin-top: 10px;
 
-      border:
-        1px solid #ddd;
+      border: 1px solid #ddd;
 
       border-radius: 6px;
     }
@@ -541,6 +599,7 @@
 
       font-size: 13px;
     }
+
 
     /* =========================================================
        MOBILE
@@ -569,20 +628,16 @@
         height: auto;
 
         border-left: none;
-
-        border-top:
-          1px solid #ddd;
+        border-top: 1px solid #ddd;
       }
 
       .availability-toggle {
         top: 12px;
         right: 12px;
 
-        font-size: 11px;
+        padding: 9px 11px;
 
-        padding:
-          9px
-          11px;
+        font-size: 11px;
       }
 
       .frame-indicator {
@@ -596,11 +651,12 @@
 
       #orbitImage {
         left: 5%;
-        top: 5%;
+        top: 6%;
 
         width: 90%;
-        height: 90%;
+        height: 86%;
       }
+
     }
 
   </style>
@@ -612,15 +668,12 @@
 <div class="app">
 
 
-  <!-- =======================================================
-       VIEWER AREA
-  ======================================================== -->
+  <!-- VIEWER -->
 
   <main class="viewer-area">
 
     <div id="viewerCanvasWrapper">
 
-      <!-- BLURRED BACKGROUND -->
       <img
         id="orbitBackground"
         src=""
@@ -628,7 +681,6 @@
         draggable="false"
       >
 
-      <!-- SHARP MAIN IMAGE -->
       <img
         id="orbitImage"
         src=""
@@ -684,10 +736,7 @@
   </main>
 
 
-
-  <!-- =======================================================
-       SIDEBAR
-  ======================================================== -->
+  <!-- SIDEBAR -->
 
   <aside
     class="panel"
@@ -695,14 +744,8 @@
   >
 
 
-    <!-- OVERVIEW -->
-
     <div
-      class="
-        panel-section
-        section-collapsible
-        is-open
-      "
+      class="panel-section section-collapsible is-open"
       id="overviewSection"
     >
 
@@ -729,35 +772,16 @@
           <thead>
 
             <tr>
-
-              <th>
-                Nummer
-              </th>
-
-              <th>
-                Etage
-              </th>
-
-              <th>
-                Größe
-              </th>
-
-              <th>
-                Preis
-              </th>
-
-              <th>
-                Status
-              </th>
-
+              <th>Nummer</th>
+              <th>Etage</th>
+              <th>Größe</th>
+              <th>Preis</th>
+              <th>Status</th>
             </tr>
 
           </thead>
 
-
-          <tbody
-            id="infoRows"
-          ></tbody>
+          <tbody id="infoRows"></tbody>
 
         </table>
 
@@ -766,14 +790,8 @@
     </div>
 
 
-
-    <!-- DETAILS -->
-
     <div
-      class="
-        panel-section
-        section-collapsible
-      "
+      class="panel-section section-collapsible"
       id="detailsSection"
     >
 
@@ -797,10 +815,7 @@
 
         <div
           id="detailsCard"
-          class="
-            details-card
-            is-hidden
-          "
+          class="details-card is-hidden"
         >
 
 
@@ -813,7 +828,6 @@
               Wohnung
             </div>
 
-
             <div
               id="detailsBadge"
               class="badge"
@@ -824,9 +838,7 @@
           </div>
 
 
-
           <div class="details-grid">
-
 
             <div class="detail-item">
 
@@ -842,7 +854,6 @@
               </div>
 
             </div>
-
 
 
             <div class="detail-item">
@@ -861,7 +872,6 @@
             </div>
 
 
-
             <div class="detail-item">
 
               <div class="detail-label">
@@ -876,7 +886,6 @@
               </div>
 
             </div>
-
 
 
             <div class="detail-item">
@@ -895,7 +904,6 @@
             </div>
 
 
-
             <div class="detail-item">
 
               <div class="detail-label">
@@ -910,7 +918,6 @@
               </div>
 
             </div>
-
 
 
             <div class="detail-item">
@@ -928,9 +935,7 @@
 
             </div>
 
-
           </div>
-
 
 
           <div class="plan-wrap">
@@ -939,25 +944,17 @@
               Grundriss
             </div>
 
-
             <img
               id="detailsPlan"
-              class="
-                details-plan
-                is-hidden
-              "
+              class="details-plan is-hidden"
               alt="Grundriss"
             >
 
-
-            <div
-              id="detailsPlanEmpty"
-            >
+            <div id="detailsPlanEmpty">
               Kein Grundriss hinterlegt.
             </div>
 
           </div>
-
 
         </div>
 
@@ -971,39 +968,22 @@
 </div>
 
 
-
 <script>
 
   /* =========================================================
-     BASIC SETTINGS
+     SETTINGS
   ========================================================= */
 
   const TOTAL_FRAMES = 26;
 
-  /*
-    Lower number = faster rotation.
-
-    8  = very sensitive
-    15 = medium
-    25 = slower
-  */
-
   const PIXELS_PER_FRAME = 15;
-
 
 
   /* =========================================================
      IMAGE PATHS
-
-     models/1.png
-     models/2.png
-     models/3.png
-     ...
-     models/26.png
   ========================================================= */
 
   const imagePaths = [];
-
 
   for (
     let i = 1;
@@ -1018,9 +998,8 @@
   }
 
 
-
   /* =========================================================
-     DOM ELEMENTS
+     ELEMENTS
   ========================================================= */
 
   const wrapper =
@@ -1028,42 +1007,35 @@
       "viewerCanvasWrapper"
     );
 
-
   const orbitImage =
     document.getElementById(
       "orbitImage"
     );
-
 
   const orbitBackground =
     document.getElementById(
       "orbitBackground"
     );
 
-
   const loader =
     document.getElementById(
       "loader"
     );
-
 
   const loaderInfo =
     document.getElementById(
       "loaderInfo"
     );
 
-
   const frameIndicator =
     document.getElementById(
       "frameIndicator"
     );
 
-
   const dragHint =
     document.getElementById(
       "dragHint"
     );
-
 
   const availabilityToggle =
     document.getElementById(
@@ -1071,18 +1043,15 @@
     );
 
 
-
   /* =========================================================
-     PRELOAD ALL 26 IMAGES
+     PRELOAD
   ========================================================= */
 
   const preloadedImages = [];
 
-
   let loadedCount = 0;
 
   let failedCount = 0;
-
 
 
   function updateLoader() {
@@ -1093,26 +1062,20 @@
   }
 
 
-
   function finishLoading() {
 
     currentFrame = 0;
 
-
     const src =
       imagePaths[currentFrame];
-
 
     orbitImage.src =
       src;
 
-
     orbitBackground.src =
       src;
 
-
     updateFrameIndicator();
-
 
     loader.style.display =
       "none";
@@ -1120,10 +1083,8 @@
   }
 
 
-
   imagePaths.forEach(
     (src, index) => {
-
 
       const img =
         new Image();
@@ -1132,7 +1093,6 @@
       img.onload = () => {
 
         loadedCount++;
-
 
         updateLoader();
 
@@ -1148,7 +1108,6 @@
         }
 
       };
-
 
 
       img.onerror = () => {
@@ -1177,7 +1136,6 @@
 
       img.src = src;
 
-
       preloadedImages[index] =
         img;
 
@@ -1185,32 +1143,25 @@
   );
 
 
-
   /* =========================================================
-     CURRENT FRAME
+     FRAME CONTROL
   ========================================================= */
 
   let currentFrame = 0;
 
 
-
   function normalizeFrame(index) {
 
     return (
-
       (
         index %
         TOTAL_FRAMES
       ) +
-
       TOTAL_FRAMES
-
     ) %
-
     TOTAL_FRAMES;
 
   }
-
 
 
   function setFrame(index) {
@@ -1220,9 +1171,7 @@
 
 
     const src =
-      imagePaths[
-        currentFrame
-      ];
+      imagePaths[currentFrame];
 
 
     orbitImage.src =
@@ -1238,7 +1187,6 @@
   }
 
 
-
   function updateFrameIndicator() {
 
     frameIndicator.textContent =
@@ -1247,9 +1195,11 @@
   }
 
 
-
   /* =========================================================
      DRAGGING
+
+     IMPORTANT:
+     Direction is now REVERSED compared to previous version.
   ========================================================= */
 
   let isDragging = false;
@@ -1259,7 +1209,6 @@
   let dragAccumulator = 0;
 
   let hasInteracted = false;
-
 
 
   function startDragging(event) {
@@ -1276,10 +1225,8 @@
 
     isDragging = true;
 
-
     lastX =
       event.clientX;
-
 
     dragAccumulator = 0;
 
@@ -1289,23 +1236,22 @@
     );
 
 
-
     try {
 
       wrapper.setPointerCapture(
         event.pointerId
       );
 
-    } catch (error) {
-
     }
 
+    catch (error) {
+
+    }
 
 
     if (!hasInteracted) {
 
       hasInteracted = true;
-
 
       dragHint.classList.add(
         "hidden"
@@ -1316,7 +1262,6 @@
   }
 
 
-
   function moveDragging(event) {
 
     if (!isDragging) {
@@ -1324,7 +1269,6 @@
       return;
 
     }
-
 
 
     const movement =
@@ -1340,7 +1284,6 @@
       movement;
 
 
-
     while (
       Math.abs(
         dragAccumulator
@@ -1349,12 +1292,22 @@
     ) {
 
 
+      /*
+        REVERSED DIRECTION:
+
+        Drag LEFT
+        → previous frame
+
+        Drag RIGHT
+        → next frame
+      */
+
       if (
         dragAccumulator < 0
       ) {
 
         setFrame(
-          currentFrame + 1
+          currentFrame - 1
         );
 
 
@@ -1364,11 +1317,10 @@
       }
 
 
-
       else {
 
         setFrame(
-          currentFrame - 1
+          currentFrame + 1
         );
 
 
@@ -1380,7 +1332,6 @@
     }
 
   }
-
 
 
   function stopDragging(event) {
@@ -1400,7 +1351,6 @@
     );
 
 
-
     if (
       event &&
       event.pointerId !==
@@ -1413,7 +1363,9 @@
           event.pointerId
         );
 
-      } catch (error) {
+      }
+
+      catch (error) {
 
       }
 
@@ -1422,24 +1374,20 @@
   }
 
 
-
   wrapper.addEventListener(
     "pointerdown",
     startDragging
   );
-
 
   wrapper.addEventListener(
     "pointermove",
     moveDragging
   );
 
-
   wrapper.addEventListener(
     "pointerup",
     stopDragging
   );
-
 
   wrapper.addEventListener(
     "pointercancel",
@@ -1447,9 +1395,10 @@
   );
 
 
-
   /* =========================================================
-     KEYBOARD ARROWS
+     KEYBOARD
+
+     Also reversed to match dragging.
   ========================================================= */
 
   window.addEventListener(
@@ -1484,7 +1433,6 @@
   );
 
 
-
   /* =========================================================
      COLLAPSIBLE SIDEBAR
   ========================================================= */
@@ -1494,12 +1442,10 @@
     headerId
   ) {
 
-
     const section =
       document.getElementById(
         sectionId
       );
-
 
     const header =
       document.getElementById(
@@ -1511,7 +1457,6 @@
       "click",
       () => {
 
-
         section.classList.toggle(
           "is-open"
         );
@@ -1520,7 +1465,6 @@
     );
 
   }
-
 
 
   setupCollapsible(
@@ -1535,110 +1479,69 @@
   );
 
 
-
   /* =========================================================
-     TEMPORARY APARTMENT DATA
+     TEMP APARTMENT DATA
   ========================================================= */
 
   const apartments = [
 
     {
       id: "Top_1",
-
       number: "Top 1",
-
       floor: "EG",
-
       size: "72 m²",
-
       price: "€ 495.000",
-
       status: "verfügbar",
-
       rooms: "3",
-
       orientation: "Süd",
-
       outdoor: "Terrasse",
-
       plan: ""
     },
-
 
     {
       id: "Top_2",
-
       number: "Top 2",
-
       floor: "EG",
-
       size: "64 m²",
-
       price: "€ 445.000",
-
       status: "reserviert",
-
       rooms: "2",
-
       orientation: "West",
-
       outdoor: "Garten",
-
       plan: ""
     },
-
 
     {
       id: "Top_3",
-
       number: "Top 3",
-
       floor: "1. OG",
-
       size: "81 m²",
-
       price: "€ 575.000",
-
       status: "verfügbar",
-
       rooms: "3",
-
       orientation: "Süd-West",
-
       outdoor: "Balkon",
-
       plan: ""
     },
 
-
     {
       id: "Top_4",
-
       number: "Top 4",
-
       floor: "1. OG",
-
       size: "93 m²",
-
       price: "€ 640.000",
-
       status: "verkauft",
-
       rooms: "4",
-
       orientation: "Ost",
-
       outdoor: "Balkon",
-
       plan: ""
     }
 
   ];
 
 
-
   /* =========================================================
-     APARTMENT TABLE
+     TABLE
   ========================================================= */
 
   const infoRows =
@@ -1650,15 +1553,13 @@
   let onlyAvailable = false;
 
 
-
   function getStatusClass(
     status
   ) {
 
 
     if (
-      status ===
-      "verfügbar"
+      status === "verfügbar"
     ) {
 
       return "status-verfuegbar";
@@ -1667,8 +1568,7 @@
 
 
     if (
-      status ===
-      "reserviert"
+      status === "reserviert"
     ) {
 
       return "status-reserviert";
@@ -1677,8 +1577,7 @@
 
 
     if (
-      status ===
-      "verkauft"
+      status === "verkauft"
     ) {
 
       return "status-verkauft";
@@ -1691,12 +1590,9 @@
   }
 
 
-
   function renderApartmentTable() {
 
-
     infoRows.innerHTML = "";
-
 
 
     const filteredApartments =
@@ -1716,7 +1612,6 @@
       apartments;
 
 
-
     filteredApartments.forEach(
       apartment => {
 
@@ -1725,7 +1620,6 @@
           document.createElement(
             "tr"
           );
-
 
 
         row.innerHTML = `
@@ -1764,11 +1658,9 @@
         `;
 
 
-
         row.addEventListener(
           "click",
           () => {
-
 
             selectApartment(
               apartment,
@@ -1789,9 +1681,8 @@
   }
 
 
-
   /* =========================================================
-     AVAILABILITY FILTER
+     FILTER
   ========================================================= */
 
   availabilityToggle.addEventListener(
@@ -1803,7 +1694,6 @@
         !onlyAvailable;
 
 
-
       availabilityToggle
         .classList.toggle(
           "active",
@@ -1811,21 +1701,17 @@
         );
 
 
+      availabilityToggle.textContent =
 
-      if (onlyAvailable) {
+        onlyAvailable
 
-        availabilityToggle.textContent =
-          "Alle Wohnungen anzeigen";
+        ?
 
-      }
+        "Alle Wohnungen anzeigen"
 
-      else {
+        :
 
-        availabilityToggle.textContent =
-          "Nur verfügbare Wohnungen anzeigen";
-
-      }
-
+        "Nur verfügbare Wohnungen anzeigen";
 
 
       renderApartmentTable();
@@ -1834,9 +1720,8 @@
   );
 
 
-
   /* =========================================================
-     DETAILS ELEMENTS
+     DETAILS
   ========================================================= */
 
   const detailsCard =
@@ -1844,77 +1729,61 @@
       "detailsCard"
     );
 
-
   const detailsSection =
     document.getElementById(
       "detailsSection"
     );
-
 
   const detailsTitle =
     document.getElementById(
       "detailsTitle"
     );
 
-
   const detailsBadge =
     document.getElementById(
       "detailsBadge"
     );
-
 
   const detailsSize =
     document.getElementById(
       "detailsSize"
     );
 
-
   const detailsPrice =
     document.getElementById(
       "detailsPrice"
     );
-
 
   const detailsRooms =
     document.getElementById(
       "detailsRooms"
     );
 
-
   const detailsFloor =
     document.getElementById(
       "detailsFloor"
     );
-
 
   const detailsOrientation =
     document.getElementById(
       "detailsOrientation"
     );
 
-
   const detailsOutdoor =
     document.getElementById(
       "detailsOutdoor"
     );
-
 
   const detailsPlan =
     document.getElementById(
       "detailsPlan"
     );
 
-
   const detailsPlanEmpty =
     document.getElementById(
       "detailsPlanEmpty"
     );
 
-
-
-  /* =========================================================
-     SELECT APARTMENT
-  ========================================================= */
 
   function selectApartment(
     apartment,
@@ -1937,7 +1806,6 @@
       );
 
 
-
     if (row) {
 
       row.classList.add(
@@ -1947,34 +1815,26 @@
     }
 
 
-
     detailsTitle.textContent =
       apartment.number;
-
 
     detailsSize.textContent =
       apartment.size;
 
-
     detailsPrice.textContent =
       apartment.price;
-
 
     detailsRooms.textContent =
       apartment.rooms;
 
-
     detailsFloor.textContent =
       apartment.floor;
-
 
     detailsOrientation.textContent =
       apartment.orientation;
 
-
     detailsOutdoor.textContent =
       apartment.outdoor;
-
 
 
     detailsBadge.textContent =
@@ -1983,7 +1843,6 @@
 
     detailsBadge.className =
       "badge";
-
 
 
     if (
@@ -2020,7 +1879,6 @@
       );
 
     }
-
 
 
     if (
@@ -2060,7 +1918,6 @@
     }
 
 
-
     detailsCard.classList.remove(
       "is-hidden"
     );
@@ -2073,15 +1930,13 @@
   }
 
 
-
   /* =========================================================
-     INITIALISE
+     INIT
   ========================================================= */
 
   renderApartmentTable();
 
 </script>
-
 
 </body>
 </html>
