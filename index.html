@@ -1,124 +1,1719 @@
-<!doctype html>
+```html
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Wohnungsnavigator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <link rel="stylesheet" href="./viewer.css" />
-
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  <style>
+    * {
+      box-sizing: border-box;
     }
-  }
-  </script>
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    /* =========================================================
+       MAIN LAYOUT
+    ========================================================= */
+
+    .app {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+    }
+
+    .viewer-area {
+      position: relative;
+      flex: 1;
+      height: 100vh;
+      min-width: 0;
+      background: #111;
+      overflow: hidden;
+    }
+
+    /* =========================================================
+       ORBIT VIEWER
+    ========================================================= */
+
+    #viewerCanvasWrapper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    #viewerCanvasWrapper.is-dragging {
+      cursor: grabbing;
+    }
+
+    #orbitImage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* =========================================================
+       DRAG HINT
+    ========================================================= */
+
+    .drag-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      z-index: 10;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 10px 18px;
+
+      background: rgba(0, 0, 0, 0.55);
+      color: white;
+
+      border-radius: 30px;
+      font-size: 14px;
+
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+
+      pointer-events: none;
+
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+    }
+
+    .drag-hint.hidden {
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px);
+    }
+
+    /* =========================================================
+       FRAME INDICATOR
+    ========================================================= */
+
+    .frame-indicator {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      z-index: 10;
+
+      padding: 8px 12px;
+
+      border-radius: 8px;
+
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+
+      font-size: 13px;
+
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+
+      pointer-events: none;
+    }
+
+    /* =========================================================
+       AVAILABILITY BUTTON
+    ========================================================= */
+
+    .availability-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 20;
+
+      padding: 11px 16px;
+
+      border: none;
+      border-radius: 8px;
+
+      background: white;
+      color: #222;
+
+      font-size: 14px;
+      font-weight: 600;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.18);
+
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease;
+    }
+
+    .availability-toggle:hover {
+      transform: translateY(-1px);
+    }
+
+    .availability-toggle.active {
+      background: #258a54;
+      color: white;
+    }
+
+    /* =========================================================
+       LOADER
+    ========================================================= */
+
+    .loader {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      gap: 18px;
+
+      background: #111;
+      color: white;
+    }
+
+    .loader-text {
+      font-size: 14px;
+    }
+
+    .loader-spinner {
+      width: 40px;
+      height: 40px;
+
+      border-radius: 50%;
+
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+
+      animation: loaderSpin 0.8s linear infinite;
+    }
+
+    @keyframes loaderSpin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================================================
+       SIDEBAR
+    ========================================================= */
+
+    .panel {
+      width: 390px;
+      height: 100vh;
+      flex-shrink: 0;
+
+      background: white;
+      overflow-y: auto;
+
+      border-left: 1px solid #ddd;
+
+      box-shadow:
+        -4px 0 20px rgba(0, 0, 0, 0.08);
+
+      z-index: 30;
+    }
+
+    /* =========================================================
+       COLLAPSIBLE SECTIONS
+    ========================================================= */
+
+    .panel-section {
+      border-bottom: 1px solid #e7e7e7;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 18px 20px;
+
+      background: white;
+
+      font-size: 15px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .section-arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .section-collapsible:not(.is-open) .section-arrow {
+      transform: rotate(-90deg);
+    }
+
+    .section-body {
+      display: none;
+      padding: 0 20px 20px 20px;
+    }
+
+    .section-collapsible.is-open .section-body {
+      display: block;
+    }
+
+    /* =========================================================
+       APARTMENT TABLE
+    ========================================================= */
+
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .info-table th {
+      padding: 10px 6px;
+      text-align: left;
+
+      color: #777;
+
+      font-size: 10px;
+      font-weight: 600;
+
+      text-transform: uppercase;
+
+      border-bottom: 1px solid #ddd;
+    }
+
+    .info-table td {
+      padding: 11px 6px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .info-table tbody tr {
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .info-table tbody tr:hover {
+      background: #f4f4f4;
+    }
+
+    .info-table tbody tr.selected {
+      background: #e9e9e9;
+    }
+
+    /* =========================================================
+       STATUS
+    ========================================================= */
+
+    .status-dot {
+      display: inline-block;
+
+      width: 8px;
+      height: 8px;
+
+      margin-right: 5px;
+
+      border-radius: 50%;
+    }
+
+    .status-verfuegbar {
+      background: #2fa66a;
+    }
+
+    .status-reserviert {
+      background: #e5a400;
+    }
+
+    .status-verkauft {
+      background: #d34a4a;
+    }
+
+    /* =========================================================
+       DETAILS
+    ========================================================= */
+
+    .details-card.is-hidden {
+      display: none;
+    }
+
+    .details-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 15px;
+
+      margin-bottom: 20px;
+    }
+
+    .details-title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .badge {
+      padding: 6px 10px;
+      border-radius: 20px;
+
+      background: #eee;
+
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.verfuegbar {
+      background: #dff5e8;
+      color: #207347;
+    }
+
+    .badge.reserviert {
+      background: #fff0c5;
+      color: #866500;
+    }
+
+    .badge.verkauft {
+      background: #f7dede;
+      color: #963434;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 12px;
+    }
+
+    .detail-label {
+      margin-bottom: 4px;
+
+      color: #777;
+
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .plan-wrap {
+      margin-top: 28px;
+    }
+
+    .details-plan {
+      display: block;
+
+      width: 100%;
+      height: auto;
+
+      margin-top: 10px;
+
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+
+    .details-plan.is-hidden {
+      display: none;
+    }
+
+    #detailsPlanEmpty {
+      margin-top: 10px;
+      color: #888;
+      font-size: 13px;
+    }
+
+    /* =========================================================
+       MOBILE
+    ========================================================= */
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .viewer-area {
+        width: 100%;
+        height: 65vh;
+      }
+
+      .panel {
+        width: 100%;
+        height: auto;
+
+        border-left: none;
+        border-top: 1px solid #ddd;
+      }
+
+      .availability-toggle {
+        top: 12px;
+        right: 12px;
+
+        font-size: 11px;
+
+        padding: 9px 11px;
+      }
+
+      .frame-indicator {
+        top: 12px;
+        left: 12px;
+      }
+
+      .drag-hint {
+        bottom: 18px;
+      }
+    }
+  </style>
 </head>
+
 
 <body>
 
-  <!-- 🔥 FULLSCREEN OVERLAY -->
-  <div id="navigatorStart" class="navigator-start">
-    <div class="navigator-start-content">
-      <button id="startNavigatorBtn">
-        3D-Wohnungsnavigator starten
-      </button>
-    </div>
-  </div>
+<div class="app">
 
-  <div class="app">
+  <!-- =======================================================
+       VIEWER AREA
+  ======================================================== -->
 
-    <div class="viewer-area">
-      <div id="viewerCanvasWrapper"></div>
+  <main class="viewer-area">
 
-      <button id="availabilityToggle" class="availability-toggle">
-        Nur verfügbare Wohnungen anzeigen
-      </button>
+    <div id="viewerCanvasWrapper">
 
-      <div class="loader" id="loader">
-        <div class="loader-text" id="loaderInfo">Loading…</div>
-        <div class="loader-spinner"></div>
-      </div>
+      <img
+        id="orbitImage"
+        src=""
+        alt="Gebäudeansicht"
+        draggable="false"
+      >
+
     </div>
 
-    <!-- 🔥 SIDEBAR (initial hidden via CSS) -->
-    <aside class="panel" id="sidePanel">
-      <div class="panel-section section-collapsible is-open" id="overviewSection">
-        <div class="section-header" id="overviewHeader">
-          <span>Wohnungsübersicht</span>
-          <span class="section-arrow">▾</span>
-        </div>
 
-        <div class="section-body">
-          <table class="info-table">
-            <thead>
-              <tr>
-                <th>Nummer</th>
-                <th>Etage</th>
-                <th>Größe</th>
-                <th>Preis</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="infoRows"></tbody>
-          </table>
-        </div>
+    <div
+      class="frame-indicator"
+      id="frameIndicator"
+    >
+      Ansicht 1 / 26
+    </div>
+
+
+    <button
+      id="availabilityToggle"
+      class="availability-toggle"
+    >
+      Nur verfügbare Wohnungen anzeigen
+    </button>
+
+
+    <div
+      class="drag-hint"
+      id="dragHint"
+    >
+      ← Ziehen zum Drehen →
+    </div>
+
+
+    <div
+      class="loader"
+      id="loader"
+    >
+
+      <div
+        class="loader-text"
+        id="loaderInfo"
+      >
+        Bilder werden geladen…
       </div>
 
-      <div class="panel-section section-collapsible" id="detailsSection">
-        <div class="section-header" id="detailsHeader">
-          <span>Details</span>
-          <span class="section-arrow">▾</span>
-        </div>
+      <div
+        class="loader-spinner"
+      ></div>
 
-        <div class="section-body">
-          <div id="detailsCard" class="details-card is-hidden">
-            <div class="details-top">
-              <div class="details-title" id="detailsTitle">Wohnung</div>
-              <div id="detailsBadge" class="badge">Status</div>
+    </div>
+
+  </main>
+
+
+  <!-- =======================================================
+       SIDEBAR
+  ======================================================== -->
+
+  <aside
+    class="panel"
+    id="sidePanel"
+  >
+
+    <!-- OVERVIEW -->
+
+    <div
+      class="
+        panel-section
+        section-collapsible
+        is-open
+      "
+      id="overviewSection"
+    >
+
+      <div
+        class="section-header"
+        id="overviewHeader"
+      >
+
+        <span>
+          Wohnungsübersicht
+        </span>
+
+        <span class="section-arrow">
+          ▾
+        </span>
+
+      </div>
+
+
+      <div class="section-body">
+
+        <table class="info-table">
+
+          <thead>
+
+            <tr>
+
+              <th>Nummer</th>
+              <th>Etage</th>
+              <th>Größe</th>
+              <th>Preis</th>
+              <th>Status</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="infoRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- DETAILS -->
+
+    <div
+      class="
+        panel-section
+        section-collapsible
+      "
+      id="detailsSection"
+    >
+
+      <div
+        class="section-header"
+        id="detailsHeader"
+      >
+
+        <span>
+          Details
+        </span>
+
+        <span class="section-arrow">
+          ▾
+        </span>
+
+      </div>
+
+
+      <div class="section-body">
+
+        <div
+          id="detailsCard"
+          class="
+            details-card
+            is-hidden
+          "
+        >
+
+          <div class="details-top">
+
+            <div
+              class="details-title"
+              id="detailsTitle"
+            >
+              Wohnung
             </div>
 
-            <div class="details-grid">
-              <div class="detail-item">
-                <div class="detail-label">Größe</div>
-                <div class="detail-value" id="detailsSize">—</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Preis</div>
-                <div class="detail-value" id="detailsPrice">—</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Zimmer</div>
-                <div class="detail-value" id="detailsRooms">—</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Etage</div>
-                <div class="detail-value" id="detailsFloor">—</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Ausrichtung</div>
-                <div class="detail-value" id="detailsOrientation">—</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Freifläche</div>
-                <div class="detail-value" id="detailsOutdoor">—</div>
-              </div>
+            <div
+              id="detailsBadge"
+              class="badge"
+            >
+              Status
             </div>
 
-            <div class="plan-wrap">
-              <div class="detail-label">Grundriss</div>
-              <img id="detailsPlan" class="details-plan is-hidden" />
-              <div id="detailsPlanEmpty">Kein Grundriss hinterlegt.</div>
-            </div>
           </div>
+
+
+          <div class="details-grid">
+
+            <div class="detail-item">
+              <div class="detail-label">
+                Größe
+              </div>
+
+              <div
+                class="detail-value"
+                id="detailsSize"
+              >
+                —
+              </div>
+            </div>
+
+
+            <div class="detail-item">
+              <div class="detail-label">
+                Preis
+              </div>
+
+              <div
+                class="detail-value"
+                id="detailsPrice"
+              >
+                —
+              </div>
+            </div>
+
+
+            <div class="detail-item">
+              <div class="detail-label">
+                Zimmer
+              </div>
+
+              <div
+                class="detail-value"
+                id="detailsRooms"
+              >
+                —
+              </div>
+            </div>
+
+
+            <div class="detail-item">
+              <div class="detail-label">
+                Etage
+              </div>
+
+              <div
+                class="detail-value"
+                id="detailsFloor"
+              >
+                —
+              </div>
+            </div>
+
+
+            <div class="detail-item">
+              <div class="detail-label">
+                Ausrichtung
+              </div>
+
+              <div
+                class="detail-value"
+                id="detailsOrientation"
+              >
+                —
+              </div>
+            </div>
+
+
+            <div class="detail-item">
+              <div class="detail-label">
+                Freifläche
+              </div>
+
+              <div
+                class="detail-value"
+                id="detailsOutdoor"
+              >
+                —
+              </div>
+            </div>
+
+          </div>
+
+
+          <div class="plan-wrap">
+
+            <div class="detail-label">
+              Grundriss
+            </div>
+
+            <img
+              id="detailsPlan"
+              class="
+                details-plan
+                is-hidden
+              "
+              alt="Grundriss"
+            >
+
+            <div id="detailsPlanEmpty">
+              Kein Grundriss hinterlegt.
+            </div>
+
+          </div>
+
         </div>
+
       </div>
-    </aside>
 
-  </div>
+    </div>
 
-  <script type="module" src="./main.js"></script>
+  </aside>
+
+</div>
+
+
+<script>
+
+  /* =========================================================
+     BASIC SETTINGS
+  ========================================================= */
+
+  const TOTAL_FRAMES = 26;
+
+  /*
+    Lower number = faster rotation.
+
+    8  = very sensitive
+    15 = medium
+    25 = slower
+  */
+
+  const PIXELS_PER_FRAME = 15;
+
+
+  /* =========================================================
+     IMAGE PATHS
+
+     Folder:
+     models/
+
+     Files:
+     models/1.png
+     models/2.png
+     models/3.png
+     ...
+     models/26.png
+  ========================================================= */
+
+  const imagePaths = [];
+
+  for (
+    let i = 1;
+    i <= TOTAL_FRAMES;
+    i++
+  ) {
+
+    imagePaths.push(
+      `models/${i}.png`
+    );
+
+  }
+
+
+  /* =========================================================
+     DOM ELEMENTS
+  ========================================================= */
+
+  const wrapper =
+    document.getElementById(
+      "viewerCanvasWrapper"
+    );
+
+  const orbitImage =
+    document.getElementById(
+      "orbitImage"
+    );
+
+  const loader =
+    document.getElementById(
+      "loader"
+    );
+
+  const loaderInfo =
+    document.getElementById(
+      "loaderInfo"
+    );
+
+  const frameIndicator =
+    document.getElementById(
+      "frameIndicator"
+    );
+
+  const dragHint =
+    document.getElementById(
+      "dragHint"
+    );
+
+  const availabilityToggle =
+    document.getElementById(
+      "availabilityToggle"
+    );
+
+
+  /* =========================================================
+     PRELOAD ALL 26 IMAGES
+  ========================================================= */
+
+  const preloadedImages = [];
+
+  let loadedCount = 0;
+  let failedCount = 0;
+
+
+  function updateLoader() {
+
+    loaderInfo.textContent =
+      `Lade Bilder ${loadedCount} / ${TOTAL_FRAMES}`;
+
+  }
+
+
+  function finishLoading() {
+
+    currentFrame = 0;
+
+    orbitImage.src =
+      imagePaths[currentFrame];
+
+    updateFrameIndicator();
+
+    loader.style.display =
+      "none";
+
+  }
+
+
+  imagePaths.forEach(
+    (src, index) => {
+
+      const img =
+        new Image();
+
+
+      img.onload = () => {
+
+        loadedCount++;
+
+        updateLoader();
+
+        if (
+          loadedCount +
+          failedCount ===
+          TOTAL_FRAMES
+        ) {
+
+          finishLoading();
+
+        }
+
+      };
+
+
+      img.onerror = () => {
+
+        failedCount++;
+
+        console.error(
+          "Bild konnte nicht geladen werden:",
+          src
+        );
+
+        if (
+          loadedCount +
+          failedCount ===
+          TOTAL_FRAMES
+        ) {
+
+          finishLoading();
+
+        }
+
+      };
+
+
+      img.src = src;
+
+      preloadedImages[index] =
+        img;
+
+    }
+  );
+
+
+  /* =========================================================
+     CURRENT FRAME
+  ========================================================= */
+
+  let currentFrame = 0;
+
+
+  function normalizeFrame(index) {
+
+    return (
+      (
+        index %
+        TOTAL_FRAMES
+      ) +
+      TOTAL_FRAMES
+    ) %
+    TOTAL_FRAMES;
+
+  }
+
+
+  function setFrame(index) {
+
+    currentFrame =
+      normalizeFrame(index);
+
+    orbitImage.src =
+      imagePaths[
+        currentFrame
+      ];
+
+    updateFrameIndicator();
+
+  }
+
+
+  function updateFrameIndicator() {
+
+    frameIndicator.textContent =
+      `Ansicht ${currentFrame + 1} / ${TOTAL_FRAMES}`;
+
+  }
+
+
+  /* =========================================================
+     DRAGGING
+  ========================================================= */
+
+  let isDragging = false;
+  let lastX = 0;
+  let dragAccumulator = 0;
+  let hasInteracted = false;
+
+
+  function startDragging(event) {
+
+    if (
+      event.pointerType === "mouse" &&
+      event.button !== 0
+    ) {
+
+      return;
+
+    }
+
+
+    isDragging = true;
+
+    lastX =
+      event.clientX;
+
+    dragAccumulator = 0;
+
+    wrapper.classList.add(
+      "is-dragging"
+    );
+
+
+    try {
+
+      wrapper.setPointerCapture(
+        event.pointerId
+      );
+
+    } catch (error) {
+
+    }
+
+
+    if (!hasInteracted) {
+
+      hasInteracted = true;
+
+      dragHint.classList.add(
+        "hidden"
+      );
+
+    }
+
+  }
+
+
+  function moveDragging(event) {
+
+    if (!isDragging) {
+      return;
+    }
+
+
+    const movement =
+      event.clientX -
+      lastX;
+
+    lastX =
+      event.clientX;
+
+    dragAccumulator +=
+      movement;
+
+
+    while (
+      Math.abs(
+        dragAccumulator
+      ) >=
+      PIXELS_PER_FRAME
+    ) {
+
+      if (
+        dragAccumulator < 0
+      ) {
+
+        setFrame(
+          currentFrame + 1
+        );
+
+        dragAccumulator +=
+          PIXELS_PER_FRAME;
+
+      } else {
+
+        setFrame(
+          currentFrame - 1
+        );
+
+        dragAccumulator -=
+          PIXELS_PER_FRAME;
+
+      }
+
+    }
+
+  }
+
+
+  function stopDragging(event) {
+
+    if (!isDragging) {
+      return;
+    }
+
+
+    isDragging = false;
+
+    wrapper.classList.remove(
+      "is-dragging"
+    );
+
+
+    if (
+      event &&
+      event.pointerId !==
+      undefined
+    ) {
+
+      try {
+
+        wrapper.releasePointerCapture(
+          event.pointerId
+        );
+
+      } catch (error) {
+
+      }
+
+    }
+
+  }
+
+
+  wrapper.addEventListener(
+    "pointerdown",
+    startDragging
+  );
+
+  wrapper.addEventListener(
+    "pointermove",
+    moveDragging
+  );
+
+  wrapper.addEventListener(
+    "pointerup",
+    stopDragging
+  );
+
+  wrapper.addEventListener(
+    "pointercancel",
+    stopDragging
+  );
+
+
+  /* =========================================================
+     KEYBOARD ARROWS
+  ========================================================= */
+
+  window.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key ===
+        "ArrowLeft"
+      ) {
+
+        setFrame(
+          currentFrame - 1
+        );
+
+      }
+
+
+      if (
+        event.key ===
+        "ArrowRight"
+      ) {
+
+        setFrame(
+          currentFrame + 1
+        );
+
+      }
+
+    }
+  );
+
+
+  /* =========================================================
+     COLLAPSIBLE SIDEBAR
+  ========================================================= */
+
+  function setupCollapsible(
+    sectionId,
+    headerId
+  ) {
+
+    const section =
+      document.getElementById(
+        sectionId
+      );
+
+    const header =
+      document.getElementById(
+        headerId
+      );
+
+
+    header.addEventListener(
+      "click",
+      () => {
+
+        section.classList.toggle(
+          "is-open"
+        );
+
+      }
+    );
+
+  }
+
+
+  setupCollapsible(
+    "overviewSection",
+    "overviewHeader"
+  );
+
+  setupCollapsible(
+    "detailsSection",
+    "detailsHeader"
+  );
+
+
+  /* =========================================================
+     TEMPORARY APARTMENT DATA
+  ========================================================= */
+
+  const apartments = [
+
+    {
+      id: "Top_1",
+      number: "Top 1",
+      floor: "EG",
+      size: "72 m²",
+      price: "€ 495.000",
+      status: "verfügbar",
+      rooms: "3",
+      orientation: "Süd",
+      outdoor: "Terrasse",
+      plan: ""
+    },
+
+    {
+      id: "Top_2",
+      number: "Top 2",
+      floor: "EG",
+      size: "64 m²",
+      price: "€ 445.000",
+      status: "reserviert",
+      rooms: "2",
+      orientation: "West",
+      outdoor: "Garten",
+      plan: ""
+    },
+
+    {
+      id: "Top_3",
+      number: "Top 3",
+      floor: "1. OG",
+      size: "81 m²",
+      price: "€ 575.000",
+      status: "verfügbar",
+      rooms: "3",
+      orientation: "Süd-West",
+      outdoor: "Balkon",
+      plan: ""
+    },
+
+    {
+      id: "Top_4",
+      number: "Top 4",
+      floor: "1. OG",
+      size: "93 m²",
+      price: "€ 640.000",
+      status: "verkauft",
+      rooms: "4",
+      orientation: "Ost",
+      outdoor: "Balkon",
+      plan: ""
+    }
+
+  ];
+
+
+  /* =========================================================
+     APARTMENT TABLE
+  ========================================================= */
+
+  const infoRows =
+    document.getElementById(
+      "infoRows"
+    );
+
+
+  let onlyAvailable = false;
+
+
+  function getStatusClass(
+    status
+  ) {
+
+    if (
+      status ===
+      "verfügbar"
+    ) {
+
+      return "status-verfuegbar";
+
+    }
+
+    if (
+      status ===
+      "reserviert"
+    ) {
+
+      return "status-reserviert";
+
+    }
+
+    if (
+      status ===
+      "verkauft"
+    ) {
+
+      return "status-verkauft";
+
+    }
+
+    return "";
+
+  }
+
+
+  function renderApartmentTable() {
+
+    infoRows.innerHTML = "";
+
+
+    const filteredApartments =
+
+      onlyAvailable
+
+      ?
+
+      apartments.filter(
+        apartment =>
+          apartment.status ===
+          "verfügbar"
+      )
+
+      :
+
+      apartments;
+
+
+    filteredApartments.forEach(
+      apartment => {
+
+        const row =
+          document.createElement(
+            "tr"
+          );
+
+
+        row.innerHTML = `
+
+          <td>
+            ${apartment.number}
+          </td>
+
+          <td>
+            ${apartment.floor}
+          </td>
+
+          <td>
+            ${apartment.size}
+          </td>
+
+          <td>
+            ${apartment.price}
+          </td>
+
+          <td>
+
+            <span
+              class="
+                status-dot
+                ${getStatusClass(
+                  apartment.status
+                )}
+              "
+            ></span>
+
+            ${apartment.status}
+
+          </td>
+
+        `;
+
+
+        row.addEventListener(
+          "click",
+          () => {
+
+            selectApartment(
+              apartment,
+              row
+            );
+
+          }
+        );
+
+
+        infoRows.appendChild(
+          row
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     AVAILABILITY FILTER
+  ========================================================= */
+
+  availabilityToggle.addEventListener(
+    "click",
+    () => {
+
+      onlyAvailable =
+        !onlyAvailable;
+
+
+      availabilityToggle
+        .classList.toggle(
+          "active",
+          onlyAvailable
+        );
+
+
+      if (onlyAvailable) {
+
+        availabilityToggle.textContent =
+          "Alle Wohnungen anzeigen";
+
+      } else {
+
+        availabilityToggle.textContent =
+          "Nur verfügbare Wohnungen anzeigen";
+
+      }
+
+
+      renderApartmentTable();
+
+    }
+  );
+
+
+  /* =========================================================
+     DETAILS ELEMENTS
+  ========================================================= */
+
+  const detailsCard =
+    document.getElementById(
+      "detailsCard"
+    );
+
+  const detailsSection =
+    document.getElementById(
+      "detailsSection"
+    );
+
+  const detailsTitle =
+    document.getElementById(
+      "detailsTitle"
+    );
+
+  const detailsBadge =
+    document.getElementById(
+      "detailsBadge"
+    );
+
+  const detailsSize =
+    document.getElementById(
+      "detailsSize"
+    );
+
+  const detailsPrice =
+    document.getElementById(
+      "detailsPrice"
+    );
+
+  const detailsRooms =
+    document.getElementById(
+      "detailsRooms"
+    );
+
+  const detailsFloor =
+    document.getElementById(
+      "detailsFloor"
+    );
+
+  const detailsOrientation =
+    document.getElementById(
+      "detailsOrientation"
+    );
+
+  const detailsOutdoor =
+    document.getElementById(
+      "detailsOutdoor"
+    );
+
+  const detailsPlan =
+    document.getElementById(
+      "detailsPlan"
+    );
+
+  const detailsPlanEmpty =
+    document.getElementById(
+      "detailsPlanEmpty"
+    );
+
+
+  /* =========================================================
+     SELECT APARTMENT
+  ========================================================= */
+
+  function selectApartment(
+    apartment,
+    row
+  ) {
+
+    document
+      .querySelectorAll(
+        ".info-table tbody tr"
+      )
+      .forEach(
+        item => {
+
+          item.classList.remove(
+            "selected"
+          );
+
+        }
+      );
+
+
+    if (row) {
+
+      row.classList.add(
+        "selected"
+      );
+
+    }
+
+
+    detailsTitle.textContent =
+      apartment.number;
+
+    detailsSize.textContent =
+      apartment.size;
+
+    detailsPrice.textContent =
+      apartment.price;
+
+    detailsRooms.textContent =
+      apartment.rooms;
+
+    detailsFloor.textContent =
+      apartment.floor;
+
+    detailsOrientation.textContent =
+      apartment.orientation;
+
+    detailsOutdoor.textContent =
+      apartment.outdoor;
+
+
+    detailsBadge.textContent =
+      apartment.status;
+
+    detailsBadge.className =
+      "badge";
+
+
+    if (
+      apartment.status ===
+      "verfügbar"
+    ) {
+
+      detailsBadge.classList.add(
+        "verfuegbar"
+      );
+
+    } else if (
+      apartment.status ===
+      "reserviert"
+    ) {
+
+      detailsBadge.classList.add(
+        "reserviert"
+      );
+
+    } else if (
+      apartment.status ===
+      "verkauft"
+    ) {
+
+      detailsBadge.classList.add(
+        "verkauft"
+      );
+
+    }
+
+
+    if (
+      apartment.plan
+    ) {
+
+      detailsPlan.src =
+        apartment.plan;
+
+      detailsPlan.classList.remove(
+        "is-hidden"
+      );
+
+      detailsPlanEmpty.style.display =
+        "none";
+
+    } else {
+
+      detailsPlan.src = "";
+
+      detailsPlan.classList.add(
+        "is-hidden"
+      );
+
+      detailsPlanEmpty.style.display =
+        "block";
+
+    }
+
+
+    detailsCard.classList.remove(
+      "is-hidden"
+    );
+
+    detailsSection.classList.add(
+      "is-open"
+    );
+
+  }
+
+
+  /* =========================================================
+     INITIALISE
+  ========================================================= */
+
+  renderApartmentTable();
+
+</script>
 
 </body>
 </html>
+```
