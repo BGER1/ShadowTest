@@ -18,7 +18,7 @@
       width: 100%;
       height: 100%;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f5f5f5;
+      background: #111;
       color: #222;
     }
 
@@ -52,30 +52,83 @@
     #viewerCanvasWrapper {
       position: absolute;
       inset: 0;
+
       width: 100%;
       height: 100%;
+
       overflow: hidden;
+
       cursor: grab;
+
       user-select: none;
       -webkit-user-select: none;
+
       touch-action: none;
+
+      background: #111;
     }
 
     #viewerCanvasWrapper.is-dragging {
       cursor: grabbing;
     }
 
-    #orbitImage {
+    /* =========================================================
+       BLURRED BACKGROUND
+
+       This is the same current orbit image,
+       enlarged and blurred behind the sharp image.
+    ========================================================= */
+
+    #orbitBackground {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+
+      inset: -40px;
+
+      width: calc(100% + 80px);
+      height: calc(100% + 80px);
+
       object-fit: cover;
       object-position: center;
+
+      filter: blur(28px);
+      transform: scale(1.08);
+
+      opacity: 0.92;
+
       pointer-events: none;
+
       user-select: none;
       -webkit-user-select: none;
       -webkit-user-drag: none;
+    }
+
+    /* =========================================================
+       SHARP MAIN IMAGE
+
+       86% means the image is slightly zoomed out,
+       leaving about 7% blurred border on each side.
+    ========================================================= */
+
+    #orbitImage {
+      position: absolute;
+
+      left: 7%;
+      top: 7%;
+
+      width: 86%;
+      height: 86%;
+
+      object-fit: contain;
+      object-position: center;
+
+      pointer-events: none;
+
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-drag: none;
+
+      box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.18);
     }
 
     /* =========================================================
@@ -84,9 +137,12 @@
 
     .drag-hint {
       position: absolute;
+
       left: 50%;
       bottom: 30px;
+
       transform: translateX(-50%);
+
       z-index: 10;
 
       display: flex;
@@ -99,6 +155,7 @@
       color: white;
 
       border-radius: 30px;
+
       font-size: 14px;
 
       backdrop-filter: blur(8px);
@@ -113,7 +170,10 @@
 
     .drag-hint.hidden {
       opacity: 0;
-      transform: translateX(-50%) translateY(10px);
+
+      transform:
+        translateX(-50%)
+        translateY(10px);
     }
 
     /* =========================================================
@@ -122,8 +182,10 @@
 
     .frame-indicator {
       position: absolute;
+
       left: 20px;
       top: 20px;
+
       z-index: 10;
 
       padding: 8px 12px;
@@ -147,8 +209,10 @@
 
     .availability-toggle {
       position: absolute;
+
       top: 20px;
       right: 20px;
+
       z-index: 20;
 
       padding: 11px 16px;
@@ -189,6 +253,7 @@
     .loader {
       position: absolute;
       inset: 0;
+
       z-index: 100;
 
       display: flex;
@@ -231,9 +296,11 @@
     .panel {
       width: 390px;
       height: 100vh;
+
       flex-shrink: 0;
 
       background: white;
+
       overflow-y: auto;
 
       border-left: 1px solid #ddd;
@@ -254,6 +321,7 @@
 
     .section-header {
       display: flex;
+
       align-items: center;
       justify-content: space-between;
 
@@ -271,16 +339,23 @@
       transition: transform 0.2s ease;
     }
 
-    .section-collapsible:not(.is-open) .section-arrow {
+    .section-collapsible:not(.is-open)
+    .section-arrow {
       transform: rotate(-90deg);
     }
 
     .section-body {
       display: none;
-      padding: 0 20px 20px 20px;
+
+      padding:
+        0
+        20px
+        20px
+        20px;
     }
 
-    .section-collapsible.is-open .section-body {
+    .section-collapsible.is-open
+    .section-body {
       display: block;
     }
 
@@ -290,12 +365,15 @@
 
     .info-table {
       width: 100%;
+
       border-collapse: collapse;
+
       font-size: 13px;
     }
 
     .info-table th {
       padding: 10px 6px;
+
       text-align: left;
 
       color: #777;
@@ -310,12 +388,15 @@
 
     .info-table td {
       padding: 11px 6px;
+
       border-bottom: 1px solid #eee;
     }
 
     .info-table tbody tr {
       cursor: pointer;
-      transition: background 0.15s ease;
+
+      transition:
+        background 0.15s ease;
     }
 
     .info-table tbody tr:hover {
@@ -363,6 +444,7 @@
 
     .details-top {
       display: flex;
+
       align-items: center;
       justify-content: space-between;
 
@@ -378,6 +460,7 @@
 
     .badge {
       padding: 6px 10px;
+
       border-radius: 20px;
 
       background: #eee;
@@ -403,8 +486,13 @@
 
     .details-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px 12px;
+
+      grid-template-columns:
+        1fr 1fr;
+
+      gap:
+        18px
+        12px;
     }
 
     .detail-label {
@@ -413,7 +501,9 @@
       color: #777;
 
       font-size: 10px;
+
       text-transform: uppercase;
+
       letter-spacing: 0.5px;
     }
 
@@ -434,7 +524,9 @@
 
       margin-top: 10px;
 
-      border: 1px solid #ddd;
+      border:
+        1px solid #ddd;
+
       border-radius: 6px;
     }
 
@@ -444,7 +536,9 @@
 
     #detailsPlanEmpty {
       margin-top: 10px;
+
       color: #888;
+
       font-size: 13px;
     }
 
@@ -453,12 +547,14 @@
     ========================================================= */
 
     @media (max-width: 900px) {
+
       body {
         overflow: auto;
       }
 
       .app {
         display: block;
+
         width: 100%;
         height: auto;
       }
@@ -473,7 +569,9 @@
         height: auto;
 
         border-left: none;
-        border-top: 1px solid #ddd;
+
+        border-top:
+          1px solid #ddd;
       }
 
       .availability-toggle {
@@ -482,7 +580,9 @@
 
         font-size: 11px;
 
-        padding: 9px 11px;
+        padding:
+          9px
+          11px;
       }
 
       .frame-indicator {
@@ -493,7 +593,16 @@
       .drag-hint {
         bottom: 18px;
       }
+
+      #orbitImage {
+        left: 5%;
+        top: 5%;
+
+        width: 90%;
+        height: 90%;
+      }
     }
+
   </style>
 </head>
 
@@ -501,6 +610,7 @@
 <body>
 
 <div class="app">
+
 
   <!-- =======================================================
        VIEWER AREA
@@ -510,6 +620,15 @@
 
     <div id="viewerCanvasWrapper">
 
+      <!-- BLURRED BACKGROUND -->
+      <img
+        id="orbitBackground"
+        src=""
+        alt=""
+        draggable="false"
+      >
+
+      <!-- SHARP MAIN IMAGE -->
       <img
         id="orbitImage"
         src=""
@@ -565,6 +684,7 @@
   </main>
 
 
+
   <!-- =======================================================
        SIDEBAR
   ======================================================== -->
@@ -573,6 +693,7 @@
     class="panel"
     id="sidePanel"
   >
+
 
     <!-- OVERVIEW -->
 
@@ -609,24 +730,41 @@
 
             <tr>
 
-              <th>Nummer</th>
-              <th>Etage</th>
-              <th>Größe</th>
-              <th>Preis</th>
-              <th>Status</th>
+              <th>
+                Nummer
+              </th>
+
+              <th>
+                Etage
+              </th>
+
+              <th>
+                Größe
+              </th>
+
+              <th>
+                Preis
+              </th>
+
+              <th>
+                Status
+              </th>
 
             </tr>
 
           </thead>
 
 
-          <tbody id="infoRows"></tbody>
+          <tbody
+            id="infoRows"
+          ></tbody>
 
         </table>
 
       </div>
 
     </div>
+
 
 
     <!-- DETAILS -->
@@ -665,6 +803,7 @@
           "
         >
 
+
           <div class="details-top">
 
             <div
@@ -673,6 +812,7 @@
             >
               Wohnung
             </div>
+
 
             <div
               id="detailsBadge"
@@ -684,9 +824,12 @@
           </div>
 
 
+
           <div class="details-grid">
 
+
             <div class="detail-item">
+
               <div class="detail-label">
                 Größe
               </div>
@@ -697,10 +840,13 @@
               >
                 —
               </div>
+
             </div>
 
 
+
             <div class="detail-item">
+
               <div class="detail-label">
                 Preis
               </div>
@@ -711,10 +857,13 @@
               >
                 —
               </div>
+
             </div>
 
 
+
             <div class="detail-item">
+
               <div class="detail-label">
                 Zimmer
               </div>
@@ -725,10 +874,13 @@
               >
                 —
               </div>
+
             </div>
 
 
+
             <div class="detail-item">
+
               <div class="detail-label">
                 Etage
               </div>
@@ -739,10 +891,13 @@
               >
                 —
               </div>
+
             </div>
 
 
+
             <div class="detail-item">
+
               <div class="detail-label">
                 Ausrichtung
               </div>
@@ -753,10 +908,13 @@
               >
                 —
               </div>
+
             </div>
 
 
+
             <div class="detail-item">
+
               <div class="detail-label">
                 Freifläche
               </div>
@@ -767,9 +925,12 @@
               >
                 —
               </div>
+
             </div>
 
+
           </div>
+
 
 
           <div class="plan-wrap">
@@ -777,6 +938,7 @@
             <div class="detail-label">
               Grundriss
             </div>
+
 
             <img
               id="detailsPlan"
@@ -787,11 +949,15 @@
               alt="Grundriss"
             >
 
-            <div id="detailsPlanEmpty">
+
+            <div
+              id="detailsPlanEmpty"
+            >
               Kein Grundriss hinterlegt.
             </div>
 
           </div>
+
 
         </div>
 
@@ -799,9 +965,11 @@
 
     </div>
 
+
   </aside>
 
 </div>
+
 
 
 <script>
@@ -823,13 +991,10 @@
   const PIXELS_PER_FRAME = 15;
 
 
+
   /* =========================================================
      IMAGE PATHS
 
-     Folder:
-     models/
-
-     Files:
      models/1.png
      models/2.png
      models/3.png
@@ -838,6 +1003,7 @@
   ========================================================= */
 
   const imagePaths = [];
+
 
   for (
     let i = 1;
@@ -852,6 +1018,7 @@
   }
 
 
+
   /* =========================================================
      DOM ELEMENTS
   ========================================================= */
@@ -861,35 +1028,48 @@
       "viewerCanvasWrapper"
     );
 
+
   const orbitImage =
     document.getElementById(
       "orbitImage"
     );
+
+
+  const orbitBackground =
+    document.getElementById(
+      "orbitBackground"
+    );
+
 
   const loader =
     document.getElementById(
       "loader"
     );
 
+
   const loaderInfo =
     document.getElementById(
       "loaderInfo"
     );
+
 
   const frameIndicator =
     document.getElementById(
       "frameIndicator"
     );
 
+
   const dragHint =
     document.getElementById(
       "dragHint"
     );
 
+
   const availabilityToggle =
     document.getElementById(
       "availabilityToggle"
     );
+
 
 
   /* =========================================================
@@ -898,8 +1078,11 @@
 
   const preloadedImages = [];
 
+
   let loadedCount = 0;
+
   let failedCount = 0;
+
 
 
   function updateLoader() {
@@ -910,14 +1093,26 @@
   }
 
 
+
   function finishLoading() {
 
     currentFrame = 0;
 
-    orbitImage.src =
+
+    const src =
       imagePaths[currentFrame];
 
+
+    orbitImage.src =
+      src;
+
+
+    orbitBackground.src =
+      src;
+
+
     updateFrameIndicator();
+
 
     loader.style.display =
       "none";
@@ -925,8 +1120,10 @@
   }
 
 
+
   imagePaths.forEach(
     (src, index) => {
+
 
       const img =
         new Image();
@@ -936,7 +1133,9 @@
 
         loadedCount++;
 
+
         updateLoader();
+
 
         if (
           loadedCount +
@@ -951,14 +1150,17 @@
       };
 
 
+
       img.onerror = () => {
 
         failedCount++;
+
 
         console.error(
           "Bild konnte nicht geladen werden:",
           src
         );
+
 
         if (
           loadedCount +
@@ -975,11 +1177,13 @@
 
       img.src = src;
 
+
       preloadedImages[index] =
         img;
 
     }
   );
+
 
 
   /* =========================================================
@@ -989,18 +1193,24 @@
   let currentFrame = 0;
 
 
+
   function normalizeFrame(index) {
 
     return (
+
       (
         index %
         TOTAL_FRAMES
       ) +
+
       TOTAL_FRAMES
+
     ) %
+
     TOTAL_FRAMES;
 
   }
+
 
 
   function setFrame(index) {
@@ -1008,14 +1218,25 @@
     currentFrame =
       normalizeFrame(index);
 
-    orbitImage.src =
+
+    const src =
       imagePaths[
         currentFrame
       ];
 
+
+    orbitImage.src =
+      src;
+
+
+    orbitBackground.src =
+      src;
+
+
     updateFrameIndicator();
 
   }
+
 
 
   function updateFrameIndicator() {
@@ -1026,14 +1247,19 @@
   }
 
 
+
   /* =========================================================
      DRAGGING
   ========================================================= */
 
   let isDragging = false;
+
   let lastX = 0;
+
   let dragAccumulator = 0;
+
   let hasInteracted = false;
+
 
 
   function startDragging(event) {
@@ -1050,14 +1276,18 @@
 
     isDragging = true;
 
+
     lastX =
       event.clientX;
 
+
     dragAccumulator = 0;
+
 
     wrapper.classList.add(
       "is-dragging"
     );
+
 
 
     try {
@@ -1071,9 +1301,11 @@
     }
 
 
+
     if (!hasInteracted) {
 
       hasInteracted = true;
+
 
       dragHint.classList.add(
         "hidden"
@@ -1084,22 +1316,29 @@
   }
 
 
+
   function moveDragging(event) {
 
     if (!isDragging) {
+
       return;
+
     }
+
 
 
     const movement =
       event.clientX -
       lastX;
 
+
     lastX =
       event.clientX;
 
+
     dragAccumulator +=
       movement;
+
 
 
     while (
@@ -1109,6 +1348,7 @@
       PIXELS_PER_FRAME
     ) {
 
+
       if (
         dragAccumulator < 0
       ) {
@@ -1117,14 +1357,20 @@
           currentFrame + 1
         );
 
+
         dragAccumulator +=
           PIXELS_PER_FRAME;
 
-      } else {
+      }
+
+
+
+      else {
 
         setFrame(
           currentFrame - 1
         );
+
 
         dragAccumulator -=
           PIXELS_PER_FRAME;
@@ -1136,18 +1382,23 @@
   }
 
 
+
   function stopDragging(event) {
 
     if (!isDragging) {
+
       return;
+
     }
 
 
     isDragging = false;
 
+
     wrapper.classList.remove(
       "is-dragging"
     );
+
 
 
     if (
@@ -1171,25 +1422,30 @@
   }
 
 
+
   wrapper.addEventListener(
     "pointerdown",
     startDragging
   );
+
 
   wrapper.addEventListener(
     "pointermove",
     moveDragging
   );
 
+
   wrapper.addEventListener(
     "pointerup",
     stopDragging
   );
 
+
   wrapper.addEventListener(
     "pointercancel",
     stopDragging
   );
+
 
 
   /* =========================================================
@@ -1199,6 +1455,7 @@
   window.addEventListener(
     "keydown",
     event => {
+
 
       if (
         event.key ===
@@ -1227,6 +1484,7 @@
   );
 
 
+
   /* =========================================================
      COLLAPSIBLE SIDEBAR
   ========================================================= */
@@ -1236,10 +1494,12 @@
     headerId
   ) {
 
+
     const section =
       document.getElementById(
         sectionId
       );
+
 
     const header =
       document.getElementById(
@@ -1251,6 +1511,7 @@
       "click",
       () => {
 
+
         section.classList.toggle(
           "is-open"
         );
@@ -1261,15 +1522,18 @@
   }
 
 
+
   setupCollapsible(
     "overviewSection",
     "overviewHeader"
   );
 
+
   setupCollapsible(
     "detailsSection",
     "detailsHeader"
   );
+
 
 
   /* =========================================================
@@ -1280,57 +1544,97 @@
 
     {
       id: "Top_1",
+
       number: "Top 1",
+
       floor: "EG",
+
       size: "72 m²",
+
       price: "€ 495.000",
+
       status: "verfügbar",
+
       rooms: "3",
+
       orientation: "Süd",
+
       outdoor: "Terrasse",
+
       plan: ""
     },
+
 
     {
       id: "Top_2",
+
       number: "Top 2",
+
       floor: "EG",
+
       size: "64 m²",
+
       price: "€ 445.000",
+
       status: "reserviert",
+
       rooms: "2",
+
       orientation: "West",
+
       outdoor: "Garten",
+
       plan: ""
     },
+
 
     {
       id: "Top_3",
+
       number: "Top 3",
+
       floor: "1. OG",
+
       size: "81 m²",
+
       price: "€ 575.000",
+
       status: "verfügbar",
+
       rooms: "3",
+
       orientation: "Süd-West",
+
       outdoor: "Balkon",
+
       plan: ""
     },
 
+
     {
       id: "Top_4",
+
       number: "Top 4",
+
       floor: "1. OG",
+
       size: "93 m²",
+
       price: "€ 640.000",
+
       status: "verkauft",
+
       rooms: "4",
+
       orientation: "Ost",
+
       outdoor: "Balkon",
+
       plan: ""
     }
 
   ];
+
 
 
   /* =========================================================
@@ -1346,9 +1650,11 @@
   let onlyAvailable = false;
 
 
+
   function getStatusClass(
     status
   ) {
+
 
     if (
       status ===
@@ -1359,6 +1665,7 @@
 
     }
 
+
     if (
       status ===
       "reserviert"
@@ -1367,6 +1674,7 @@
       return "status-reserviert";
 
     }
+
 
     if (
       status ===
@@ -1377,14 +1685,18 @@
 
     }
 
+
     return "";
 
   }
 
 
+
   function renderApartmentTable() {
 
+
     infoRows.innerHTML = "";
+
 
 
     const filteredApartments =
@@ -1404,13 +1716,16 @@
       apartments;
 
 
+
     filteredApartments.forEach(
       apartment => {
+
 
         const row =
           document.createElement(
             "tr"
           );
+
 
 
         row.innerHTML = `
@@ -1449,9 +1764,11 @@
         `;
 
 
+
         row.addEventListener(
           "click",
           () => {
+
 
             selectApartment(
               apartment,
@@ -1472,6 +1789,7 @@
   }
 
 
+
   /* =========================================================
      AVAILABILITY FILTER
   ========================================================= */
@@ -1480,8 +1798,10 @@
     "click",
     () => {
 
+
       onlyAvailable =
         !onlyAvailable;
+
 
 
       availabilityToggle
@@ -1491,12 +1811,15 @@
         );
 
 
+
       if (onlyAvailable) {
 
         availabilityToggle.textContent =
           "Alle Wohnungen anzeigen";
 
-      } else {
+      }
+
+      else {
 
         availabilityToggle.textContent =
           "Nur verfügbare Wohnungen anzeigen";
@@ -1504,10 +1827,12 @@
       }
 
 
+
       renderApartmentTable();
 
     }
   );
+
 
 
   /* =========================================================
@@ -1519,60 +1844,72 @@
       "detailsCard"
     );
 
+
   const detailsSection =
     document.getElementById(
       "detailsSection"
     );
+
 
   const detailsTitle =
     document.getElementById(
       "detailsTitle"
     );
 
+
   const detailsBadge =
     document.getElementById(
       "detailsBadge"
     );
+
 
   const detailsSize =
     document.getElementById(
       "detailsSize"
     );
 
+
   const detailsPrice =
     document.getElementById(
       "detailsPrice"
     );
+
 
   const detailsRooms =
     document.getElementById(
       "detailsRooms"
     );
 
+
   const detailsFloor =
     document.getElementById(
       "detailsFloor"
     );
+
 
   const detailsOrientation =
     document.getElementById(
       "detailsOrientation"
     );
 
+
   const detailsOutdoor =
     document.getElementById(
       "detailsOutdoor"
     );
+
 
   const detailsPlan =
     document.getElementById(
       "detailsPlan"
     );
 
+
   const detailsPlanEmpty =
     document.getElementById(
       "detailsPlanEmpty"
     );
+
 
 
   /* =========================================================
@@ -1583,6 +1920,7 @@
     apartment,
     row
   ) {
+
 
     document
       .querySelectorAll(
@@ -1599,6 +1937,7 @@
       );
 
 
+
     if (row) {
 
       row.classList.add(
@@ -1608,33 +1947,43 @@
     }
 
 
+
     detailsTitle.textContent =
       apartment.number;
+
 
     detailsSize.textContent =
       apartment.size;
 
+
     detailsPrice.textContent =
       apartment.price;
+
 
     detailsRooms.textContent =
       apartment.rooms;
 
+
     detailsFloor.textContent =
       apartment.floor;
 
+
     detailsOrientation.textContent =
       apartment.orientation;
+
 
     detailsOutdoor.textContent =
       apartment.outdoor;
 
 
+
     detailsBadge.textContent =
       apartment.status;
 
+
     detailsBadge.className =
       "badge";
+
 
 
     if (
@@ -1646,7 +1995,10 @@
         "verfuegbar"
       );
 
-    } else if (
+    }
+
+
+    else if (
       apartment.status ===
       "reserviert"
     ) {
@@ -1655,7 +2007,10 @@
         "reserviert"
       );
 
-    } else if (
+    }
+
+
+    else if (
       apartment.status ===
       "verkauft"
     ) {
@@ -1667,27 +2022,37 @@
     }
 
 
+
     if (
       apartment.plan
     ) {
 
+
       detailsPlan.src =
         apartment.plan;
+
 
       detailsPlan.classList.remove(
         "is-hidden"
       );
 
+
       detailsPlanEmpty.style.display =
         "none";
 
-    } else {
+    }
+
+
+    else {
+
 
       detailsPlan.src = "";
+
 
       detailsPlan.classList.add(
         "is-hidden"
       );
+
 
       detailsPlanEmpty.style.display =
         "block";
@@ -1695,15 +2060,18 @@
     }
 
 
+
     detailsCard.classList.remove(
       "is-hidden"
     );
+
 
     detailsSection.classList.add(
       "is-open"
     );
 
   }
+
 
 
   /* =========================================================
@@ -1713,6 +2081,7 @@
   renderApartmentTable();
 
 </script>
+
 
 </body>
 </html>
