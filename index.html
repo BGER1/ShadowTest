@@ -1075,115 +1075,223 @@
     const PIXELS_PER_FRAME = 30;
 
     /* =========================================================
-       FRAME 1 GRID AREAS
-
-       FRACTIONS:
-       columnFractionsTop    = vertical separators on TOP edge
-       columnFractionsBottom = vertical separators on BOTTOM edge
-       rowFractionsLeft      = horizontal separators on LEFT edge
-       rowFractionsRight     = horizontal separators on RIGHT edge
-
-       All values run from 0 to 1.
-       You can adjust every form independently later.
+       GRID DATA
+       currentFrame is zero-based: 0 = Bild 1, 1 = Bild 2.
+       Every form keeps editable fractions underneath it.
     ========================================================= */
-    const FRAME_1_GRIDS = [
-      {
-        name: "Fassade",
-        svgWidth: 2145,
-        svgHeight: 560,
-        corners: [
-          { x: 0, y: 25 },
-          { x: 2145, y: 0 },
-          { x: 2070, y: 495 },
-          { x: 100, y: 560 }
-        ],
-        leftPct: 25.5,
-        topPct: 37,
-        widthPct: 53.5,
+    const FRAME_GRIDS = {
+      0: [
+        {
+          name: "Fassade",
+          svgWidth: 2145,
+          svgHeight: 560,
+          corners: [
+            { x: 0, y: 25 }, { x: 2145, y: 0 },
+            { x: 2070, y: 495 }, { x: 100, y: 560 }
+          ],
+          rows: 4,
+          cols: 4,
+          leftPct: 25.5,
+          topPct: 37,
+          widthPct: 53.5,
 
-        columnFractionsTop:    [0, 0.25, 0.50, 0.75, 1],
-        columnFractionsBottom: [0, 0.25, 0.50, 0.75, 1],
-        rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
-        rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1],
+          columnFractionsTop:    [0, 0.25, 0.50, 0.75, 1],
+          columnFractionsBottom: [0, 0.25, 0.50, 0.75, 1],
+          rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
+          rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1],
 
-        apartments: [
-          [1, 2, 3, 4],
-          [11, 12, 13, 14],
-          [21, 22, 23, 24],
-          [31, 32, 33, 34]
-        ]
-      },
-      {
-        name: "Top",
-        svgWidth: 2145,
-        svgHeight: 290,
-        corners: [
-          { x: 240, y: 20 },
-          { x: 1925, y: 0 },
-          { x: 2145, y: 265 },
-          { x: 0, y: 290 }
-        ],
-        leftPct: 25.5,
-        topPct: 25.5,
-        widthPct: 53.5,
+          apartments: [
+            [1, 2, 3, 4],
+            [11, 12, 13, 14],
+            [21, 22, 23, 24],
+            [31, 32, 33, 34]
+          ]
+        },
+        {
+          name: "Top",
+          svgWidth: 2145,
+          svgHeight: 290,
+          corners: [
+            { x: 240, y: 20 }, { x: 1925, y: 0 },
+            { x: 2145, y: 265 }, { x: 0, y: 290 }
+          ],
+          rows: 1,
+          cols: 4,
+          leftPct: 25.5,
+          topPct: 25.5,
+          widthPct: 53.5,
 
-        /* first upper divider intentionally shifted right */
-        columnFractionsTop:    [0, 0.31, 0.50, 0.75, 1],
-        columnFractionsBottom: [0, 0.25, 0.50, 0.75, 1],
-        rowFractionsLeft:      [0, 1],
-        rowFractionsRight:     [0, 1],
+          columnFractionsTop:    [0, 0.31, 0.50, 0.75, 1],
+          columnFractionsBottom: [0, 0.25, 0.50, 0.75, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
 
-        apartments: [
-          [41, 42, 43, 44]
-        ]
-      },
-      {
-        name: "Left",
-        svgWidth: 256,
-        svgHeight: 158,
-        corners: [
-          { x: 126, y: 0 },
-          { x: 256, y: 122 },
-          { x: 256, y: 158 },
-          { x: 0, y: 148 }
-        ],
-        leftPct: 32.5,
-        topPct: 18.7,
-        widthPct: 6,
+          apartments: [[41, 42, 43, 44]]
+        },
+        {
+          name: "Left",
+          svgWidth: 256,
+          svgHeight: 158,
+          path: "M126 0L256 122V158L0 148L126 0Z",
+          rows: 1,
+          cols: 1,
+          leftPct: 32.5,
+          topPct: 18.7,
+          widthPct: 6,
 
-        columnFractionsTop:    [0, 1],
-        columnFractionsBottom: [0, 1],
-        rowFractionsLeft:      [0, 1],
-        rowFractionsRight:     [0, 1],
+          columnFractionsTop:    [0, 1],
+          columnFractionsBottom: [0, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
 
-        apartments: [
-          [45]
-        ]
-      },
-      {
-        name: "Right",
-        svgWidth: 256,
-        svgHeight: 160,
-        corners: [
-          { x: 0, y: 126 },
-          { x: 138, y: 0 },
-          { x: 256, y: 160 },
-          { x: 16, y: 160 }
-        ],
-        leftPct: 66.1,
-        topPct: 18.3,
-        widthPct: 6.1,
+          apartments: [[45]]
+        },
+        {
+          name: "Right",
+          svgWidth: 256,
+          svgHeight: 160,
+          path: "M0 126L138 0L256 160H16L0 126Z",
+          rows: 1,
+          cols: 1,
+          leftPct: 66.1,
+          topPct: 18.3,
+          widthPct: 6.1,
 
-        columnFractionsTop:    [0, 1],
-        columnFractionsBottom: [0, 1],
-        rowFractionsLeft:      [0, 1],
-        rowFractionsRight:     [0, 1],
+          columnFractionsTop:    [0, 1],
+          columnFractionsBottom: [0, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
 
-        apartments: [
-          [48]
-        ]
-      }
-    ];
+          apartments: [[48]]
+        }
+      ],
+
+      1: [
+        {
+          name: "Fassade",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [
+            { x: 979.5, y: 900 }, { x: 2998.5, y: 671.5 },
+            { x: 2931, y: 1153 }, { x: 1047, y: 1470 }
+          ],
+          rows: 4,
+          cols: 4,
+
+          columnFractionsTop:    [0, 0.25, 0.50, 0.75, 1],
+          columnFractionsBottom: [0, 0.25, 0.50, 0.75, 1],
+          rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
+          rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1],
+
+          apartments: [
+            [1, 2, 3, 4],
+            [11, 12, 13, 14],
+            [21, 22, 23, 24],
+            [31, 32, 33, 34]
+          ]
+        },
+        {
+          name: "Top",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [
+            { x: 1132, y: 591 }, { x: 2749.5, y: 443.5 },
+            { x: 2990, y: 676 }, { x: 979.5, y: 900 }
+          ],
+          rows: 1,
+          cols: 4,
+
+          columnFractionsTop:    [0, 0.25, 0.50, 0.75, 1],
+          columnFractionsBottom: [0, 0.25, 0.50, 0.75, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
+
+          apartments: [[41, 42, 43, 44]]
+        },
+        {
+          name: "Top 41 Zusatzfläche",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1136 589L976 903L1000 721L1136 589Z",
+          rows: 1,
+          cols: 1,
+
+          columnFractionsTop:    [0, 1],
+          columnFractionsBottom: [0, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
+
+          apartments: [[41]]
+        },
+        {
+          name: "Top 45 A",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1024 549L1136 409V589L998 727L1024 549Z",
+          rows: 1,
+          cols: 1,
+
+          columnFractionsTop:    [0, 1],
+          columnFractionsBottom: [0, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
+
+          apartments: [[45]]
+        },
+        {
+          name: "Top 45 B",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1136 409L1174 399V571L1136 587V409Z",
+          rows: 1,
+          cols: 1,
+
+          columnFractionsTop:    [0, 1],
+          columnFractionsBottom: [0, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
+
+          apartments: [[45]]
+        },
+        {
+          name: "Top 45 C",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1176 409L1306 493L1326 557L1176 567V409Z",
+          rows: 1,
+          cols: 1,
+
+          columnFractionsTop:    [0, 1],
+          columnFractionsBottom: [0, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
+
+          apartments: [[45]]
+        },
+        {
+          name: "Top 48",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2470 303L2694 437L2498 459L2390 391L2470 303Z",
+          rows: 1,
+          cols: 1,
+
+          columnFractionsTop:    [0, 1],
+          columnFractionsBottom: [0, 1],
+          rowFractionsLeft:      [0, 1],
+          rowFractionsRight:     [0, 1],
+
+          apartments: [[48]]
+        }
+      ]
+    };
 
     /*
       Compass calibration:
@@ -1517,7 +1625,7 @@
       "verkauft", "verfügbar", "reserviert", "verfügbar"
     ];
 
-    const apartments = Array.from({ length: 16 }, (_, index) => {
+    const apartments = Array.from({ length: 48 }, (_, index) => {
       const top = index + 1;
       const row = Math.floor(index / 4);
       const col = index % 4;
@@ -1525,7 +1633,7 @@
       return {
         id: `Top_${top}`,
         number: `Top ${top}`,
-        floor: ["EG", "1. OG", "2. OG", "3. OG"][row],
+        floor: row === 0 ? "EG" : `${row}. OG`,
         size: `${58 + ((index * 7) % 38)} m²`,
         price: `€ ${(395000 + index * 18500).toLocaleString("de-DE")}`,
         status: demoStatuses[index],
@@ -1543,7 +1651,7 @@
 
     /* =========================================================
        MULTI-GRID RENDERER
-       Each frame can contain several independently positioned grids.
+       Supports old cropped SVG areas and new full-frame SVG paths.
     ========================================================= */
 
     function gridLerp(a, b, t) {
@@ -1554,58 +1662,66 @@
     }
 
     function gridPointAt(config, row, col) {
-      const topU = config.columnFractionsTop[col];
-      const bottomU = config.columnFractionsBottom[col];
-      const leftV = config.rowFractionsLeft[row];
-      const rightV = config.rowFractionsRight[row];
+      const rows = config.rows;
+      const cols = config.cols;
 
-      // Horizontal grid line can start/end at different heights.
-      const leftPoint = gridLerp(
-        config.corners[0],
-        config.corners[3],
-        leftV
-      );
+      const topU = config.columnFractionsTop?.[col] ?? (col / cols);
+      const bottomU = config.columnFractionsBottom?.[col] ?? (col / cols);
+      const leftV = config.rowFractionsLeft?.[row] ?? (row / rows);
+      const rightV = config.rowFractionsRight?.[row] ?? (row / rows);
 
-      const rightPoint = gridLerp(
-        config.corners[1],
-        config.corners[2],
-        rightV
-      );
+      const topPoint = gridLerp(config.corners[0], config.corners[1], topU);
+      const bottomPoint = gridLerp(config.corners[3], config.corners[2], bottomU);
+      const averageU = (topU + bottomU) / 2;
+      const v = leftV + (rightV - leftV) * averageU;
 
-      // Vertical grid line can hit the top/bottom edges at different x positions.
-      const averageV = (leftV + rightV) / 2;
-      const u = topU + (bottomU - topU) * averageV;
-
-      return gridLerp(leftPoint, rightPoint, u);
+      return gridLerp(topPoint, bottomPoint, v);
     }
 
-    function getGridApartment(topNumber) {
-      const apartmentId = `Top_${topNumber}`;
-      const existing = apartments.find(item => item.id === apartmentId);
+    function getApartmentByTopNumber(topNumber) {
+      let apartment = apartments.find(item => item.id === `Top_${topNumber}`);
 
-      if (existing) {
-        return existing;
+      if (!apartment) {
+        const statusCycle = ["verfügbar", "reserviert", "verkauft"];
+        apartment = {
+          id: `Top_${topNumber}`,
+          number: `Top ${topNumber}`,
+          floor: "—",
+          size: "—",
+          price: "—",
+          status: statusCycle[(topNumber - 1) % statusCycle.length],
+          rooms: "—",
+          orientation: "—",
+          outdoor: "—",
+          plan: `https://placehold.co/900x650/f4f4f4/333333?text=Demo+Grundriss+Top+${topNumber}`,
+          gallery: [
+            `https://picsum.photos/seed/top-${topNumber}-living/900/600`,
+            `https://picsum.photos/seed/top-${topNumber}-kitchen/700/525`,
+            `https://picsum.photos/seed/top-${topNumber}-bedroom/700/525`
+          ]
+        };
       }
 
-      const demoStatuses = [
-        "verfügbar",
-        "reserviert",
-        "verkauft"
-      ];
+      return apartment;
+    }
 
-      return {
-        id: apartmentId,
-        number: `Top ${topNumber}`,
-        floor: "—",
-        size: "—",
-        price: "—",
-        status: demoStatuses[(topNumber - 1) % demoStatuses.length],
-        rooms: "—",
-        orientation: "—",
-        outdoor: "—",
-        plan: "",
-        gallery: []
-      };
+    function attachApartmentInteraction(shape, apartment, configName) {
+      shape.classList.add(getStatusClass(apartment.status));
+      shape.setAttribute(
+        "aria-label",
+        `${configName}: ${apartment.number}, ${apartment.status}`
+      );
+
+      shape.addEventListener("click", event => {
+        event.stopPropagation();
+
+        if (suppressNextApartmentClick) {
+          suppressNextApartmentClick = false;
+          return;
+        }
+
+        selectApartment(apartment);
+      });
     }
 
     function renderGridArea(config) {
@@ -1613,67 +1729,40 @@
       area.className = "facade-grid-area";
       area.dataset.gridName = config.name;
 
-      const svg = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "svg"
-      );
-
-      svg.setAttribute(
-        "viewBox",
-        `0 0 ${config.svgWidth} ${config.svgHeight}`
-      );
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", `0 0 ${config.svgWidth} ${config.svgHeight}`);
       svg.setAttribute("preserveAspectRatio", "none");
       svg.setAttribute("aria-label", config.name);
 
-      const rows = config.apartments.length;
-      const cols = config.apartments[0].length;
+      // Single irregular Figma path: keep the exact geometry.
+      if (config.path && config.rows === 1 && config.cols === 1) {
+        const apartment = getApartmentByTopNumber(config.apartments[0][0]);
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", config.path);
+        attachApartmentInteraction(path, apartment, config.name);
+        svg.appendChild(path);
+      } else {
+        for (let row = 0; row < config.rows; row++) {
+          for (let col = 0; col < config.cols; col++) {
+            const apartment = getApartmentByTopNumber(config.apartments[row][col]);
+            const p1 = gridPointAt(config, row, col);
+            const p2 = gridPointAt(config, row, col + 1);
+            const p3 = gridPointAt(config, row + 1, col + 1);
+            const p4 = gridPointAt(config, row + 1, col);
 
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-          const topNumber = config.apartments[row][col];
-          const apartment = getGridApartment(topNumber);
+            const polygon = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "polygon"
+            );
 
-          const p1 = gridPointAt(config, row, col);
-          const p2 = gridPointAt(config, row, col + 1);
-          const p3 = gridPointAt(config, row + 1, col + 1);
-          const p4 = gridPointAt(config, row + 1, col);
+            polygon.setAttribute(
+              "points",
+              `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
+            );
 
-          const polygon = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "polygon"
-          );
-
-          polygon.setAttribute(
-            "points",
-            `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
-          );
-
-          polygon.classList.add(
-            getStatusClass(apartment.status)
-          );
-
-          polygon.setAttribute(
-            "aria-label",
-            `${config.name}: ${apartment.number}, ${apartment.status}`
-          );
-
-          polygon.dataset.apartmentId = apartment.id;
-          polygon.dataset.gridName = config.name;
-          polygon.dataset.row = String(row);
-          polygon.dataset.col = String(col);
-
-          polygon.addEventListener("click", event => {
-            event.stopPropagation();
-
-            if (suppressNextApartmentClick) {
-              suppressNextApartmentClick = false;
-              return;
-            }
-
-            selectApartment(apartment);
-          });
-
-          svg.appendChild(polygon);
+            attachApartmentInteraction(polygon, apartment, config.name);
+            svg.appendChild(polygon);
+          }
         }
       }
 
@@ -1685,8 +1774,8 @@
     function updateFacadeGrid() {
       facadeGrid.innerHTML = "";
 
-      // For now only frame 1 has grid data.
-      if (currentFrame !== 0) {
+      const configs = FRAME_GRIDS[currentFrame];
+      if (!configs) {
         facadeGrid.classList.remove("is-visible");
         return;
       }
@@ -1694,11 +1783,8 @@
       const image = preloadedImages[currentFrame];
 
       if (
-        !image ||
-        !image.naturalWidth ||
-        !image.naturalHeight ||
-        !wrapper.clientWidth ||
-        !wrapper.clientHeight
+        !image || !image.naturalWidth || !image.naturalHeight ||
+        !wrapper.clientWidth || !wrapper.clientHeight
       ) {
         facadeGrid.classList.remove("is-visible");
         return;
@@ -1709,10 +1795,7 @@
       const imageAspect = image.naturalWidth / image.naturalHeight;
       const viewerAspect = viewerWidth / viewerHeight;
 
-      let shownWidth;
-      let shownHeight;
-      let imageLeft;
-      let imageTop;
+      let shownWidth, shownHeight, imageLeft, imageTop;
 
       if (viewerAspect > imageAspect) {
         shownHeight = viewerHeight;
@@ -1726,17 +1809,25 @@
         imageTop = (viewerHeight - shownHeight) / 2;
       }
 
-      FRAME_1_GRIDS.forEach(config => {
+      configs.forEach(config => {
         const area = renderGridArea(config);
-        const gridWidth = shownWidth * (config.widthPct / 100);
-        const gridHeight = gridWidth * (config.svgHeight / config.svgWidth);
 
-        area.style.left =
-          `${imageLeft + shownWidth * (config.leftPct / 100)}px`;
-        area.style.top =
-          `${imageTop + shownHeight * (config.topPct / 100)}px`;
-        area.style.width = `${gridWidth}px`;
-        area.style.height = `${gridHeight}px`;
+        if (config.fullFrame) {
+          // New workflow: SVG coordinates are already absolute in the 4000x2250 photo.
+          area.style.left = `${imageLeft}px`;
+          area.style.top = `${imageTop}px`;
+          area.style.width = `${shownWidth}px`;
+          area.style.height = `${shownHeight}px`;
+        } else {
+          // Legacy workflow for image 1.
+          const gridWidth = shownWidth * (config.widthPct / 100);
+          const gridHeight = gridWidth * (config.svgHeight / config.svgWidth);
+
+          area.style.left = `${imageLeft + shownWidth * (config.leftPct / 100)}px`;
+          area.style.top = `${imageTop + shownHeight * (config.topPct / 100)}px`;
+          area.style.width = `${gridWidth}px`;
+          area.style.height = `${gridHeight}px`;
+        }
       });
 
       facadeGrid.classList.add("is-visible");
