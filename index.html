@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wohnungsnavigator</title>
+  <!-- Grid test: frame 1 = 4x4 apartment overlay -->
 
   <style>
     * {
@@ -127,6 +128,48 @@
       user-select: none;
       -webkit-user-select: none;
       -webkit-user-drag: none;
+    }
+
+    /* =========================================================
+       APARTMENT GRID OVERLAY
+       Frame 1 only for now. More frame configs can be added later.
+    ========================================================= */
+
+    #facadeGrid {
+      position: absolute;
+      z-index: 12;
+      display: none;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    #facadeGrid.is-visible {
+      display: block;
+    }
+
+    #facadeGrid polygon {
+      fill: transparent;
+      stroke: rgba(255,255,255,0.95);
+      stroke-width: 5;
+      vector-effect: non-scaling-stroke;
+      cursor: pointer;
+      pointer-events: all;
+      transition: fill 0.16s ease, filter 0.16s ease;
+    }
+
+    #facadeGrid polygon.status-verfuegbar:hover {
+      fill: rgba(47,166,106,0.62);
+      filter: drop-shadow(0 0 8px rgba(47,166,106,0.75));
+    }
+
+    #facadeGrid polygon.status-reserviert:hover {
+      fill: rgba(229,164,0,0.62);
+      filter: drop-shadow(0 0 8px rgba(229,164,0,0.75));
+    }
+
+    #facadeGrid polygon.status-verkauft:hover {
+      fill: rgba(211,74,74,0.62);
+      filter: drop-shadow(0 0 8px rgba(211,74,74,0.75));
     }
 
     /* =========================================================
@@ -638,6 +681,13 @@
           draggable="false"
         >
 
+        <svg
+          id="facadeGrid"
+          viewBox="0 0 2145 560"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-label="Wohnungsraster"
+        ></svg>
+
       </div>
 
       <div class="compass" aria-label="Kompass">
@@ -830,6 +880,7 @@
 
     const wrapper = document.getElementById("viewerCanvasWrapper");
     const orbitImage = document.getElementById("orbitImage");
+    const facadeGrid = document.getElementById("facadeGrid");
 
     const sideFillLeft = document.getElementById("sideFillLeft");
     const sideFillRight = document.getElementById("sideFillRight");
@@ -921,6 +972,7 @@
 
       updateCompass();
       updateSideFillers();
+      updateFacadeGrid();
     }
 
     /* =========================================================
@@ -981,7 +1033,10 @@
       }
     }
 
-    window.addEventListener("resize", updateSideFillers);
+    window.addEventListener("resize", () => {
+      updateSideFillers();
+      updateFacadeGrid();
+    });
 
     /* =========================================================
        COMPASS
@@ -1106,56 +1161,178 @@
        Keep/replace this with your real data later.
     ========================================================= */
 
-    const apartments = [
-      {
-        id: "Top_1",
-        number: "Top 1",
-        floor: "EG",
-        size: "72 m²",
-        price: "€ 495.000",
-        status: "verfügbar",
-        rooms: "3",
-        orientation: "Süd",
-        outdoor: "Terrasse",
-        plan: ""
-      },
-      {
-        id: "Top_2",
-        number: "Top 2",
-        floor: "EG",
-        size: "64 m²",
-        price: "€ 445.000",
-        status: "reserviert",
-        rooms: "2",
-        orientation: "West",
-        outdoor: "Garten",
-        plan: ""
-      },
-      {
-        id: "Top_3",
-        number: "Top 3",
-        floor: "1. OG",
-        size: "81 m²",
-        price: "€ 575.000",
-        status: "verfügbar",
-        rooms: "3",
-        orientation: "Süd-West",
-        outdoor: "Balkon",
-        plan: ""
-      },
-      {
-        id: "Top_4",
-        number: "Top 4",
-        floor: "1. OG",
-        size: "93 m²",
-        price: "€ 640.000",
-        status: "verkauft",
-        rooms: "4",
-        orientation: "Ost",
-        outdoor: "Balkon",
-        plan: ""
-      }
+    const demoStatuses = [
+      "verfügbar", "reserviert", "verkauft", "verfügbar",
+      "verkauft", "verfügbar", "reserviert", "verfügbar",
+      "verfügbar", "verkauft", "verfügbar", "reserviert",
+      "verkauft", "verfügbar", "reserviert", "verfügbar"
     ];
+
+    const apartments = Array.from({ length: 16 }, (_, index) => {
+      const top = index + 1;
+      const row = Math.floor(index / 4);
+      const col = index % 4;
+
+      return {
+        id: `Top_${top}`,
+        number: `Top ${top}`,
+        floor: ["EG", "1. OG", "2. OG", "3. OG"][row],
+        size: `${58 + ((index * 7) % 38)} m²`,
+        price: `€ ${(395000 + index * 18500).toLocaleString("de-DE")}`,
+        status: demoStatuses[index],
+        rooms: String(2 + (col % 3)),
+        orientation: ["Süd", "West", "Ost", "Süd-West"][col],
+        outdoor: row === 0 ? "Terrasse" : "Balkon",
+        plan: ""
+      };
+    });
+
+    /* =========================================================
+       FRAME 1 GRID
+       The Figma SVG defines only the perspective quadrilateral.
+       This code divides it into 4 equal rows x 4 equal columns.
+
+       IMPORTANT FOR POSITIONING:
+       Because Figma exported only the rectangle itself, the SVG no
+       longer contains its original position on the full photo.
+       Adjust leftPct/topPct/widthPct below until it sits exactly on
+       the building. Later each of the 26 frames can get its own config.
+    ========================================================= */
+
+    const frameGridConfigs = {
+      0: {
+        viewBoxWidth: 2145,
+        viewBoxHeight: 560,
+        corners: [
+          { x: 0, y: 25 },
+          { x: 2145, y: 0 },
+          { x: 2070, y: 495 },
+          { x: 100, y: 560 }
+        ],
+        rows: 4,
+        cols: 4,
+
+        // Position of the exported Figma rectangle on frame 1.
+        // These four values are intentionally easy to fine-tune.
+        leftPct: 20,
+        topPct: 31,
+        widthPct: 60
+      }
+    };
+
+    function gridLerp(a, b, t) {
+      return {
+        x: a.x + (b.x - a.x) * t,
+        y: a.y + (b.y - a.y) * t
+      };
+    }
+
+    function gridPointAt(config, row, col) {
+      const v = row / config.rows;
+      const u = col / config.cols;
+
+      const left = gridLerp(config.corners[0], config.corners[3], v);
+      const right = gridLerp(config.corners[1], config.corners[2], v);
+
+      return gridLerp(left, right, u);
+    }
+
+    function renderFacadeGrid(config) {
+      facadeGrid.innerHTML = "";
+      facadeGrid.setAttribute(
+        "viewBox",
+        `0 0 ${config.viewBoxWidth} ${config.viewBoxHeight}`
+      );
+
+      let apartmentIndex = 0;
+
+      for (let row = 0; row < config.rows; row++) {
+        for (let col = 0; col < config.cols; col++) {
+          const apartment = apartments[apartmentIndex];
+          const p1 = gridPointAt(config, row, col);
+          const p2 = gridPointAt(config, row, col + 1);
+          const p3 = gridPointAt(config, row + 1, col + 1);
+          const p4 = gridPointAt(config, row + 1, col);
+
+          const polygon = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "polygon"
+          );
+
+          polygon.setAttribute("id", `grid-${apartment.id}`);
+          polygon.setAttribute(
+            "points",
+            `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
+          );
+          polygon.classList.add(getStatusClass(apartment.status));
+          polygon.setAttribute(
+            "aria-label",
+            `${apartment.number}, ${apartment.status}`
+          );
+
+          polygon.addEventListener("click", event => {
+            event.stopPropagation();
+            selectApartment(apartment);
+          });
+
+          facadeGrid.appendChild(polygon);
+          apartmentIndex++;
+        }
+      }
+    }
+
+    function updateFacadeGrid() {
+      const config = frameGridConfigs[currentFrame];
+      const image = preloadedImages[currentFrame];
+
+      if (
+        !config ||
+        !image ||
+        !image.naturalWidth ||
+        !image.naturalHeight ||
+        !wrapper.clientWidth ||
+        !wrapper.clientHeight
+      ) {
+        facadeGrid.classList.remove("is-visible");
+        return;
+      }
+
+      const viewerWidth = wrapper.clientWidth;
+      const viewerHeight = wrapper.clientHeight;
+      const imageAspect = image.naturalWidth / image.naturalHeight;
+      const viewerAspect = viewerWidth / viewerHeight;
+
+      let shownWidth;
+      let shownHeight;
+      let imageLeft;
+      let imageTop;
+
+      if (viewerAspect > imageAspect) {
+        shownHeight = viewerHeight;
+        shownWidth = shownHeight * imageAspect;
+        imageLeft = (viewerWidth - shownWidth) / 2;
+        imageTop = 0;
+      } else {
+        shownWidth = viewerWidth;
+        shownHeight = shownWidth / imageAspect;
+        imageLeft = 0;
+        imageTop = (viewerHeight - shownHeight) / 2;
+      }
+
+      const gridWidth = shownWidth * (config.widthPct / 100);
+      const gridHeight = gridWidth *
+        (config.viewBoxHeight / config.viewBoxWidth);
+
+      facadeGrid.style.left =
+        `${imageLeft + shownWidth * (config.leftPct / 100)}px`;
+      facadeGrid.style.top =
+        `${imageTop + shownHeight * (config.topPct / 100)}px`;
+      facadeGrid.style.width = `${gridWidth}px`;
+      facadeGrid.style.height = `${gridHeight}px`;
+
+      renderFacadeGrid(config);
+      facadeGrid.classList.add("is-visible");
+    }
 
     /* =========================================================
        HELPERS
@@ -1510,6 +1687,7 @@
     renderApartmentResults();
     updateCompass();
     updateSideFillers();
+    updateFacadeGrid();
   </script>
 </body>
 </html>
