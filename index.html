@@ -1221,7 +1221,7 @@
           apartments: [[41, 42, 43, 44]]
         },
         {
-          name: "Top 41 Zusatzfläche",
+          name: "Top 41 Zusatzfläche (verbunden mit Top-Feld 1)",
           fullFrame: true,
           svgWidth: 4000,
           svgHeight: 2250,
@@ -1536,6 +1536,7 @@
     let dragAccumulator = 0;
     let dragDistance = 0;
     let suppressNextApartmentClick = false;
+    let pendingApartmentFromGrid = null;
     let hasInteracted = false;
 
     function startDragging(event) {
@@ -1593,7 +1594,8 @@
       }
 
       isDragging = false;
-      suppressNextApartmentClick = dragDistance > 6;
+      const wasDrag = dragDistance > 6;
+      suppressNextApartmentClick = wasDrag;
       wrapper.classList.remove("is-dragging");
 
       if (
@@ -1603,6 +1605,15 @@
         try {
           wrapper.releasePointerCapture(event.pointerId);
         } catch (error) {}
+      }
+
+      if (!wasDrag && pendingApartmentFromGrid) {
+        const apartmentToOpen = pendingApartmentFromGrid;
+        pendingApartmentFromGrid = null;
+        suppressNextApartmentClick = true;
+        selectApartment(apartmentToOpen);
+      } else {
+        pendingApartmentFromGrid = null;
       }
     }
 
@@ -1732,6 +1743,10 @@
         "aria-label",
         `${configName}: ${apartment.number}, ${apartment.status || "Status offen"}`
       );
+
+      shape.addEventListener("pointerdown", () => {
+        pendingApartmentFromGrid = apartment;
+      });
 
       shape.addEventListener("click", event => {
         event.stopPropagation();
