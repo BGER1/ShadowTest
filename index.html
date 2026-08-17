@@ -1368,8 +1368,14 @@
 
     function finishLoading() {
       currentFrame = 0;
-      setFrame(0);
-      loader.style.display = "none";
+
+      try {
+        setFrame(0);
+      } catch (error) {
+        console.error("Navigator konnte initial nicht vollständig gerendert werden:", error);
+      } finally {
+        loader.style.display = "none";
+      }
     }
 
     imagePaths.forEach((src, index) => {
@@ -1706,10 +1712,15 @@
     }
 
     function attachApartmentInteraction(shape, apartment, configName) {
-      shape.classList.add(getStatusClass(apartment.status));
+      const statusClass = getStatusClass(apartment.status);
+
+      if (statusClass) {
+        shape.classList.add(statusClass);
+      }
+
       shape.setAttribute(
         "aria-label",
-        `${configName}: ${apartment.number}, ${apartment.status}`
+        `${configName}: ${apartment.number}, ${apartment.status || "Status offen"}`
       );
 
       shape.addEventListener("click", event => {
