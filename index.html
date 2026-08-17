@@ -1074,7 +1074,18 @@
     const TOTAL_FRAMES = 26;
     const PIXELS_PER_FRAME = 30;
 
-    /* FRAME 1: four Figma grid areas */
+    /* =========================================================
+       FRAME 1 GRID AREAS
+
+       FRACTIONS:
+       columnFractionsTop    = vertical separators on TOP edge
+       columnFractionsBottom = vertical separators on BOTTOM edge
+       rowFractionsLeft      = horizontal separators on LEFT edge
+       rowFractionsRight     = horizontal separators on RIGHT edge
+
+       All values run from 0 to 1.
+       You can adjust every form independently later.
+    ========================================================= */
     const FRAME_1_GRIDS = [
       {
         name: "Fassade",
@@ -1086,11 +1097,21 @@
           { x: 2070, y: 495 },
           { x: 100, y: 560 }
         ],
-        cols: 4,
-        rows: 4,
         leftPct: 25.5,
         topPct: 37,
-        widthPct: 53.5
+        widthPct: 53.5,
+
+        columnFractionsTop:    [0, 0.25, 0.50, 0.75, 1],
+        columnFractionsBottom: [0, 0.25, 0.50, 0.75, 1],
+        rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
+        rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1],
+
+        apartments: [
+          [1, 2, 3, 4],
+          [11, 12, 13, 14],
+          [21, 22, 23, 24],
+          [31, 32, 33, 34]
+        ]
       },
       {
         name: "Top",
@@ -1102,17 +1123,19 @@
           { x: 2145, y: 265 },
           { x: 0, y: 290 }
         ],
-        rows: 1,
-        cols: 4,
         leftPct: 25.5,
         topPct: 25.5,
         widthPct: 53.5,
 
-        // Horizontal cell boundaries along the upper and lower roof edges.
-        // The first upper divider is intentionally shifted right:
-        // normal = 0.25, adjusted = 0.31.
-        topColumnFractions:    [0, 0.20, 0.50, 0.82, 1],
-        bottomColumnFractions: [0, 0.25, 0.50, 0.75, 1]
+        /* first upper divider intentionally shifted right */
+        columnFractionsTop:    [0, 0.31, 0.50, 0.75, 1],
+        columnFractionsBottom: [0, 0.25, 0.50, 0.75, 1],
+        rowFractionsLeft:      [0, 1],
+        rowFractionsRight:     [0, 1],
+
+        apartments: [
+          [41, 42, 43, 44]
+        ]
       },
       {
         name: "Left",
@@ -1124,11 +1147,18 @@
           { x: 256, y: 158 },
           { x: 0, y: 148 }
         ],
-        cols: 1,
-        rows: 1,
         leftPct: 32.5,
         topPct: 18.7,
-        widthPct: 6
+        widthPct: 6,
+
+        columnFractionsTop:    [0, 1],
+        columnFractionsBottom: [0, 1],
+        rowFractionsLeft:      [0, 1],
+        rowFractionsRight:     [0, 1],
+
+        apartments: [
+          [45]
+        ]
       },
       {
         name: "Right",
@@ -1140,14 +1170,20 @@
           { x: 256, y: 160 },
           { x: 16, y: 160 }
         ],
-        cols: 1,
-        rows: 1,
         leftPct: 66.1,
         topPct: 18.3,
-        widthPct: 6.1
+        widthPct: 6.1,
+
+        columnFractionsTop:    [0, 1],
+        columnFractionsBottom: [0, 1],
+        rowFractionsLeft:      [0, 1],
+        rowFractionsRight:     [0, 1],
+
+        apartments: [
+          [48]
+        ]
       }
     ];
- // slower rotation: twice as much drag per frame
 
     /*
       Compass calibration:
@@ -1518,30 +1554,61 @@
     }
 
     function gridPointAt(config, row, col) {
-      const v = row / config.rows;
+      const topU = config.columnFractionsTop[col];
+      const bottomU = config.columnFractionsBottom[col];
+      const leftV = config.rowFractionsLeft[row];
+      const rightV = config.rowFractionsRight[row];
 
-      // Standard grids use equal column widths.
-      let u = col / config.cols;
+      // Horizontal grid line can start/end at different heights.
+      const leftPoint = gridLerp(
+        config.corners[0],
+        config.corners[3],
+        leftV
+      );
 
-      // Optional per-edge column fractions allow selected dividers to be
-      // skewed without changing the surrounding Figma outline.
-      if (
-        config.topColumnFractions &&
-        config.bottomColumnFractions &&
-        config.rows === 1
-      ) {
-        const topU = config.topColumnFractions[col];
-        const bottomU = config.bottomColumnFractions[col];
-        u = v === 0 ? topU : bottomU;
-      }
+      const rightPoint = gridLerp(
+        config.corners[1],
+        config.corners[2],
+        rightV
+      );
 
-      const left = gridLerp(config.corners[0], config.corners[3], v);
-      const right = gridLerp(config.corners[1], config.corners[2], v);
+      // Vertical grid line can hit the top/bottom edges at different x positions.
+      const averageV = (leftV + rightV) / 2;
+      const u = topU + (bottomU - topU) * averageV;
 
-      return gridLerp(left, right, u);
+      return gridLerp(leftPoint, rightPoint, u);
     }
 
-    function renderGridArea(config, startIndex) {
+    function getGridApartment(topNumber) {
+      const apartmentId = `Top_${topNumber}`;
+      const existing = apartments.find(item => item.id === apartmentId);
+
+      if (existing) {
+        return existing;
+      }
+
+      const demoStatuses = [
+        "verfügbar",
+        "reserviert",
+        "verkauft"
+      ];
+
+      return {
+        id: apartmentId,
+        number: `Top ${topNumber}`,
+        floor: "—",
+        size: "—",
+        price: "—",
+        status: demoStatuses[(topNumber - 1) % demoStatuses.length],
+        rooms: "—",
+        orientation: "—",
+        outdoor: "—",
+        plan: "",
+        gallery: []
+      };
+    }
+
+    function renderGridArea(config) {
       const area = document.createElement("div");
       area.className = "facade-grid-area";
       area.dataset.gridName = config.name;
@@ -1550,6 +1617,7 @@
         "http://www.w3.org/2000/svg",
         "svg"
       );
+
       svg.setAttribute(
         "viewBox",
         `0 0 ${config.svgWidth} ${config.svgHeight}`
@@ -1557,12 +1625,13 @@
       svg.setAttribute("preserveAspectRatio", "none");
       svg.setAttribute("aria-label", config.name);
 
-      let localIndex = 0;
+      const rows = config.apartments.length;
+      const cols = config.apartments[0].length;
 
-      for (let row = 0; row < config.rows; row++) {
-        for (let col = 0; col < config.cols; col++) {
-          const apartmentIndex = (startIndex + localIndex) % apartments.length;
-          const apartment = apartments[apartmentIndex];
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const topNumber = config.apartments[row][col];
+          const apartment = getGridApartment(topNumber);
 
           const p1 = gridPointAt(config, row, col);
           const p2 = gridPointAt(config, row, col + 1);
@@ -1578,11 +1647,20 @@
             "points",
             `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
           );
-          polygon.classList.add(getStatusClass(apartment.status));
+
+          polygon.classList.add(
+            getStatusClass(apartment.status)
+          );
+
           polygon.setAttribute(
             "aria-label",
             `${config.name}: ${apartment.number}, ${apartment.status}`
           );
+
+          polygon.dataset.apartmentId = apartment.id;
+          polygon.dataset.gridName = config.name;
+          polygon.dataset.row = String(row);
+          polygon.dataset.col = String(col);
 
           polygon.addEventListener("click", event => {
             event.stopPropagation();
@@ -1596,7 +1674,6 @@
           });
 
           svg.appendChild(polygon);
-          localIndex++;
         }
       }
 
@@ -1649,10 +1726,8 @@
         imageTop = (viewerHeight - shownHeight) / 2;
       }
 
-      let cellOffset = 0;
-
       FRAME_1_GRIDS.forEach(config => {
-        const area = renderGridArea(config, cellOffset);
+        const area = renderGridArea(config);
         const gridWidth = shownWidth * (config.widthPct / 100);
         const gridHeight = gridWidth * (config.svgHeight / config.svgWidth);
 
@@ -1662,8 +1737,6 @@
           `${imageTop + shownHeight * (config.topPct / 100)}px`;
         area.style.width = `${gridWidth}px`;
         area.style.height = `${gridHeight}px`;
-
-        cellOffset += config.rows * config.cols;
       });
 
       facadeGrid.classList.add("is-visible");
