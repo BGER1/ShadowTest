@@ -93,7 +93,7 @@
       height: calc(100vh + 50px);
       object-fit: cover;
       object-position: center center;
-      filter: blur(28px);
+      filter: blur(16px);
       transform: scale(1.05);
       pointer-events: none;
       user-select: none;
@@ -750,7 +750,7 @@
         width: calc(100% + 56px);
         height: calc(100% + 56px);
         object-fit: cover;
-        filter: blur(24px);
+        filter: blur(14px);
         transform: scale(1.05);
         opacity: 0.72;
         pointer-events: none;
@@ -1062,7 +1062,24 @@
     ========================================================= */
 
     const TOTAL_FRAMES = 26;
-    const PIXELS_PER_FRAME = 30; // slower rotation: twice as much drag per frame
+    const PIXELS_PER_FRAME = 30;
+
+    /* FRAME 1: four Figma grid areas */
+    const FRAME_1_GRIDS = [
+      { name:"Fassade", svgWidth:2145, svgHeight:560,
+        corners:[{x:0,y:25},{x:2145,y:0},{x:2070,y:495},{x:100,y:560}],
+        cols:4, rows:4, leftPct:25.5, topPct:37, widthPct:53.5 },
+      { name:"Top", svgWidth:2145, svgHeight:290,
+        corners:[{x:240,y:20},{x:1925,y:0},{x:2145,y:265},{x:0,y:290}],
+        cols:1, rows:4, leftPct:25.5, topPct:20, widthPct:53.5 },
+      { name:"Left", svgWidth:256, svgHeight:158,
+        corners:[{x:126,y:0},{x:256,y:122},{x:256,y:158},{x:0,y:148}],
+        cols:1, rows:1, leftPct:25.5, topPct:20, widthPct:20 },
+      { name:"Right", svgWidth:256, svgHeight:160,
+        corners:[{x:0,y:126},{x:138,y:0},{x:256,y:160},{x:16,y:160}],
+        cols:1, rows:1, leftPct:75, topPct:20, widthPct:20 }
+    ];
+ // slower rotation: twice as much drag per frame
 
     /*
       Compass calibration:
@@ -1447,9 +1464,9 @@
 
         // Position of the exported Figma rectangle on frame 1.
         // These three values are intentionally easy to fine-tune.
-        leftPct: 25.5,
-        topPct: 37,
-        widthPct: 53.5
+        leftPct: 21,
+        topPct: 32,
+        widthPct: 58
       }
     };
 
