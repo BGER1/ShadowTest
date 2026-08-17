@@ -132,43 +132,59 @@
 
     /* =========================================================
        APARTMENT GRID OVERLAY
-       Frame 1 only for now. More frame configs can be added later.
+       Multiple independently positioned Figma areas per frame.
     ========================================================= */
 
     #facadeGrid {
       position: absolute;
+      inset: 0;
       z-index: 12;
       display: none;
-      overflow: visible;
       pointer-events: none;
+      overflow: visible;
     }
 
     #facadeGrid.is-visible {
       display: block;
     }
 
-    #facadeGrid polygon {
+    .facade-grid-area {
+      position: absolute;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .facade-grid-area svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .facade-grid-area polygon {
       fill: transparent;
-      stroke: transparent;
-      stroke-width: 0;
+      stroke: rgba(255,255,255,0.92);
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
       cursor: pointer;
       pointer-events: all;
       transition: fill 0.16s ease, filter 0.16s ease;
     }
 
-    #facadeGrid polygon.status-verfuegbar:hover {
-      fill: rgba(47,166,106,0.28);
-      filter: drop-shadow(0 0 5px rgba(47,166,106,0.28));
+    .facade-grid-area polygon.status-verfuegbar:hover {
+      fill: rgba(47,166,106,0.22);
+      filter: drop-shadow(0 0 4px rgba(47,166,106,0.22));
     }
 
-    #facadeGrid polygon.status-reserviert:hover {
-      fill: rgba(229,164,0,0.28);
-      filter: drop-shadow(0 0 5px rgba(229,164,0,0.28));
+    .facade-grid-area polygon.status-reserviert:hover {
+      fill: rgba(229,164,0,0.22);
+      filter: drop-shadow(0 0 4px rgba(229,164,0,0.22));
     }
 
-    #facadeGrid polygon.status-verkauft:hover {
-      fill: rgba(211,74,74,0.28);
-      filter: drop-shadow(0 0 5px rgba(211,74,74,0.28));
+    .facade-grid-area polygon.status-verkauft:hover {
+      fill: rgba(211,74,74,0.22);
+      filter: drop-shadow(0 0 4px rgba(211,74,74,0.22));
     }
 
     /* =========================================================
@@ -876,13 +892,7 @@
           alt="Gebäudeansicht"
           draggable="false"
         >
-
-        <svg
-          id="facadeGrid"
-          viewBox="0 0 2145 560"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-label="Wohnungsraster"
-        ></svg>
+        <div id="facadeGrid" aria-label="Wohnungsraster"></div>
 
       </div>
 
@@ -1438,37 +1448,9 @@
     });
 
     /* =========================================================
-       FRAME 1 GRID
-       The Figma SVG defines only the perspective quadrilateral.
-       This code divides it into 4 equal rows x 4 equal columns.
-
-       IMPORTANT FOR POSITIONING:
-       Because Figma exported only the rectangle itself, the SVG no
-       longer contains its original position on the full photo.
-       Adjust leftPct/topPct/widthPct below until it sits exactly on
-       the building. Later each of the 26 frames can get its own config.
+       MULTI-GRID RENDERER
+       Each frame can contain several independently positioned grids.
     ========================================================= */
-
-    const frameGridConfigs = {
-      0: {
-        viewBoxWidth: 2145,
-        viewBoxHeight: 560,
-        corners: [
-          { x: 0, y: 25 },
-          { x: 2145, y: 0 },
-          { x: 2070, y: 495 },
-          { x: 100, y: 560 }
-        ],
-        rows: 4,
-        cols: 4,
-
-        // Position of the exported Figma rectangle on frame 1.
-        // These three values are intentionally easy to fine-tune.
-        leftPct: 21,
-        topPct: 32,
-        widthPct: 58
-      }
-    };
 
     function gridLerp(a, b, t) {
       return {
@@ -1487,18 +1469,29 @@
       return gridLerp(left, right, u);
     }
 
-    function renderFacadeGrid(config) {
-      facadeGrid.innerHTML = "";
-      facadeGrid.setAttribute(
-        "viewBox",
-        `0 0 ${config.viewBoxWidth} ${config.viewBoxHeight}`
-      );
+    function renderGridArea(config, startIndex) {
+      const area = document.createElement("div");
+      area.className = "facade-grid-area";
+      area.dataset.gridName = config.name;
 
-      let apartmentIndex = 0;
+      const svg = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+      svg.setAttribute(
+        "viewBox",
+        `0 0 ${config.svgWidth} ${config.svgHeight}`
+      );
+      svg.setAttribute("preserveAspectRatio", "none");
+      svg.setAttribute("aria-label", config.name);
+
+      let localIndex = 0;
 
       for (let row = 0; row < config.rows; row++) {
         for (let col = 0; col < config.cols; col++) {
+          const apartmentIndex = (startIndex + localIndex) % apartments.length;
           const apartment = apartments[apartmentIndex];
+
           const p1 = gridPointAt(config, row, col);
           const p2 = gridPointAt(config, row, col + 1);
           const p3 = gridPointAt(config, row + 1, col + 1);
@@ -1509,7 +1502,6 @@
             "polygon"
           );
 
-          polygon.setAttribute("id", `grid-${apartment.id}`);
           polygon.setAttribute(
             "points",
             `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
@@ -1517,15 +1509,12 @@
           polygon.classList.add(getStatusClass(apartment.status));
           polygon.setAttribute(
             "aria-label",
-            `${apartment.number}, ${apartment.status}`
+            `${config.name}: ${apartment.number}, ${apartment.status}`
           );
 
-          // Pointerdown is intentionally allowed to bubble to the viewer,
-          // so dragging can start even when the pointer is on an apartment.
           polygon.addEventListener("click", event => {
             event.stopPropagation();
 
-            // If this gesture was a drag, do not treat it as an apartment click.
             if (suppressNextApartmentClick) {
               suppressNextApartmentClick = false;
               return;
@@ -1534,18 +1523,28 @@
             selectApartment(apartment);
           });
 
-          facadeGrid.appendChild(polygon);
-          apartmentIndex++;
+          svg.appendChild(polygon);
+          localIndex++;
         }
       }
+
+      area.appendChild(svg);
+      facadeGrid.appendChild(area);
+      return area;
     }
 
     function updateFacadeGrid() {
-      const config = frameGridConfigs[currentFrame];
+      facadeGrid.innerHTML = "";
+
+      // For now only frame 1 has grid data.
+      if (currentFrame !== 0) {
+        facadeGrid.classList.remove("is-visible");
+        return;
+      }
+
       const image = preloadedImages[currentFrame];
 
       if (
-        !config ||
         !image ||
         !image.naturalWidth ||
         !image.naturalHeight ||
@@ -1578,18 +1577,23 @@
         imageTop = (viewerHeight - shownHeight) / 2;
       }
 
-      const gridWidth = shownWidth * (config.widthPct / 100);
-      const gridHeight = gridWidth *
-        (config.viewBoxHeight / config.viewBoxWidth);
+      let cellOffset = 0;
 
-      facadeGrid.style.left =
-        `${imageLeft + shownWidth * (config.leftPct / 100)}px`;
-      facadeGrid.style.top =
-        `${imageTop + shownHeight * (config.topPct / 100)}px`;
-      facadeGrid.style.width = `${gridWidth}px`;
-      facadeGrid.style.height = `${gridHeight}px`;
+      FRAME_1_GRIDS.forEach(config => {
+        const area = renderGridArea(config, cellOffset);
+        const gridWidth = shownWidth * (config.widthPct / 100);
+        const gridHeight = gridWidth * (config.svgHeight / config.svgWidth);
 
-      renderFacadeGrid(config);
+        area.style.left =
+          `${imageLeft + shownWidth * (config.leftPct / 100)}px`;
+        area.style.top =
+          `${imageTop + shownHeight * (config.topPct / 100)}px`;
+        area.style.width = `${gridWidth}px`;
+        area.style.height = `${gridHeight}px`;
+
+        cellOffset += config.rows * config.cols;
+      });
+
       facadeGrid.classList.add("is-visible");
     }
 
