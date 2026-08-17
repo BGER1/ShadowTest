@@ -1214,9 +1214,9 @@
 
         // Position of the exported Figma rectangle on frame 1.
         // These four values are intentionally easy to fine-tune.
-        leftPct: 20,
-        topPct: 31,
-        widthPct: 60
+        leftPct: 25,
+        topPct: 36,
+        widthPct: 51
       }
     };
 
@@ -1269,6 +1269,11 @@
             "aria-label",
             `${apartment.number}, ${apartment.status}`
           );
+
+          polygon.addEventListener("pointerdown", event => {
+            // Clicking a flat must not start rotating the 26-frame viewer.
+            event.stopPropagation();
+          });
 
           polygon.addEventListener("click", event => {
             event.stopPropagation();
