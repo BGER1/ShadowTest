@@ -1132,9 +1132,15 @@
        Every form keeps editable fractions underneath it.
     ========================================================= */
     const GRID_FRAME_OFFSETS = {
-      // currentFrame is zero-based: 1 = Bild 2
-      // Positive x = move mask right; positive y = move mask down.
-      1: { x: 145, y: 55 }
+      // Zero-based frame index: 1 = Bild 2, 2 = Bild 3, etc.
+      // Positive x = right; positive y = down. Values are original 4000x2250 pixels.
+      1: { x: 145, y: 55 },
+      2: { x: 145, y: 55 },
+      3: { x: 145, y: 55 },
+      4: { x: 145, y: 55 },
+      5: { x: 145, y: 55 },
+      6: { x: 145, y: 55 },
+      7: { x: 145, y: 55 }
     };
 
     const FRAME_GRIDS = {
@@ -1347,6 +1353,960 @@
           rowFractionsRight:     [0, 1],
 
           apartments: [[48]]
+        }
+      ],
+
+      2: [
+        {
+          name: "Fassade",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1234,y:1087}, {x:3100.5,y:638}, {x:2999,y:1157.5}, {x:1304,y:1729}],
+          rows: 4,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,2,3,4],[11,12,13,14],[21,22,23,24],[31,32,33,34]]
+          
+        },
+        {
+          name: "Top",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1350,y:691}, {x:2831,y:428.5}, {x:3101,y:635.5}, {x:1240,y:1087}],
+          rows: 1,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[41,42,43,44]]
+          
+        },
+        {
+          name: "Top 45",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1181 474L1331 602L1392 695H1331L1181 474Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[45]]
+          
+        },
+        {
+          name: "Top 45 B",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1137 474L1308 713L1093 850L1007 660L1137 474Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[45]],
+          // connected to all Top 45 shapes
+        },
+        {
+          name: "Top 45 C",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1139 478H1185L1342 703L1313 721L1139 478Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[45]],
+          // connected to all Top 45 shapes
+        },
+        {
+          name: "Top 41",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1348 693L1242 1083L1093 842L1348 693Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[41]]
+          
+        },
+        {
+          name: "Top 48",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2481 298L2787 428L2525 464L2367 428L2481 298Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[48]]
+          
+        },
+        {
+          name: "Links",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1016,y:665}, {x:1242,y:1091}, {x:1304,y:1717}, {x:1112,y:1167}],
+          rows: 4,
+          cols: 3,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.3333,0.6667,1],
+          columnFractionsBottom: [0,0.3333,0.6667,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,5,9],[11,15,19],[21,25,29],[31,35,39]]
+          
+        }
+      ],
+
+      3: [
+        {
+          name: "Fassade",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1415,y:1127}, {x:2914,y:540}, {x:2838,y:1030}, {x:1448.5,y:1756.5}],
+          rows: 4,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,2,3,4],[11,12,13,14],[21,22,23,24],[31,32,33,34]]
+          
+        },
+        {
+          name: "Top",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1414.5,y:734.5}, {x:2648,y:375.5}, {x:2922.5,y:536}, {x:1414.5,y:1131.5}],
+          rows: 1,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[41,42,43,44]]
+          
+        },
+        {
+          name: "Top 41",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1414.5 722V1144L1203.5 958.5L1414.5 722Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[41]]
+          
+        },
+        {
+          name: "Top 45",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1119 553L1414.5 722L1203.5 958.5L975.5 760L1119 553Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[45]]
+          
+        },
+        {
+          name: "Links",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:975.5,y:764}, {x:1419,y:1148.5}, {x:1448.5,y:1765}, {x:1030.5,y:1279.5}],
+          rows: 4,
+          cols: 3,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.3333,0.6667,1],
+          columnFractionsBottom: [0,0.3333,0.6667,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,5,9],[11,15,19],[21,25,29],[31,35,39]]
+          
+        },
+        {
+          name: "Top 48",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2314.5 270L2648 375L2378 455.5L2225.5 422L2314.5 270Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[48]]
+          
+        },
+        {
+          name: "Top 40",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2215 424L2373 456L2215 500V424Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[40]]
+          
+        }
+      ],
+
+      4: [
+        {
+          name: "Fassade",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1656,y:1292.5}, {x:2669.5,y:532}, {x:2602,y:942}, {x:1656,y:1884}],
+          rows: 4,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,2,3,4],[11,12,13,14],[21,22,23,24],[31,32,33,34]]
+          
+        },
+        {
+          name: "Links",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:891.5,y:937.5}, {x:1643.5,y:1292.5}, {x:1643.5,y:1884}, {x:993,y:1503.5}],
+          rows: 4,
+          cols: 3,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.3333,0.6667,1],
+          columnFractionsBottom: [0,0.3333,0.6667,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,5,9],[11,15,19],[21,25,29],[31,35,39]]
+          
+        },
+        {
+          name: "Top 45 & Top 41",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1014 667.5L1499.5 870L1643.5 1275.5L900 925L1014 667.5Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[[45,41]]]
+          
+        },
+        {
+          name: "Top",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1508,y:874.5}, {x:2467,y:371.5}, {x:2678,y:532}, {x:1643,y:1280}],
+          rows: 1,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[41,42,43,44]]
+          
+        },
+        {
+          name: "Top 48",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2049 268L2471 367.5L2181 492L1975 440L2049 268Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[48]]
+          
+        },
+        {
+          name: "Top 40",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1975 444L2181 492L1965 590L1975 444Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[40]]
+          
+        }
+      ],
+
+      5: [
+        {
+          name: "Links",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:815,y:1001.5}, {x:1769.5,y:1238}, {x:1735.5,y:1867}, {x:891,y:1618}],
+          rows: 4,
+          cols: 3,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.3333,0.6667,1],
+          columnFractionsBottom: [0,0.3333,0.6667,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,5,9],[11,15,19],[21,25,29],[31,35,39]]
+          
+        },
+        {
+          name: "Fassade",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1748.5,y:1863}, {x:2306,y:803}, {x:2365,y:380.5}, {x:1778,y:1242}],
+          rows: 4,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,2,3,4],[11,12,13,14],[21,22,23,24],[31,32,33,34]]
+          
+        },
+        {
+          name: "Top 45 & Top 41",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M912 718L1536 850L1770 1228L814 988L912 718Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[[45,41]]]
+          
+        },
+        {
+          name: "Top",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1538,y:842}, {x:2148,y:262}, {x:2362,y:388}, {x:1776,y:1226}],
+          rows: 1,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[41,42,43,44]]
+          
+        },
+        {
+          name: "Top 45 A",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1702 680L1538 848L1410 802L1702 680Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[45]]
+          
+        },
+        {
+          name: "Top 45 B",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M946 704L1398 800L1540 850L914 718L946 704Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[45]]
+          
+        },
+        {
+          name: "Top 46 & Top 47",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1796 462L2026 354L1744 624L1634 602L1796 462Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[[46,47]]]
+          
+        },
+        {
+          name: "Top 48",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1716 212L2122 256L1914 412L1664 374L1716 212Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[48]]
+          
+        },
+        {
+          name: "Top 40",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1654 377L1902 411L1722 524L1654 516V377Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[40]]
+          
+        },
+        {
+          name: "Top 30",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1724 525L1654 585V517L1724 525Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[30]]
+          
+        }
+      ],
+
+      6: [
+        {
+          name: "Links",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1216.5,y:1141}, {x:2365.5,y:1276}, {x:2323,y:1875.5}, {x:1292.5,y:1715}],
+          rows: 4,
+          cols: 3,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.3333,0.6667,1],
+          columnFractionsBottom: [0,0.3333,0.6667,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,5,9],[11,15,19],[21,25,29],[31,35,39]]
+          
+        },
+        {
+          name: "Top",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:2162.5,y:287.5}, {x:2378,y:435.5}, {x:2378,y:1259}, {x:2002,y:929.5}],
+          rows: 1,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[41,42,43,44]]
+          
+        },
+        {
+          name: "Top 45 & Top 41",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1267 841L1977 904L2378 1267.5L1225 1132.5L1267 841Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[[45,41]]]
+          
+        },
+        {
+          name: "Top 45",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2023 760.5L1985 904L1753 879L2023 760.5Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[45]]
+          
+        },
+        {
+          name: "Top 46 & Top 47",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1871 527L2119 395L2041 683L1797 709L1871 527Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[[46,47]]]
+          
+        },
+        {
+          name: "Top 48",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1703 281L2141 299L1939 467L1677 455L1703 281Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[48]]
+          
+        },
+        {
+          name: "Top 30, Top 20 & Top 40",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1681 461H1883V519L1697 823L1681 461Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[[30,20,40]]]
+          
+        },
+        {
+          name: "Top 32 & Top 33",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2385 725H2443V903H2385V725Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[[32,33]]]
+          
+        },
+        {
+          name: "Top 22",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2376 905H2424V1027L2376 1017V905Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[22]]
+          
+        },
+        {
+          name: "Top 12",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2375 1017L2417 1026V1134L2379 1131L2375 1017Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[12]]
+          
+        }
+      ],
+
+      7: [
+        {
+          name: "Links",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:1537.5,y:1145}, {x:2842.5,y:1123.5}, {x:2745.5,y:1841.5}, {x:1558.5,y:1841.5}],
+          rows: 4,
+          cols: 3,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.3333,0.6667,1],
+          columnFractionsBottom: [0,0.3333,0.6667,1],
+          rowFractionsLeft:      [0,0.25,0.50,0.75,1],
+          rowFractionsRight:     [0,0.25,0.50,0.75,1],
+
+          apartments: [[1,5,9],[11,15,19],[21,25,29],[31,35,39]]
+          
+        },
+        {
+          name: "Top 45",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1550 1153L2821.5 1123.5L2348.5 802.5L2276.5 612.5L1959.5 781.5H1550V1153Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[45]]
+          
+        },
+        {
+          name: "Top 48",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1601 340H1843V238H1947L2045 160L1601 178V340Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[48]]
+          
+        },
+        {
+          name: "Top",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          corners: [{x:2055,y:156}, {x:2241,y:234}, {x:2829,y:1130}, {x:2351,y:796}],
+          rows: 1,
+          cols: 4,
+
+          // Fractions: adjust individual separators here if the real geometry is imperfect.
+          columnFractionsTop:    [0,0.25,0.50,0.75,1],
+          columnFractionsBottom: [0,0.25,0.50,0.75,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[41,42,43,44]]
+          
+        },
+        {
+          name: "Top 47",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2091 250L1853 400L1877 540L2161 400L2091 250Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[47]]
+          
+        },
+        {
+          name: "Top 46",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M2231 538L2165 404L1875 538L1907 738L1919 598L2067 588V538H2231Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[46]]
+          
+        },
+        {
+          name: "Top 40, Top 30 & Top 20",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1607 346H1835V736L1607 748V346Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[[40,30,20]]]
+          
+        },
+        {
+          name: "Top 37",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1787 514L1853 509L1862 603L1794 609L1787 514Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[37]]
+          
+        },
+        {
+          name: "Top 27",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1788 624H1851L1862 715L1796 722L1788 624Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[27]]
+          
+        },
+        {
+          name: "Top 36",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1807 711H1887L1897 780H1813L1807 711Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[36]]
+          
+        },
+        {
+          name: "Top 26",
+          fullFrame: true,
+          svgWidth: 4000,
+          svgHeight: 2250,
+          path: "M1788 733H1807L1810 782.5H1790.5L1788 733Z",
+          rows: 1,
+          cols: 1,
+
+          // Fractions kept underneath every form for future fine-tuning/splitting.
+          columnFractionsTop:    [0,1],
+          columnFractionsBottom: [0,1],
+          rowFractionsLeft:      [0,1],
+          rowFractionsRight:     [0,1],
+
+          apartments: [[26]]
+          
         }
       ]
     };
@@ -1780,38 +2740,62 @@
       return apartment;
     }
 
-    function setApartmentGroupHover(apartmentId, active) {
-      const selector = `[data-apartment-id="${apartmentId}"]`;
+    function normalizeApartmentRefs(refValue) {
+      const refs = Array.isArray(refValue) ? refValue : [refValue];
 
-      facadeGrid.querySelectorAll(selector).forEach(shape => {
-        shape.classList.toggle("group-hover", active);
+      return refs.map(topNumber => {
+        return getApartmentByTopNumber(topNumber);
       });
     }
 
-    function attachApartmentInteraction(shape, apartment, configName) {
-      const statusClass = getStatusClass(apartment.status);
+    function setApartmentGroupHover(apartmentIds, active) {
+      apartmentIds.forEach(apartmentId => {
+        const selector = `[data-apartment-ids~="${apartmentId}"]`;
+
+        facadeGrid.querySelectorAll(selector).forEach(shape => {
+          shape.classList.toggle("group-hover", active);
+        });
+      });
+    }
+
+    function attachApartmentInteraction(shape, apartmentRefs, configName) {
+      const apartmentsForShape = normalizeApartmentRefs(apartmentRefs);
+      const apartmentIds = apartmentsForShape.map(apartment => apartment.id);
+
+      /*
+        A shared visual surface can belong to more than one apartment.
+        For the color we use the first mapped apartment as the temporary
+        demo status. Individual real statuses can be wired later.
+      */
+      const primaryApartment = apartmentsForShape[0];
+      const statusClass = getStatusClass(primaryApartment.status);
 
       if (statusClass) {
         shape.classList.add(statusClass);
       }
 
-      shape.dataset.apartmentId = apartment.id;
+      shape.dataset.apartmentIds = apartmentIds.join(" ");
 
       shape.setAttribute(
         "aria-label",
-        `${configName}: ${apartment.number}, ${apartment.status || "Status offen"}`
+        `${configName}: ${apartmentsForShape.map(a => a.number).join(", ")}`
       );
 
       shape.addEventListener("pointerenter", () => {
-        setApartmentGroupHover(apartment.id, true);
+        setApartmentGroupHover(apartmentIds, true);
       });
 
       shape.addEventListener("pointerleave", () => {
-        setApartmentGroupHover(apartment.id, false);
+        setApartmentGroupHover(apartmentIds, false);
       });
 
       shape.addEventListener("pointerdown", () => {
-        pendingApartmentFromGrid = apartment;
+        /*
+          If a shared surface contains several apartments, clicking it opens
+          the first apartment named in the Figma layer. All referenced
+          apartments still participate in the linked hover.
+        */
+        pendingApartmentFromGrid = primaryApartment;
       });
 
       shape.addEventListener("click", event => {
@@ -1822,7 +2806,7 @@
           return;
         }
 
-        selectApartment(apartment);
+        selectApartment(primaryApartment);
       });
     }
 
@@ -1838,15 +2822,15 @@
 
       // Single irregular Figma path: keep the exact geometry.
       if (config.path && config.rows === 1 && config.cols === 1) {
-        const apartment = getApartmentByTopNumber(config.apartments[0][0]);
+        const apartmentRefs = config.apartments[0][0];
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", config.path);
-        attachApartmentInteraction(path, apartment, config.name);
+        attachApartmentInteraction(path, apartmentRefs, config.name);
         svg.appendChild(path);
       } else {
         for (let row = 0; row < config.rows; row++) {
           for (let col = 0; col < config.cols; col++) {
-            const apartment = getApartmentByTopNumber(config.apartments[row][col]);
+            const apartmentRefs = config.apartments[row][col];
             const p1 = gridPointAt(config, row, col);
             const p2 = gridPointAt(config, row, col + 1);
             const p3 = gridPointAt(config, row + 1, col + 1);
@@ -1862,7 +2846,7 @@
               `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
             );
 
-            attachApartmentInteraction(polygon, apartment, config.name);
+            attachApartmentInteraction(polygon, apartmentRefs, config.name);
             svg.appendChild(polygon);
           }
         }
