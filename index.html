@@ -191,6 +191,24 @@
       filter: drop-shadow(0 0 4px rgba(211,74,74,0.22));
     }
 
+    .facade-grid-area polygon.group-hover.status-verfuegbar,
+    .facade-grid-area path.group-hover.status-verfuegbar {
+      fill: rgba(47,166,106,0.22);
+      filter: drop-shadow(0 0 4px rgba(47,166,106,0.22));
+    }
+
+    .facade-grid-area polygon.group-hover.status-reserviert,
+    .facade-grid-area path.group-hover.status-reserviert {
+      fill: rgba(229,164,0,0.22);
+      filter: drop-shadow(0 0 4px rgba(229,164,0,0.22));
+    }
+
+    .facade-grid-area polygon.group-hover.status-verkauft,
+    .facade-grid-area path.group-hover.status-verkauft {
+      fill: rgba(211,74,74,0.22);
+      filter: drop-shadow(0 0 4px rgba(211,74,74,0.22));
+    }
+
     /* =========================================================
        DRAG HINT
     ========================================================= */
@@ -492,22 +510,50 @@
 
     .panel {
       position: absolute;
-      top: 0;
-      right: 0;
+      top: 14px;
+      right: 14px;
       z-index: 50;
       width: 390px;
       max-width: 92vw;
-      height: 100vh;
-      background: #fff;
+      height: calc(100vh - 28px);
+      background: rgba(255,255,255,0.98);
       overflow-y: auto;
-      border-left: 1px solid #ddd;
-      box-shadow: -8px 0 28px rgba(0,0,0,0.14);
-      transform: translateX(105%);
-      transition: transform 0.28s ease;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 18px;
+      box-shadow: -10px 18px 45px rgba(0,0,0,0.18);
+      transform: translateX(calc(100% + 30px)) scale(0.985);
+      opacity: 0;
+      transition:
+        transform 0.38s cubic-bezier(.22,.8,.2,1),
+        opacity 0.24s ease;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
 
     .panel.is-open {
-      transform: translateX(0);
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+
+    #viewerCanvasWrapper,
+    .compass,
+    .finder,
+    .drag-hint {
+      transition:
+        transform 0.38s cubic-bezier(.22,.8,.2,1),
+        opacity 0.25s ease;
+    }
+
+    @media (min-width: 901px) {
+      body.panel-open #viewerCanvasWrapper {
+        transform: translateX(-150px);
+      }
+
+      body.panel-open .compass,
+      body.panel-open .finder,
+      body.panel-open .drag-hint {
+        transform: translateX(-90px);
+      }
     }
 
     .panel-header {
@@ -848,9 +894,11 @@
         max-width: 100%;
         height: 100dvh;
         z-index: 200;
+        border-radius: 0;
         transform: translateY(105%);
+        opacity: 1;
         transition: transform 0.28s ease;
-        border-left: 0;
+        border: 0;
       }
 
       .panel.is-open {
@@ -1221,7 +1269,7 @@
           apartments: [[41, 42, 43, 44]]
         },
         {
-          name: "Top 41 Zusatzfläche (verbunden mit Top-Feld 1)",
+          name: "Top 41 Zusatzfläche (gleiche Wohnung wie Top-Feld 1)",
           fullFrame: true,
           svgWidth: 4000,
           svgHeight: 2250,
@@ -1237,7 +1285,7 @@
           apartments: [[41]]
         },
         {
-          name: "Top 45 A",
+          name: "Top 45 A (verbunden)",
           fullFrame: true,
           svgWidth: 4000,
           svgHeight: 2250,
@@ -1253,7 +1301,7 @@
           apartments: [[45]]
         },
         {
-          name: "Top 45 B",
+          name: "Top 45 B (verbunden)",
           fullFrame: true,
           svgWidth: 4000,
           svgHeight: 2250,
@@ -1269,7 +1317,7 @@
           apartments: [[45]]
         },
         {
-          name: "Top 45 C",
+          name: "Top 45 C (verbunden)",
           fullFrame: true,
           svgWidth: 4000,
           svgHeight: 2250,
@@ -1732,6 +1780,14 @@
       return apartment;
     }
 
+    function setApartmentGroupHover(apartmentId, active) {
+      const selector = `[data-apartment-id="${apartmentId}"]`;
+
+      facadeGrid.querySelectorAll(selector).forEach(shape => {
+        shape.classList.toggle("group-hover", active);
+      });
+    }
+
     function attachApartmentInteraction(shape, apartment, configName) {
       const statusClass = getStatusClass(apartment.status);
 
@@ -1739,10 +1795,20 @@
         shape.classList.add(statusClass);
       }
 
+      shape.dataset.apartmentId = apartment.id;
+
       shape.setAttribute(
         "aria-label",
         `${configName}: ${apartment.number}, ${apartment.status || "Status offen"}`
       );
+
+      shape.addEventListener("pointerenter", () => {
+        setApartmentGroupHover(apartment.id, true);
+      });
+
+      shape.addEventListener("pointerleave", () => {
+        setApartmentGroupHover(apartment.id, false);
+      });
 
       shape.addEventListener("pointerdown", () => {
         pendingApartmentFromGrid = apartment;
