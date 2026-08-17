@@ -1062,7 +1062,7 @@
     ========================================================= */
 
     const TOTAL_FRAMES = 26;
-    const PIXELS_PER_FRAME = 15;
+    const PIXELS_PER_FRAME = 30; // slower rotation: twice as much drag per frame
 
     /*
       Compass calibration:
@@ -1289,6 +1289,8 @@
     let isDragging = false;
     let lastX = 0;
     let dragAccumulator = 0;
+    let dragDistance = 0;
+    let suppressNextApartmentClick = false;
     let hasInteracted = false;
 
     function startDragging(event) {
@@ -1302,6 +1304,8 @@
       isDragging = true;
       lastX = event.clientX;
       dragAccumulator = 0;
+      dragDistance = 0;
+      suppressNextApartmentClick = false;
 
       wrapper.classList.add("is-dragging");
 
@@ -1323,6 +1327,7 @@
       const movement = event.clientX - lastX;
       lastX = event.clientX;
       dragAccumulator += movement;
+      dragDistance += Math.abs(movement);
 
       while (
         Math.abs(dragAccumulator) >= PIXELS_PER_FRAME
@@ -1343,6 +1348,7 @@
       }
 
       isDragging = false;
+      suppressNextApartmentClick = dragDistance > 6;
       wrapper.classList.remove("is-dragging");
 
       if (
@@ -1441,9 +1447,9 @@
 
         // Position of the exported Figma rectangle on frame 1.
         // These three values are intentionally easy to fine-tune.
-        leftPct: 25.5,
-        topPct: 37,
-        widthPct: 53.5
+        leftPct: 21,
+        topPct: 32,
+        widthPct: 58
       }
     };
 
@@ -1497,13 +1503,17 @@
             `${apartment.number}, ${apartment.status}`
           );
 
-          polygon.addEventListener("pointerdown", event => {
-            // Clicking a flat must not start rotating the 26-frame viewer.
-            event.stopPropagation();
-          });
-
+          // Pointerdown is intentionally allowed to bubble to the viewer,
+          // so dragging can start even when the pointer is on an apartment.
           polygon.addEventListener("click", event => {
             event.stopPropagation();
+
+            // If this gesture was a drag, do not treat it as an apartment click.
+            if (suppressNextApartmentClick) {
+              suppressNextApartmentClick = false;
+              return;
+            }
+
             selectApartment(apartment);
           });
 
