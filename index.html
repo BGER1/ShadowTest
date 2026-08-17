@@ -149,27 +149,26 @@
 
     #facadeGrid polygon {
       fill: transparent;
-      stroke: rgba(255,255,255,0.95);
-      stroke-width: 5;
-      vector-effect: non-scaling-stroke;
+      stroke: transparent;
+      stroke-width: 0;
       cursor: pointer;
       pointer-events: all;
       transition: fill 0.16s ease, filter 0.16s ease;
     }
 
     #facadeGrid polygon.status-verfuegbar:hover {
-      fill: rgba(47,166,106,0.62);
-      filter: drop-shadow(0 0 8px rgba(47,166,106,0.75));
+      fill: rgba(47,166,106,0.28);
+      filter: drop-shadow(0 0 5px rgba(47,166,106,0.28));
     }
 
     #facadeGrid polygon.status-reserviert:hover {
-      fill: rgba(229,164,0,0.62);
-      filter: drop-shadow(0 0 8px rgba(229,164,0,0.75));
+      fill: rgba(229,164,0,0.28);
+      filter: drop-shadow(0 0 5px rgba(229,164,0,0.28));
     }
 
     #facadeGrid polygon.status-verkauft:hover {
-      fill: rgba(211,74,74,0.62);
-      filter: drop-shadow(0 0 8px rgba(211,74,74,0.75));
+      fill: rgba(211,74,74,0.28);
+      filter: drop-shadow(0 0 5px rgba(211,74,74,0.28));
     }
 
     /* =========================================================
@@ -293,8 +292,8 @@
       left: 18px;
       bottom: 18px;
       z-index: 35;
-      width: min(380px, calc(100vw - 36px));
-      max-height: min(56vh, 520px);
+      width: min(350px, calc(100vw - 36px));
+      max-height: 345px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -360,6 +359,7 @@
     .finder-results {
       overflow-y: auto;
       padding: 6px;
+      max-height: 176px;
     }
 
     .finder-empty {
@@ -614,48 +614,242 @@
       font-size: 13px;
     }
 
+    .details-gallery {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 24px;
+    }
+
+    .details-gallery img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #eee;
+    }
+
+    .details-gallery img:first-child {
+      grid-column: 1 / -1;
+      aspect-ratio: 16 / 9;
+    }
+
+    .mobile-blur-bg,
+    .mobile-details-bar {
+      display: none;
+    }
+
+    .mobile-details-bar {
+      background: #fff;
+      border-top: 1px solid #ddd;
+      padding: 14px 14px 16px;
+    }
+
+    .mobile-details-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .mobile-details-title {
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .mobile-details-close {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 50%;
+      background: #f0f0f0;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .mobile-details-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mobile-summary-item {
+      padding: 9px;
+      border-radius: 8px;
+      background: #f5f5f5;
+    }
+
+    .mobile-summary-label {
+      color: #777;
+      font-size: 9px;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .mobile-summary-value {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .more-details-button {
+      width: 100%;
+      height: 42px;
+      border: 0;
+      border-radius: 9px;
+      background: #222;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     /* =========================================================
        MOBILE
     ========================================================= */
 
     @media (max-width: 900px) {
+      html,
+      body {
+        height: auto;
+        min-height: 100%;
+        background: #fff;
+      }
+
+      body {
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      .app {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        background: #fff;
+      }
+
+      .viewer-area {
+        position: relative;
+        inset: auto;
+        height: 62vh;
+        min-height: 380px;
+        overflow: hidden;
+        background: #111;
+      }
+
+      #viewerCanvasWrapper {
+        position: absolute;
+        inset: 0;
+      }
+
+      .mobile-blur-bg {
+        display: block;
+        position: absolute;
+        inset: -28px;
+        width: calc(100% + 56px);
+        height: calc(100% + 56px);
+        object-fit: cover;
+        filter: blur(24px);
+        transform: scale(1.05);
+        opacity: 0.72;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .side-fill {
+        display: none !important;
+      }
+
+      #orbitImage {
+        z-index: 2;
+      }
+
+      #facadeGrid {
+        z-index: 12;
+      }
+
       .compass {
         top: 12px;
         left: 12px;
-        width: 68px;
-        height: 68px;
+        width: 64px;
+        height: 64px;
+      }
+
+      .drag-hint {
+        bottom: 12px;
+        font-size: 12px;
+        padding: 8px 13px;
       }
 
       .finder {
-        left: 12px;
-        bottom: 12px;
-        width: min(360px, calc(100vw - 24px));
-        max-height: 48vh;
+        position: relative;
+        left: auto;
+        bottom: auto;
+        width: 100%;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+        border: 0;
+        border-top: 1px solid #ddd;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+
+      .finder-controls {
+        padding: 12px;
       }
 
       .finder-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
       }
 
       .finder-search-row {
         grid-template-columns: 105px 1fr;
       }
 
+      .finder-results {
+        max-height: 154px;
+        padding: 5px 8px 10px;
+      }
+
+      .mobile-details-bar.is-visible {
+        display: block;
+      }
+
+      body.mobile-apartment-selected .finder {
+        display: none;
+      }
+
       .panel {
+        position: fixed;
+        inset: 0;
         width: 100%;
         max-width: 100%;
+        height: 100dvh;
+        z-index: 200;
+        transform: translateY(105%);
+        transition: transform 0.28s ease;
+        border-left: 0;
       }
 
-      .drag-hint {
-        bottom: 12px;
+      .panel.is-open {
+        transform: translateY(0);
       }
 
-      body.panel-open .finder,
-      body.panel-open .drag-hint {
-        opacity: 0;
-        pointer-events: none;
+      body.panel-open {
+        overflow: hidden;
+      }
+
+      .details-gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .details-gallery img:first-child {
+        grid-column: auto;
       }
     }
+
   </style>
 </head>
 
@@ -673,6 +867,8 @@
         <div class="side-fill" id="sideFillRight">
           <img id="sideFillRightImage" src="" alt="" draggable="false">
         </div>
+
+        <img id="mobileBlurImage" class="mobile-blur-bg" src="" alt="" draggable="false">
 
         <img
           id="orbitImage"
@@ -701,6 +897,21 @@
           <span class="compass-center"></span>
         </div>
       </div>
+
+
+
+      <div class="drag-hint" id="dragHint">
+        ← Ziehen zum Drehen →
+      </div>
+
+      <div class="loader" id="loader">
+        <div class="loader-text" id="loaderInfo">
+          Bilder werden geladen…
+        </div>
+        <div class="loader-spinner"></div>
+      </div>
+
+    </main>
 
       <section class="finder" aria-label="Wohnungssuche">
         <div class="finder-controls">
@@ -751,18 +962,18 @@
         <div class="finder-results" id="finderResults"></div>
       </section>
 
-      <div class="drag-hint" id="dragHint">
-        ← Ziehen zum Drehen →
+    <section class="mobile-details-bar" id="mobileDetailsBar" aria-live="polite">
+      <div class="mobile-details-head">
+        <div class="mobile-details-title" id="mobileDetailsTitle">Wohnung</div>
+        <button class="mobile-details-close" id="mobileDetailsClose" type="button" aria-label="Auswahl schließen">×</button>
       </div>
-
-      <div class="loader" id="loader">
-        <div class="loader-text" id="loaderInfo">
-          Bilder werden geladen…
-        </div>
-        <div class="loader-spinner"></div>
+      <div class="mobile-details-summary">
+        <div class="mobile-summary-item"><div class="mobile-summary-label">Preis</div><div class="mobile-summary-value" id="mobileDetailsPrice">—</div></div>
+        <div class="mobile-summary-item"><div class="mobile-summary-label">Größe</div><div class="mobile-summary-value" id="mobileDetailsSize">—</div></div>
+        <div class="mobile-summary-item"><div class="mobile-summary-label">Zimmer</div><div class="mobile-summary-value" id="mobileDetailsRooms">—</div></div>
       </div>
-
-    </main>
+      <button class="more-details-button" id="moreDetailsButton" type="button">Mehr Wohnungsdetails</button>
+    </section>
 
     <aside class="panel" id="sidePanel" aria-hidden="true">
 
@@ -822,6 +1033,8 @@
 
           </div>
 
+          <div class="details-gallery" id="detailsGallery" aria-label="Innenansichten"></div>
+
           <div class="plan-wrap">
             <div class="detail-label">Grundriss</div>
 
@@ -880,6 +1093,7 @@
 
     const wrapper = document.getElementById("viewerCanvasWrapper");
     const orbitImage = document.getElementById("orbitImage");
+    const mobileBlurImage = document.getElementById("mobileBlurImage");
     const facadeGrid = document.getElementById("facadeGrid");
 
     const sideFillLeft = document.getElementById("sideFillLeft");
@@ -901,6 +1115,13 @@
 
     const sidePanel = document.getElementById("sidePanel");
     const panelClose = document.getElementById("panelClose");
+    const mobileDetailsBar = document.getElementById("mobileDetailsBar");
+    const mobileDetailsTitle = document.getElementById("mobileDetailsTitle");
+    const mobileDetailsPrice = document.getElementById("mobileDetailsPrice");
+    const mobileDetailsSize = document.getElementById("mobileDetailsSize");
+    const mobileDetailsRooms = document.getElementById("mobileDetailsRooms");
+    const mobileDetailsClose = document.getElementById("mobileDetailsClose");
+    const moreDetailsButton = document.getElementById("moreDetailsButton");
 
     /* =========================================================
        PRELOAD
@@ -967,6 +1188,7 @@
       const src = imagePaths[currentFrame];
 
       orbitImage.src = src;
+      mobileBlurImage.src = src;
       sideFillLeftImage.src = src;
       sideFillRightImage.src = src;
 
@@ -1183,7 +1405,12 @@
         rooms: String(2 + (col % 3)),
         orientation: ["Süd", "West", "Ost", "Süd-West"][col],
         outdoor: row === 0 ? "Terrasse" : "Balkon",
-        plan: ""
+        plan: `https://placehold.co/900x650/f4f4f4/333333?text=Demo+Grundriss+Top+${top}`,
+        gallery: [
+          `https://picsum.photos/seed/top-${top}-living/900/600`,
+          `https://picsum.photos/seed/top-${top}-kitchen/700/525`,
+          `https://picsum.photos/seed/top-${top}-bedroom/700/525`
+        ]
       };
     });
 
@@ -1213,7 +1440,7 @@
         cols: 4,
 
         // Position of the exported Figma rectangle on frame 1.
-        // These four values are intentionally easy to fine-tune.
+        // These three values are intentionally easy to fine-tune.
         leftPct: 25.5,
         topPct: 37,
         widthPct: 53.5
@@ -1596,11 +1823,18 @@
     const detailsOutdoor =
       document.getElementById("detailsOutdoor");
 
+    const detailsGallery =
+      document.getElementById("detailsGallery");
+
     const detailsPlan =
       document.getElementById("detailsPlan");
 
     const detailsPlanEmpty =
       document.getElementById("detailsPlanEmpty");
+
+    function isMobileLayout() {
+      return window.matchMedia("(max-width: 900px)").matches;
+    }
 
     function openDetailsPanel() {
       sidePanel.classList.add("is-open");
@@ -1614,38 +1848,28 @@
       document.body.classList.remove("panel-open");
     }
 
-    panelClose.addEventListener(
-      "click",
-      closeDetailsPanel
-    );
+    function closeMobileDetails() {
+      mobileDetailsBar.classList.remove("is-visible");
+      document.body.classList.remove("mobile-apartment-selected");
+    }
 
-    function selectApartment(apartment) {
-      selectedApartmentId = apartment.id;
+    panelClose.addEventListener("click", closeDetailsPanel);
+    mobileDetailsClose.addEventListener("click", closeMobileDetails);
 
-      detailsTitle.textContent =
-        apartment.number;
+    moreDetailsButton.addEventListener("click", () => {
+      openDetailsPanel();
+    });
 
-      detailsSize.textContent =
-        apartment.size;
+    function populateFullDetails(apartment) {
+      detailsTitle.textContent = apartment.number;
+      detailsSize.textContent = apartment.size;
+      detailsPrice.textContent = apartment.price;
+      detailsRooms.textContent = apartment.rooms;
+      detailsFloor.textContent = apartment.floor;
+      detailsOrientation.textContent = apartment.orientation;
+      detailsOutdoor.textContent = apartment.outdoor;
 
-      detailsPrice.textContent =
-        apartment.price;
-
-      detailsRooms.textContent =
-        apartment.rooms;
-
-      detailsFloor.textContent =
-        apartment.floor;
-
-      detailsOrientation.textContent =
-        apartment.orientation;
-
-      detailsOutdoor.textContent =
-        apartment.outdoor;
-
-      detailsBadge.textContent =
-        apartment.status;
-
+      detailsBadge.textContent = apartment.status;
       detailsBadge.className = "badge";
 
       if (apartment.status === "verfügbar") {
@@ -1656,32 +1880,44 @@
         detailsBadge.classList.add("verkauft");
       }
 
+      detailsGallery.innerHTML = "";
+      (apartment.gallery || []).forEach((src, index) => {
+        const image = document.createElement("img");
+        image.src = src;
+        image.alt = `${apartment.number} Innenansicht ${index + 1}`;
+        image.loading = "lazy";
+        detailsGallery.appendChild(image);
+      });
+
       if (apartment.plan) {
-        detailsPlan.src =
-          apartment.plan;
-
-        detailsPlan.classList.remove(
-          "is-hidden"
-        );
-
-        detailsPlanEmpty.style.display =
-          "none";
+        detailsPlan.src = apartment.plan;
+        detailsPlan.classList.remove("is-hidden");
+        detailsPlanEmpty.style.display = "none";
       } else {
         detailsPlan.src = "";
-
-        detailsPlan.classList.add(
-          "is-hidden"
-        );
-
-        detailsPlanEmpty.style.display =
-          "block";
+        detailsPlan.classList.add("is-hidden");
+        detailsPlanEmpty.style.display = "block";
       }
 
-      detailsCard.classList.remove(
-        "is-hidden"
-      );
+      detailsCard.classList.remove("is-hidden");
+    }
 
-      openDetailsPanel();
+    function selectApartment(apartment) {
+      selectedApartmentId = apartment.id;
+      populateFullDetails(apartment);
+
+      if (isMobileLayout()) {
+        closeDetailsPanel();
+        mobileDetailsTitle.textContent = `${apartment.number} · ${apartment.status}`;
+        mobileDetailsPrice.textContent = apartment.price;
+        mobileDetailsSize.textContent = apartment.size;
+        mobileDetailsRooms.textContent = apartment.rooms;
+        mobileDetailsBar.classList.add("is-visible");
+        document.body.classList.add("mobile-apartment-selected");
+      } else {
+        openDetailsPanel();
+      }
+
       renderApartmentResults();
     }
 
