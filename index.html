@@ -93,8 +93,8 @@
       height: calc(100vh + 50px);
       object-fit: cover;
       object-position: center center;
-      filter: blur(16px);
-      transform: scale(1.05);
+      filter: blur(6px) brightness(1.08);
+      transform: scale(1.015);
       pointer-events: none;
       user-select: none;
       -webkit-user-select: none;
@@ -766,9 +766,9 @@
         width: calc(100% + 56px);
         height: calc(100% + 56px);
         object-fit: cover;
-        filter: blur(14px);
-        transform: scale(1.05);
-        opacity: 0.72;
+        filter: blur(7px) brightness(1.08);
+        transform: scale(1.02);
+        opacity: 0.88;
         pointer-events: none;
         z-index: 0;
       }
@@ -1076,18 +1076,76 @@
 
     /* FRAME 1: four Figma grid areas */
     const FRAME_1_GRIDS = [
-      { name:"Fassade", svgWidth:2145, svgHeight:560,
-        corners:[{x:0,y:25},{x:2145,y:0},{x:2070,y:495},{x:100,y:560}],
-        cols:4, rows:4, leftPct:25.5, topPct:37, widthPct:53.5 },
-      { name:"Top", svgWidth:2145, svgHeight:290,
-        corners:[{x:240,y:20},{x:1925,y:0},{x:2145,y:265},{x:0,y:290}],
-        cols:4, rows:1, leftPct:25.5, topPct:25.5, widthPct:53.5 },
-      { name:"Left", svgWidth:256, svgHeight:158,
-        corners:[{x:126,y:0},{x:256,y:122},{x:256,y:158},{x:0,y:148}],
-        cols:1, rows:1, leftPct:32.5, topPct:18.7, widthPct:6 },
-      { name:"Right", svgWidth:256, svgHeight:160,
-        corners:[{x:0,y:126},{x:138,y:0},{x:256,y:160},{x:16,y:160}],
-        cols:1, rows:1, leftPct:66.1, topPct:18.3, widthPct:6.1 }
+      {
+        name: "Fassade",
+        svgWidth: 2145,
+        svgHeight: 560,
+        corners: [
+          { x: 0, y: 25 },
+          { x: 2145, y: 0 },
+          { x: 2070, y: 495 },
+          { x: 100, y: 560 }
+        ],
+        cols: 4,
+        rows: 4,
+        leftPct: 25.5,
+        topPct: 37,
+        widthPct: 53.5
+      },
+      {
+        name: "Top",
+        svgWidth: 2145,
+        svgHeight: 290,
+        corners: [
+          { x: 240, y: 20 },
+          { x: 1925, y: 0 },
+          { x: 2145, y: 265 },
+          { x: 0, y: 290 }
+        ],
+        rows: 1,
+        cols: 4,
+        leftPct: 25.5,
+        topPct: 25.5,
+        widthPct: 53.5,
+
+        // Horizontal cell boundaries along the upper and lower roof edges.
+        // The first upper divider is intentionally shifted right:
+        // normal = 0.25, adjusted = 0.31.
+        topColumnFractions:    [0, 0.27, 0.50, 0.80, 1],
+        bottomColumnFractions: [0, 0.25, 0.50, 0.75, 1]
+      },
+      {
+        name: "Left",
+        svgWidth: 256,
+        svgHeight: 158,
+        corners: [
+          { x: 126, y: 0 },
+          { x: 256, y: 122 },
+          { x: 256, y: 158 },
+          { x: 0, y: 148 }
+        ],
+        cols: 1,
+        rows: 1,
+        leftPct: 32.5,
+        topPct: 18.7,
+        widthPct: 6
+      },
+      {
+        name: "Right",
+        svgWidth: 256,
+        svgHeight: 160,
+        corners: [
+          { x: 0, y: 126 },
+          { x: 138, y: 0 },
+          { x: 256, y: 160 },
+          { x: 16, y: 160 }
+        ],
+        cols: 1,
+        rows: 1,
+        leftPct: 66.1,
+        topPct: 18.3,
+        widthPct: 6.1
+      }
     ];
  // slower rotation: twice as much drag per frame
 
@@ -1461,7 +1519,21 @@
 
     function gridPointAt(config, row, col) {
       const v = row / config.rows;
-      const u = col / config.cols;
+
+      // Standard grids use equal column widths.
+      let u = col / config.cols;
+
+      // Optional per-edge column fractions allow selected dividers to be
+      // skewed without changing the surrounding Figma outline.
+      if (
+        config.topColumnFractions &&
+        config.bottomColumnFractions &&
+        config.rows === 1
+      ) {
+        const topU = config.topColumnFractions[col];
+        const bottomU = config.bottomColumnFractions[col];
+        u = v === 0 ? topU : bottomU;
+      }
 
       const left = gridLerp(config.corners[0], config.corners[3], v);
       const right = gridLerp(config.corners[1], config.corners[2], v);
