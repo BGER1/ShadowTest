@@ -173,40 +173,25 @@
       transition: fill 0.16s ease, filter 0.16s ease;
     }
 
-    .facade-grid-area polygon.status-verfuegbar:hover,
-    .facade-grid-area path.status-verfuegbar:hover {
-      fill: rgba(47,166,106,0.22);
-      filter: drop-shadow(0 0 4px rgba(47,166,106,0.22));
+    .facade-grid-area polygon:hover,
+    .facade-grid-area path:hover,
+    .facade-grid-area polygon.group-hover,
+    .facade-grid-area path.group-hover {
+      fill: rgba(255,255,255,0.72);
+      filter: drop-shadow(0 0 9px rgba(255,255,255,0.95));
     }
 
-    .facade-grid-area polygon.status-reserviert:hover,
-    .facade-grid-area path.status-reserviert:hover {
-      fill: rgba(229,164,0,0.22);
-      filter: drop-shadow(0 0 4px rgba(229,164,0,0.22));
+    .facade-grid-area polygon.filter-match,
+    .facade-grid-area path.filter-match {
+      fill: rgba(255,255,255,0.46);
+      filter: drop-shadow(0 0 7px rgba(255,255,255,0.8));
     }
 
-    .facade-grid-area polygon.status-verkauft:hover,
-    .facade-grid-area path.status-verkauft:hover {
-      fill: rgba(211,74,74,0.22);
-      filter: drop-shadow(0 0 4px rgba(211,74,74,0.22));
-    }
-
-    .facade-grid-area polygon.group-hover.status-verfuegbar,
-    .facade-grid-area path.group-hover.status-verfuegbar {
-      fill: rgba(47,166,106,0.22);
-      filter: drop-shadow(0 0 4px rgba(47,166,106,0.22));
-    }
-
-    .facade-grid-area polygon.group-hover.status-reserviert,
-    .facade-grid-area path.group-hover.status-reserviert {
-      fill: rgba(229,164,0,0.22);
-      filter: drop-shadow(0 0 4px rgba(229,164,0,0.22));
-    }
-
-    .facade-grid-area polygon.group-hover.status-verkauft,
-    .facade-grid-area path.group-hover.status-verkauft {
-      fill: rgba(211,74,74,0.22);
-      filter: drop-shadow(0 0 4px rgba(211,74,74,0.22));
+    .facade-grid-area polygon.filter-hidden,
+    .facade-grid-area path.filter-hidden {
+      pointer-events: none;
+      fill: transparent;
+      filter: none;
     }
 
     /* =========================================================
@@ -965,6 +950,44 @@
       }
     }
 
+    /* Permanent right navigation */
+    .viewer-area { right: 410px; }
+    .finder { position: static; width: 100%; max-height: none; border: 0; border-radius: 0; box-shadow: none; background: transparent; backdrop-filter: none; }
+    .finder-controls { padding: 18px; }
+    .filter-title { margin: 0 0 12px; font-size: 17px; }
+    .filter-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .filter-field { display: flex; flex-direction: column; gap: 5px; color: #747474; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .sort-buttons { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-top: 12px; }
+    .sort-button { min-width: 0; height: 38px; padding: 0 4px; border: 1px solid #dedede; border-radius: 8px; background: #f5f5f5; font-size: 10px; font-weight: 700; cursor: pointer; }
+    .sort-button.active { background: #191919; color: white; border-color: #191919; }
+    .sort-button .arrow { display: inline-block; width: 8px; }
+    .finder-results { flex: 1; max-height: none; padding: 8px 10px 18px; }
+    .finder-count { padding: 10px 14px 4px; color: #777; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .panel { top: 0; right: 0; width: 410px; max-width: 100vw; height: 100vh; border: 0; border-left: 1px solid #ddd; border-radius: 0; box-shadow: -8px 0 30px rgba(0,0,0,.13); transform: none; opacity: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .panel-view { display: none; min-height: 0; flex: 1; flex-direction: column; }
+    .panel-view.is-active { display: flex; }
+    .panel-header { flex: 0 0 auto; }
+    .panel-content { overflow-y: auto; }
+    .panel-close { font-size: 14px; font-weight: 700; width: auto; padding: 0 12px; border-radius: 18px; }
+    .apartment-tooltip { position: fixed; z-index: 500; display: none; min-width: 190px; padding: 11px 13px; border-radius: 9px; background: rgba(20,20,20,.94); color: #fff; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,.28); font-size: 12px; line-height: 1.5; }
+    .apartment-tooltip.is-visible { display: block; }
+    .tooltip-title { font-size: 14px; font-weight: 800; margin-bottom: 3px; }
+    .tooltip-status { opacity: .72; text-transform: capitalize; }
+    .zoom-controls { right: 18px; }
+
+    @media (min-width: 901px) {
+      body.panel-open #viewerCanvasWrapper, body.panel-open .compass, body.panel-open .finder, body.panel-open .drag-hint { transform: none; }
+    }
+
+    @media (max-width: 900px) {
+      .viewer-area { right: auto; }
+      .panel { position: relative; inset: auto; width: 100%; height: auto; min-height: 38vh; transform: none; border-left: 0; border-top: 1px solid #ddd; }
+      .panel-view { min-height: 420px; }
+      .finder { display: flex !important; }
+      .mobile-details-bar { display: none !important; }
+      .filter-fields { grid-template-columns: 1fr 1fr; }
+      body.panel-open { overflow-y: auto; }
+    }
   </style>
 </head>
 
@@ -1029,84 +1052,48 @@
 
     </main>
 
-      <section class="finder" aria-label="Wohnungssuche">
-        <div class="finder-controls">
+    <div class="apartment-tooltip" id="apartmentTooltip" role="tooltip"></div>
 
-          <label class="availability-row">
-            <input type="checkbox" id="availabilityToggle">
-            <span>Nur verfügbare Wohnungen anzeigen</span>
-          </label>
-
-          <div class="finder-grid">
-            <select id="sortBy" class="finder-control" aria-label="Sortieren">
-              <option value="none">Sortieren nach …</option>
-              <option value="price-asc">Preis: niedrig → hoch</option>
-              <option value="price-desc">Preis: hoch → niedrig</option>
-              <option value="rooms-asc">Zimmer: wenig → viele</option>
-              <option value="rooms-desc">Zimmer: viele → wenig</option>
-              <option value="size-asc">Größe: klein → groß</option>
-              <option value="size-desc">Größe: groß → klein</option>
-            </select>
-
-            <select id="searchField" class="finder-control" aria-label="Suchparameter">
-              <option value="all">Suche: alle Parameter</option>
-              <option value="price">Suche nach Preis</option>
-              <option value="rooms">Suche nach Zimmer</option>
-              <option value="size">Suche nach Größe</option>
-            </select>
+    <aside class="panel" id="sidePanel" aria-hidden="false">
+      <div class="panel-view is-active" id="finderView">
+        <div class="panel-header"><div class="panel-header-title">Wohnungen</div></div>
+        <section class="finder" aria-label="Wohnungssuche">
+          <div class="finder-controls">
+            <h2 class="filter-title">Passende Einheit finden</h2>
+            <div class="filter-fields">
+              <label class="filter-field">Preis bis
+                <input id="filterPriceMax" class="finder-control" type="number" min="0" step="10000" placeholder="z. B. 600000">
+              </label>
+              <label class="filter-field">Zimmer ab
+                <input id="filterRoomsMin" class="finder-control" type="number" min="0" step="0.5" placeholder="z. B. 3">
+              </label>
+              <label class="filter-field">Größe ab
+                <input id="filterSizeMin" class="finder-control" type="number" min="0" step="1" placeholder="z. B. 75 m²">
+              </label>
+              <label class="filter-field">Etage
+                <select id="filterFloor" class="finder-control"><option value="">Alle Etagen</option></select>
+              </label>
+            </div>
+            <div class="sort-buttons" aria-label="Sortierung und Verfügbarkeit">
+              <button class="sort-button" type="button" data-sort="price">Preis <span class="arrow"></span></button>
+              <button class="sort-button" type="button" data-sort="rooms">Zimmer <span class="arrow"></span></button>
+              <button class="sort-button" type="button" data-sort="size">Größe <span class="arrow"></span></button>
+              <button class="sort-button" id="availabilityButton" type="button" aria-pressed="false">Frei</button>
+            </div>
+            <input id="availabilityToggle" type="checkbox" hidden>
+            <select id="sortBy" hidden><option value="none">Keine</option></select>
           </div>
+          <div class="finder-count" id="finderCount"></div>
+          <div class="finder-results" id="finderResults"></div>
+        </section>
+      </div>
 
-          <div class="finder-search-row">
-            <select id="searchOperator" class="finder-control" aria-label="Suchbedingung">
-              <option value="contains">enthält / ca.</option>
-              <option value="max">maximal</option>
-              <option value="min">mindestens</option>
-            </select>
-
-            <input
-              id="searchInput"
-              class="finder-control"
-              type="text"
-              inputmode="decimal"
-              placeholder="z. B. 500000, 3 oder 80"
-              autocomplete="off"
-            >
-          </div>
-
+      <div class="panel-view" id="detailsView">
+        <div class="panel-header">
+          <div class="panel-header-title">Wohnungsdetails</div>
+          <button class="panel-close" id="panelClose" type="button" aria-label="Zurück zur Wohnungsliste">← Zurück</button>
         </div>
-
-        <div class="finder-results" id="finderResults"></div>
-      </section>
-
-    <section class="mobile-details-bar" id="mobileDetailsBar" aria-live="polite">
-      <div class="mobile-details-head">
-        <div class="mobile-details-title" id="mobileDetailsTitle">Wohnung</div>
-        <button class="mobile-details-close" id="mobileDetailsClose" type="button" aria-label="Auswahl schließen">×</button>
-      </div>
-      <div class="mobile-details-summary">
-        <div class="mobile-summary-item"><div class="mobile-summary-label">Preis</div><div class="mobile-summary-value" id="mobileDetailsPrice">—</div></div>
-        <div class="mobile-summary-item"><div class="mobile-summary-label">Größe</div><div class="mobile-summary-value" id="mobileDetailsSize">—</div></div>
-        <div class="mobile-summary-item"><div class="mobile-summary-label">Zimmer</div><div class="mobile-summary-value" id="mobileDetailsRooms">—</div></div>
-      </div>
-      <button class="more-details-button" id="moreDetailsButton" type="button">Mehr Wohnungsdetails</button>
-    </section>
-
-    <aside class="panel" id="sidePanel" aria-hidden="true">
-
-      <div class="panel-header">
-        <div class="panel-header-title">Wohnungsdetails</div>
-
-        <button
-          class="panel-close"
-          id="panelClose"
-          type="button"
-          aria-label="Details schließen"
-        >
-          ×
-        </button>
-      </div>
-
-      <div class="panel-content">
+        <div class="panel-content">
 
         <div id="detailsCard" class="details-card is-hidden">
 
@@ -1166,8 +1153,8 @@
           </div>
 
         </div>
+        </div>
       </div>
-
     </aside>
 
   </div>
@@ -2421,20 +2408,20 @@
 
     const availabilityToggle = document.getElementById("availabilityToggle");
     const sortBy = document.getElementById("sortBy");
-    const searchField = document.getElementById("searchField");
-    const searchOperator = document.getElementById("searchOperator");
-    const searchInput = document.getElementById("searchInput");
+    const filterPriceMax = document.getElementById("filterPriceMax");
+    const filterRoomsMin = document.getElementById("filterRoomsMin");
+    const filterSizeMin = document.getElementById("filterSizeMin");
+    const filterFloor = document.getElementById("filterFloor");
+    const availabilityButton = document.getElementById("availabilityButton");
+    const sortButtons = [...document.querySelectorAll("[data-sort]")];
     const finderResults = document.getElementById("finderResults");
+    const finderCount = document.getElementById("finderCount");
+    const finderView = document.getElementById("finderView");
+    const detailsView = document.getElementById("detailsView");
+    const apartmentTooltip = document.getElementById("apartmentTooltip");
 
     const sidePanel = document.getElementById("sidePanel");
     const panelClose = document.getElementById("panelClose");
-    const mobileDetailsBar = document.getElementById("mobileDetailsBar");
-    const mobileDetailsTitle = document.getElementById("mobileDetailsTitle");
-    const mobileDetailsPrice = document.getElementById("mobileDetailsPrice");
-    const mobileDetailsSize = document.getElementById("mobileDetailsSize");
-    const mobileDetailsRooms = document.getElementById("mobileDetailsRooms");
-    const mobileDetailsClose = document.getElementById("mobileDetailsClose");
-    const moreDetailsButton = document.getElementById("moreDetailsButton");
 
     /* =========================================================
        PRELOAD
@@ -2875,6 +2862,28 @@
       });
     }
 
+    function showApartmentTooltip(apartment, event) {
+      apartmentTooltip.innerHTML = `
+        <div class="tooltip-title">${apartment.number}</div>
+        <div>${apartment.price} · ${apartment.size}</div>
+        <div>${apartment.rooms} Zimmer · ${apartment.floor}</div>
+        <div class="tooltip-status">${apartment.status}</div>`;
+      apartmentTooltip.classList.add("is-visible");
+      moveApartmentTooltip(event);
+    }
+
+    function moveApartmentTooltip(event) {
+      const gap = 16;
+      const width = apartmentTooltip.offsetWidth || 200;
+      const height = apartmentTooltip.offsetHeight || 100;
+      apartmentTooltip.style.left = `${Math.min(event.clientX + gap, window.innerWidth - width - 10)}px`;
+      apartmentTooltip.style.top = `${Math.min(event.clientY + gap, window.innerHeight - height - 10)}px`;
+    }
+
+    function hideApartmentTooltip() {
+      apartmentTooltip.classList.remove("is-visible");
+    }
+
     function attachApartmentInteraction(shape, apartmentRefs, configName) {
       const apartmentsForShape = normalizeApartmentRefs(apartmentRefs);
       const apartmentIds = apartmentsForShape.map(apartment => apartment.id);
@@ -2898,13 +2907,17 @@
         `${configName}: ${apartmentsForShape.map(a => a.number).join(", ")}`
       );
 
-      shape.addEventListener("pointerenter", () => {
+      shape.addEventListener("pointerenter", event => {
         setApartmentGroupHover(apartmentIds, true);
+        showApartmentTooltip(primaryApartment, event);
       });
 
       shape.addEventListener("pointerleave", () => {
         setApartmentGroupHover(apartmentIds, false);
+        hideApartmentTooltip();
       });
+
+      shape.addEventListener("pointermove", moveApartmentTooltip);
 
       shape.addEventListener("pointerdown", () => {
         /*
@@ -3038,6 +3051,7 @@
       });
 
       facadeGrid.classList.add("is-visible");
+      updateGridFilterHighlights();
     }
 
     /* =========================================================
@@ -3095,58 +3109,20 @@
 
     let selectedApartmentId = null;
 
-    function apartmentMatchesSearch(apartment) {
-      const rawQuery = searchInput.value.trim();
+    let activeSortField = null;
+    let activeSortDirection = 1;
 
-      if (!rawQuery) {
-        return true;
-      }
+    function hasActiveFilters() {
+      return Boolean(filterPriceMax.value || filterRoomsMin.value || filterSizeMin.value || filterFloor.value || availabilityToggle.checked);
+    }
 
-      const field = searchField.value;
-      const operator = searchOperator.value;
-      const queryNumber = parseNumber(rawQuery);
-
-      /*
-        "All parameters" searches price, rooms and size together.
-      */
-      const fields =
-        field === "all"
-          ? ["price", "rooms", "size"]
-          : [field];
-
-      return fields.some(currentField => {
-        const apartmentValue =
-          getApartmentNumericValue(apartment, currentField);
-
-        if (operator === "max") {
-          return apartmentValue <= queryNumber;
-        }
-
-        if (operator === "min") {
-          return apartmentValue >= queryNumber;
-        }
-
-        /*
-          For "contains / ca.":
-          - numeric equality for rooms
-          - text/numeric partial match for price & size
-        */
-        if (currentField === "rooms") {
-          return apartmentValue === queryNumber;
-        }
-
-        const apartmentText =
-          String(apartmentValue);
-
-        const queryText =
-          String(queryNumber);
-
-        return (
-          apartmentText.includes(queryText) ||
-          Math.abs(apartmentValue - queryNumber) <=
-            Math.max(1, apartmentValue * 0.02)
-        );
-      });
+    function apartmentMatchesFilters(apartment) {
+      if (availabilityToggle.checked && apartment.status !== "verfügbar") return false;
+      if (filterPriceMax.value && getApartmentNumericValue(apartment, "price") > Number(filterPriceMax.value)) return false;
+      if (filterRoomsMin.value && getApartmentNumericValue(apartment, "rooms") < Number(filterRoomsMin.value)) return false;
+      if (filterSizeMin.value && getApartmentNumericValue(apartment, "size") < Number(filterSizeMin.value)) return false;
+      if (filterFloor.value && apartment.floor !== filterFloor.value) return false;
+      return true;
     }
 
     function getFilteredSortedApartments() {
@@ -3158,29 +3134,13 @@
           return false;
         }
 
-        return apartmentMatchesSearch(apartment);
+        return apartmentMatchesFilters(apartment);
       });
 
-      const sortValue = sortBy.value;
-
-      const sortMap = {
-        "price-asc": ["price", 1],
-        "price-desc": ["price", -1],
-        "rooms-asc": ["rooms", 1],
-        "rooms-desc": ["rooms", -1],
-        "size-asc": ["size", 1],
-        "size-desc": ["size", -1]
-      };
-
-      if (sortMap[sortValue]) {
-        const [field, direction] = sortMap[sortValue];
-
-        result = [...result].sort((a, b) => {
-          return (
-            getApartmentNumericValue(a, field) -
-            getApartmentNumericValue(b, field)
-          ) * direction;
-        });
+      if (activeSortField) {
+        result = [...result].sort((a, b) => (
+          getApartmentNumericValue(a, activeSortField) - getApartmentNumericValue(b, activeSortField)
+        ) * activeSortDirection);
       }
 
       return result;
@@ -3191,6 +3151,7 @@
 
       const filteredApartments =
         getFilteredSortedApartments();
+      finderCount.textContent = `${filteredApartments.length} von ${apartments.length} Wohnungen`;
 
       if (!filteredApartments.length) {
         finderResults.innerHTML =
@@ -3239,32 +3200,42 @@
 
         finderResults.appendChild(button);
       });
+
+      updateGridFilterHighlights();
     }
 
-    availabilityToggle.addEventListener(
-      "change",
-      renderApartmentResults
-    );
+    function updateGridFilterHighlights() {
+      const matchingIds = new Set(getFilteredSortedApartments().map(apartment => apartment.id));
+      const filtering = hasActiveFilters();
+      facadeGrid.querySelectorAll("[data-apartment-ids]").forEach(shape => {
+        const ids = shape.dataset.apartmentIds.split(" ");
+        const matches = ids.some(id => matchingIds.has(id));
+        shape.classList.toggle("filter-match", filtering && matches);
+        shape.classList.toggle("filter-hidden", filtering && !matches);
+      });
+    }
 
-    sortBy.addEventListener(
-      "change",
-      renderApartmentResults
-    );
+    [filterPriceMax, filterRoomsMin, filterSizeMin].forEach(input => input.addEventListener("input", renderApartmentResults));
+    filterFloor.addEventListener("change", renderApartmentResults);
 
-    searchField.addEventListener(
-      "change",
-      renderApartmentResults
-    );
+    availabilityButton.addEventListener("click", () => {
+      availabilityToggle.checked = !availabilityToggle.checked;
+      availabilityButton.classList.toggle("active", availabilityToggle.checked);
+      availabilityButton.setAttribute("aria-pressed", String(availabilityToggle.checked));
+      renderApartmentResults();
+    });
 
-    searchOperator.addEventListener(
-      "change",
-      renderApartmentResults
-    );
-
-    searchInput.addEventListener(
-      "input",
-      renderApartmentResults
-    );
+    sortButtons.forEach(button => button.addEventListener("click", () => {
+      const field = button.dataset.sort;
+      if (activeSortField === field) activeSortDirection *= -1;
+      else { activeSortField = field; activeSortDirection = 1; }
+      sortButtons.forEach(item => {
+        const active = item === button;
+        item.classList.toggle("active", active);
+        item.querySelector(".arrow").textContent = active ? (activeSortDirection === 1 ? "↑" : "↓") : "";
+      });
+      renderApartmentResults();
+    }));
 
     /* =========================================================
        DETAILS
@@ -3306,33 +3277,17 @@
     const detailsPlanEmpty =
       document.getElementById("detailsPlanEmpty");
 
-    function isMobileLayout() {
-      return window.matchMedia("(max-width: 900px)").matches;
-    }
-
     function openDetailsPanel() {
-      sidePanel.classList.add("is-open");
-      sidePanel.setAttribute("aria-hidden", "false");
-      document.body.classList.add("panel-open");
+      finderView.classList.remove("is-active");
+      detailsView.classList.add("is-active");
     }
 
     function closeDetailsPanel() {
-      sidePanel.classList.remove("is-open");
-      sidePanel.setAttribute("aria-hidden", "true");
-      document.body.classList.remove("panel-open");
-    }
-
-    function closeMobileDetails() {
-      mobileDetailsBar.classList.remove("is-visible");
-      document.body.classList.remove("mobile-apartment-selected");
+      detailsView.classList.remove("is-active");
+      finderView.classList.add("is-active");
     }
 
     panelClose.addEventListener("click", closeDetailsPanel);
-    mobileDetailsClose.addEventListener("click", closeMobileDetails);
-
-    moreDetailsButton.addEventListener("click", () => {
-      openDetailsPanel();
-    });
 
     function populateFullDetails(apartment) {
       detailsTitle.textContent = apartment.number;
@@ -3380,17 +3335,7 @@
       selectedApartmentId = apartment.id;
       populateFullDetails(apartment);
 
-      if (isMobileLayout()) {
-        closeDetailsPanel();
-        mobileDetailsTitle.textContent = `${apartment.number} · ${apartment.status}`;
-        mobileDetailsPrice.textContent = apartment.price;
-        mobileDetailsSize.textContent = apartment.size;
-        mobileDetailsRooms.textContent = apartment.rooms;
-        mobileDetailsBar.classList.add("is-visible");
-        document.body.classList.add("mobile-apartment-selected");
-      } else {
-        openDetailsPanel();
-      }
+      openDetailsPanel();
 
       renderApartmentResults();
     }
@@ -3399,6 +3344,12 @@
        INIT
     ========================================================= */
 
+    [...new Set(apartments.map(apartment => apartment.floor))].forEach(floor => {
+      const option = document.createElement("option");
+      option.value = floor;
+      option.textContent = floor;
+      filterFloor.appendChild(option);
+    });
     renderApartmentResults();
     updateCompass();
     updateSideFillers();
