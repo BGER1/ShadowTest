@@ -1043,6 +1043,39 @@
       .panel { width:100%; padding:10px; }
       .brand-logo { width:190px; }
     }
+
+    /* Smooth frames, slider zoom and collapsible menu sections */
+    #orbitImage,.orbit-image-next { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; pointer-events:none; user-select:none; -webkit-user-drag:none; }
+    .orbit-image-next { z-index:3; opacity:0; will-change:opacity,transform; }
+    #facadeGrid { transition:transform .16s ease,opacity .07s ease; }
+    #facadeGrid.is-transitioning { opacity:0; pointer-events:none; }
+    .zoom-controls { min-width:210px; padding:8px 10px; gap:8px; }
+    .zoom-symbol { color:#67686d; font-size:14px; font-weight:800; }
+    #zoomSlider { width:112px; height:4px; margin:0; appearance:none; -webkit-appearance:none; border-radius:999px; background:linear-gradient(to right,#202126 0%,#202126 var(--zoom-fill,0%),#d4d4d7 var(--zoom-fill,0%),#d4d4d7 100%); cursor:pointer; }
+    #zoomSlider::-webkit-slider-thumb { width:15px; height:15px; appearance:none; -webkit-appearance:none; border:3px solid #fff; border-radius:50%; background:#202126; box-shadow:0 1px 6px rgba(0,0,0,.35); }
+    #zoomSlider::-moz-range-thumb { width:10px; height:10px; border:3px solid #fff; border-radius:50%; background:#202126; box-shadow:0 1px 6px rgba(0,0,0,.35); }
+    #zoomReset { min-width:38px; height:28px; padding:0 7px; font-size:10px; }
+    .section-block { border-top:1px dashed #dedee1; }
+    .section-block:first-child { border-top:0; }
+    .section-toggle { display:flex; align-items:center; justify-content:space-between; width:100%; padding:13px 18px 8px; border:0; background:#fff; cursor:default; }
+    .section-toggle .section-title { margin:0; }
+    .section-chevron { color:#999a9e; font-size:13px; transition:transform .2s ease; }
+    .section-side { display:flex; align-items:center; gap:9px; }
+    .sort-section { padding:0 18px 15px; }
+    .section-block.is-collapsed .section-content { display:none; }
+    .section-block.is-collapsed .section-toggle { padding-bottom:13px; }
+    .section-block.is-collapsed .section-chevron { transform:rotate(180deg); }
+    .summary-dot.verfuegbar { background:#43a45b; box-shadow:0 0 0 4px #e4f5e8,0 0 13px rgba(67,164,91,.75); }
+
+    @media (max-width:900px) {
+      .viewer-area { height:72vh; min-height:500px; }
+      .mobile-blur-bg { inset:-45px; width:calc(100% + 90px); height:calc(100% + 90px); filter:blur(13px) brightness(1.04); }
+      .section-toggle { cursor:pointer; }
+      .panel-view { min-height:0; }
+      .finder-results { max-height:340px; }
+      .zoom-controls { min-width:190px; }
+      #zoomSlider { width:95px; }
+    }
   </style>
 </head>
 
@@ -1070,6 +1103,7 @@
           alt="Gebäudeansicht"
           draggable="false"
         >
+        <img id="orbitImageNext" class="orbit-image-next" src="" alt="" draggable="false">
         <div id="facadeGrid" aria-label="Wohnungsraster"></div>
 
       </div>
@@ -1090,9 +1124,10 @@
 
       
       <div class="zoom-controls" aria-label="Zoom">
-        <button id="zoomOut" type="button" aria-label="Herauszoomen">−</button>
+        <span class="zoom-symbol">−</span>
+        <input id="zoomSlider" type="range" min="100" max="200" step="10" value="100" aria-label="Zoomstufe">
+        <span class="zoom-symbol">+</span>
         <button id="zoomReset" type="button" aria-label="Zoom zurücksetzen">1×</button>
-        <button id="zoomIn" type="button" aria-label="Hineinzoomen">+</button>
       </div>
 
       <div class="drag-hint" id="dragHint">
@@ -1117,9 +1152,9 @@
           <div class="availability-summary" id="availabilitySummary"></div>
         </div>
         <section class="finder" aria-label="Wohnungssuche">
-          <div class="finder-controls">
-            <h2 class="section-title"><span class="section-icon">⌕</span> Filter</h2>
-            <div class="filter-fields">
+          <div class="section-block" data-section="filters">
+            <button class="section-toggle" type="button" aria-expanded="true"><span class="section-title"><span class="section-icon">⌕</span> Filter</span><span class="section-chevron">⌃</span></button>
+            <div class="section-content finder-controls"><div class="filter-fields">
               <label class="filter-field">Preis bis
                 <input id="filterPriceMax" class="finder-control" type="number" min="0" step="10000" placeholder="z. B. 600000">
               </label>
@@ -1132,18 +1167,23 @@
               <label class="filter-field">Etage
                 <select id="filterFloor" class="finder-control"><option value="">Alle Etagen</option></select>
               </label>
-            </div>
-            <div class="sort-buttons" aria-label="Sortierung und Verfügbarkeit">
+            </div></div>
+          </div>
+          <div class="section-block" data-section="sorting">
+            <button class="section-toggle" type="button" aria-expanded="true"><span class="section-title"><span class="section-icon">↕</span> Sortierung</span><span class="section-chevron">⌃</span></button>
+            <div class="section-content sort-section"><div class="sort-buttons" aria-label="Sortierung und Verfügbarkeit">
               <button class="sort-button" type="button" data-sort="price">Preis <span class="arrow"></span></button>
               <button class="sort-button" type="button" data-sort="rooms">Zimmer <span class="arrow"></span></button>
               <button class="sort-button" type="button" data-sort="size">Größe <span class="arrow"></span></button>
               <button class="sort-button" id="availabilityButton" type="button" aria-pressed="false">Frei</button>
-            </div>
+            </div></div>
             <input id="availabilityToggle" type="checkbox" hidden>
             <select id="sortBy" hidden><option value="none">Keine</option></select>
           </div>
-          <div class="list-heading"><h2 class="section-title"><span class="section-icon">⌂</span> Wohnungen</h2><div class="finder-count" id="finderCount"></div></div>
-          <div class="finder-results" id="finderResults"></div>
+          <div class="section-block apartments-section" data-section="apartments">
+            <button class="section-toggle" type="button" aria-expanded="true"><span class="section-title"><span class="section-icon">⌂</span> Wohnungen</span><span class="section-side"><span class="finder-count" id="finderCount"></span><span class="section-chevron">⌃</span></span></button>
+            <div class="section-content finder-results" id="finderResults"></div>
+          </div>
         </section>
       </div>
 
@@ -1224,7 +1264,7 @@
     ========================================================= */
 
     const TOTAL_FRAMES = 26;
-    const PIXELS_PER_FRAME = 30;
+    const PIXELS_PER_FRAME = 18;
 
     /* =========================================================
        GRID DATA
@@ -2449,6 +2489,7 @@
 
     const wrapper = document.getElementById("viewerCanvasWrapper");
     const orbitImage = document.getElementById("orbitImage");
+    const orbitImageNext = document.getElementById("orbitImageNext");
     const mobileBlurImage = document.getElementById("mobileBlurImage");
     const desktopBlurImage = document.getElementById("desktopBlurImage");
     const facadeGrid = document.getElementById("facadeGrid");
@@ -2462,9 +2503,8 @@
     const loaderInfo = document.getElementById("loaderInfo");
     const dragHint = document.getElementById("dragHint");
     const compassDial = document.getElementById("compassDial");
-    const zoomIn = document.getElementById("zoomIn");
-    const zoomOut = document.getElementById("zoomOut");
     const zoomReset = document.getElementById("zoomReset");
+    const zoomSlider = document.getElementById("zoomSlider");
 
     const availabilityToggle = document.getElementById("availabilityToggle");
     const sortBy = document.getElementById("sortBy");
@@ -2480,6 +2520,7 @@
     const detailsView = document.getElementById("detailsView");
     const apartmentTooltip = document.getElementById("apartmentTooltip");
     const availabilitySummary = document.getElementById("availabilitySummary");
+    const menuSections = [...document.querySelectorAll(".section-block")];
 
     const sidePanel = document.getElementById("sidePanel");
     const panelClose = document.getElementById("panelClose");
@@ -2554,8 +2595,11 @@
     function applyZoom() {
       const transform = `scale(${zoomLevel})`;
       orbitImage.style.transform = transform;
+      orbitImageNext.style.transform = transform;
       facadeGrid.style.transform = transform;
       zoomReset.textContent = `${zoomLevel.toFixed(1).replace(".0", "")}×`;
+      zoomSlider.value = String(Math.round(zoomLevel * 100));
+      zoomSlider.style.setProperty("--zoom-fill", `${(zoomLevel - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM) * 100}%`);
     }
 
     function setZoom(nextZoom) {
@@ -2575,24 +2619,21 @@
         const y = ((shapeRect.top + shapeRect.height / 2 - wrapperRect.top) / wrapperRect.height) * 100;
         const origin = `${Math.max(0, Math.min(100, x))}% ${Math.max(0, Math.min(100, y))}%`;
         orbitImage.style.transformOrigin = origin;
+        orbitImageNext.style.transformOrigin = origin;
         facadeGrid.style.transformOrigin = origin;
       }
       setZoom(1.5);
     }
 
-    zoomIn.addEventListener("click", event => {
+    zoomSlider.addEventListener("input", event => {
       event.stopPropagation();
-      setZoom(zoomLevel + ZOOM_STEP);
-    });
-
-    zoomOut.addEventListener("click", event => {
-      event.stopPropagation();
-      setZoom(zoomLevel - ZOOM_STEP);
+      setZoom(Number(zoomSlider.value) / 100);
     });
 
     zoomReset.addEventListener("click", event => {
       event.stopPropagation();
       orbitImage.style.transformOrigin = "center center";
+      orbitImageNext.style.transformOrigin = "center center";
       facadeGrid.style.transformOrigin = "center center";
       setZoom(1);
     });
@@ -2615,12 +2656,45 @@
       return ((index % TOTAL_FRAMES) + TOTAL_FRAMES) % TOTAL_FRAMES;
     }
 
+    let frameFadeTimer = null;
+
+    function crossfadeOrbitImage(src) {
+      if (!orbitImage.getAttribute("src")) {
+        orbitImage.src = src;
+        return;
+      }
+
+      if (frameFadeTimer) {
+        clearTimeout(frameFadeTimer);
+        if (orbitImageNext.src) orbitImage.src = orbitImageNext.src;
+      }
+
+      orbitImageNext.style.transition = "none";
+      orbitImageNext.style.opacity = "0";
+      orbitImageNext.src = src;
+      void orbitImageNext.offsetWidth;
+      orbitImageNext.style.transition = "opacity 95ms linear";
+      facadeGrid.classList.add("is-transitioning");
+
+      requestAnimationFrame(() => {
+        orbitImageNext.style.opacity = "1";
+      });
+
+      frameFadeTimer = setTimeout(() => {
+        orbitImage.src = src;
+        orbitImageNext.style.transition = "none";
+        orbitImageNext.style.opacity = "0";
+        facadeGrid.classList.remove("is-transitioning");
+        frameFadeTimer = null;
+      }, 105);
+    }
+
     function setFrame(index) {
       currentFrame = normalizeFrame(index);
 
       const src = imagePaths[currentFrame];
 
-      orbitImage.src = src;
+      crossfadeOrbitImage(src);
       mobileBlurImage.src = src;
       desktopBlurImage.src = src;
       sideFillLeftImage.src = src;
@@ -2728,6 +2802,8 @@
     let suppressNextApartmentClick = false;
     let pendingApartmentFromGrid = null;
     let hasInteracted = false;
+    let lastDragMovement = 0;
+    let inertiaTimer = null;
 
     function startDragging(event) {
       if (
@@ -2742,6 +2818,8 @@
       dragAccumulator = 0;
       dragDistance = 0;
       suppressNextApartmentClick = false;
+      lastDragMovement = 0;
+      if (inertiaTimer) clearTimeout(inertiaTimer);
 
       wrapper.classList.add("is-dragging");
 
@@ -2761,6 +2839,7 @@
       }
 
       const movement = event.clientX - lastX;
+      lastDragMovement = movement;
       lastX = event.clientX;
       dragAccumulator += movement;
       dragDistance += Math.abs(movement);
@@ -2804,6 +2883,17 @@
         selectApartment(apartmentToOpen);
       } else {
         pendingApartmentFromGrid = null;
+      }
+
+      if (wasDrag && Math.abs(lastDragMovement) > 4) {
+        const direction = lastDragMovement > 0 ? 1 : -1;
+        let remainingFrames = Math.min(3, Math.max(1, Math.round(Math.abs(lastDragMovement) / 9)));
+        const coast = () => {
+          if (remainingFrames-- <= 0) return;
+          setFrame(currentFrame + direction);
+          inertiaTimer = setTimeout(coast, 78 + (3 - remainingFrames) * 18);
+        };
+        inertiaTimer = setTimeout(coast, 55);
       }
     }
 
@@ -3374,6 +3464,26 @@
       finderView.classList.add("is-active");
     }
 
+    function syncMobileSections(firstRun = false) {
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+      menuSections.forEach(section => {
+        if (!mobile) section.classList.remove("is-collapsed");
+        else if (firstRun) section.classList.add("is-collapsed");
+        const toggle = section.querySelector(".section-toggle");
+        if (toggle) toggle.setAttribute("aria-expanded", String(!section.classList.contains("is-collapsed")));
+      });
+    }
+
+    menuSections.forEach(section => {
+      section.querySelector(".section-toggle")?.addEventListener("click", () => {
+        if (!window.matchMedia("(max-width: 900px)").matches) return;
+        section.classList.toggle("is-collapsed");
+        section.querySelector(".section-toggle").setAttribute("aria-expanded", String(!section.classList.contains("is-collapsed")));
+      });
+    });
+
+    window.addEventListener("resize", () => syncMobileSections(false));
+
     panelClose.addEventListener("click", closeDetailsPanel);
 
     function populateFullDetails(apartment) {
@@ -3439,6 +3549,7 @@
       filterFloor.appendChild(option);
     });
     renderAvailabilitySummary();
+    syncMobileSections(true);
     renderApartmentResults();
     updateCompass();
     updateSideFillers();
