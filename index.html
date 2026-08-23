@@ -1044,11 +1044,8 @@
       .brand-logo { width:190px; }
     }
 
-    /* Smooth frames, slider zoom and collapsible menu sections */
-    #orbitImage,.orbit-image-next { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; pointer-events:none; user-select:none; -webkit-user-drag:none; }
-    .orbit-image-next { z-index:3; opacity:0; will-change:opacity,transform; }
-    #facadeGrid { transition:transform .16s ease,opacity .07s ease; }
-    #facadeGrid.is-transitioning { opacity:0; pointer-events:none; }
+    /* Zoom indicator and collapsible menu sections */
+    #orbitImage { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; pointer-events:none; user-select:none; -webkit-user-drag:none; }
     .zoom-controls { min-width:210px; padding:8px 10px; gap:8px; }
     .zoom-symbol { color:#67686d; font-size:14px; font-weight:800; }
     .section-block { border-top:1px dashed #dedee1; }
@@ -1064,7 +1061,7 @@
     .summary-dot.verfuegbar { background:#43a45b; box-shadow:0 0 0 4px #e4f5e8,0 0 13px rgba(67,164,91,.75); }
 
     @media (max-width:900px) {
-      .viewer-area { height:72vh; min-height:500px; }
+      .viewer-area { height:64vh; min-height:420px; }
       .mobile-blur-bg { inset:-45px; width:calc(100% + 90px); height:calc(100% + 90px); filter:blur(13px) brightness(1.04); }
       .section-toggle { cursor:pointer; }
       .panel-view { min-height:0; }
@@ -1089,7 +1086,7 @@
     @media (max-width:900px) {
       .zoom-controls { display:none !important; }
       .compass { width:82px; height:82px; }
-      .apartment-tooltip.mobile-pinned { position:absolute; left:12px !important; right:auto; top:calc(max(72vh, 500px) - 105px) !important; bottom:auto; display:block; z-index:80; pointer-events:none; }
+      .apartment-tooltip.mobile-pinned { position:absolute; left:12px !important; right:auto; top:calc(max(64vh, 420px) - 105px) !important; bottom:auto; display:block; z-index:80; pointer-events:none; }
     }
   </style>
 </head>
@@ -1118,7 +1115,6 @@
           alt="Gebäudeansicht"
           draggable="false"
         >
-        <img id="orbitImageNext" class="orbit-image-next" src="" alt="" draggable="false">
         <div id="facadeGrid" aria-label="Wohnungsraster"></div>
 
       </div>
@@ -1288,7 +1284,7 @@
     ========================================================= */
 
     const TOTAL_FRAMES = 26;
-    const PIXELS_PER_FRAME = 18;
+    const PIXELS_PER_FRAME = 30;
 
     /* =========================================================
        GRID DATA
@@ -2513,7 +2509,6 @@
 
     const wrapper = document.getElementById("viewerCanvasWrapper");
     const orbitImage = document.getElementById("orbitImage");
-    const orbitImageNext = document.getElementById("orbitImageNext");
     const mobileBlurImage = document.getElementById("mobileBlurImage");
     const desktopBlurImage = document.getElementById("desktopBlurImage");
     const facadeGrid = document.getElementById("facadeGrid");
@@ -2621,7 +2616,6 @@
     function applyZoom() {
       const transform = `scale(${zoomLevel})`;
       orbitImage.style.transform = transform;
-      orbitImageNext.style.transform = transform;
       facadeGrid.style.transform = transform;
       zoomValue.textContent = `${zoomLevel.toFixed(1).replace(".0", "")}×`;
       zoomProgress.style.width = `${(zoomLevel - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM) * 100}%`;
@@ -2657,45 +2651,12 @@
       return ((index % TOTAL_FRAMES) + TOTAL_FRAMES) % TOTAL_FRAMES;
     }
 
-    let frameFadeTimer = null;
-
-    function crossfadeOrbitImage(src) {
-      if (!orbitImage.getAttribute("src")) {
-        orbitImage.src = src;
-        return;
-      }
-
-      if (frameFadeTimer) {
-        clearTimeout(frameFadeTimer);
-        if (orbitImageNext.src) orbitImage.src = orbitImageNext.src;
-      }
-
-      orbitImageNext.style.transition = "none";
-      orbitImageNext.style.opacity = "0";
-      orbitImageNext.src = src;
-      void orbitImageNext.offsetWidth;
-      orbitImageNext.style.transition = "opacity 95ms linear";
-      facadeGrid.classList.add("is-transitioning");
-
-      requestAnimationFrame(() => {
-        orbitImageNext.style.opacity = "1";
-      });
-
-      frameFadeTimer = setTimeout(() => {
-        orbitImage.src = src;
-        orbitImageNext.style.transition = "none";
-        orbitImageNext.style.opacity = "0";
-        facadeGrid.classList.remove("is-transitioning");
-        frameFadeTimer = null;
-      }, 105);
-    }
-
     function setFrame(index) {
       currentFrame = normalizeFrame(index);
 
       const src = imagePaths[currentFrame];
 
-      crossfadeOrbitImage(src);
+      orbitImage.src = src;
       mobileBlurImage.src = src;
       desktopBlurImage.src = src;
       sideFillLeftImage.src = src;
@@ -2803,8 +2764,6 @@
     let suppressNextApartmentClick = false;
     let pendingApartmentFromGrid = null;
     let hasInteracted = false;
-    let lastDragMovement = 0;
-    let inertiaTimer = null;
 
     function startDragging(event) {
       if (
@@ -2819,8 +2778,6 @@
       dragAccumulator = 0;
       dragDistance = 0;
       suppressNextApartmentClick = false;
-      lastDragMovement = 0;
-      if (inertiaTimer) clearTimeout(inertiaTimer);
 
       wrapper.classList.add("is-dragging");
 
@@ -2840,7 +2797,6 @@
       }
 
       const movement = event.clientX - lastX;
-      lastDragMovement = movement;
       lastX = event.clientX;
       dragAccumulator += movement;
       dragDistance += Math.abs(movement);
@@ -2886,16 +2842,6 @@
         pendingApartmentFromGrid = null;
       }
 
-      if (wasDrag && Math.abs(lastDragMovement) > 4) {
-        const direction = lastDragMovement > 0 ? 1 : -1;
-        let remainingFrames = Math.min(3, Math.max(1, Math.round(Math.abs(lastDragMovement) / 9)));
-        const coast = () => {
-          if (remainingFrames-- <= 0) return;
-          setFrame(currentFrame + direction);
-          inertiaTimer = setTimeout(coast, 78 + (3 - remainingFrames) * 18);
-        };
-        inertiaTimer = setTimeout(coast, 55);
-      }
     }
 
     wrapper.addEventListener("pointerdown", startDragging);
@@ -2961,7 +2907,8 @@
       const labels = { "verfügbar": "Frei", "reserviert": "Reserviert", "verkauft": "Verkauft" };
       availabilitySummary.innerHTML = ["verfügbar", "reserviert", "verkauft"].map(status => {
         const count = apartments.filter(apartment => apartment.status === status).length;
-        return `<div class="summary-status"><span class="summary-dot ${status}"></span><span class="summary-number">${count}</span><span class="summary-label">${labels[status]}</span></div>`;
+        const statusClass = getStatusClass(status).replace("status-", "");
+        return `<div class="summary-status"><span class="summary-dot ${statusClass}"></span><span class="summary-number">${count}</span><span class="summary-label">${labels[status]}</span></div>`;
       }).join("");
     }
 
