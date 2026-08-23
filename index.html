@@ -1085,8 +1085,19 @@
 
     @media (max-width:900px) {
       .zoom-controls { display:none !important; }
-      .compass { width:82px; height:82px; }
+      .compass { width:64px; height:64px; }
       .apartment-tooltip.mobile-pinned { position:absolute; left:12px !important; right:auto; top:calc(max(64vh, 420px) - 105px) !important; bottom:auto; display:block; z-index:80; pointer-events:none; }
+    }
+
+    /* Compact transparent compass and balanced availability dots */
+    .compass { width:76px; height:76px; background:transparent; border:0; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; }
+    .compass-dial { inset:0; }
+    .compass-dial svg > circle:first-child { fill:rgba(255,255,255,.55); stroke:rgba(20,20,22,.82); }
+    .summary-dot.verfuegbar { width:13px !important; height:13px !important; background:#59a96a !important; border:0; box-shadow:0 0 0 4px #e9f5eb !important; }
+
+    @media (max-width:900px) {
+      .compass { width:60px; height:60px; }
+      .finder-control { font-size:16px; }
     }
   </style>
 </head>
@@ -3346,14 +3357,28 @@
       });
     }
 
-    [filterPriceMax, filterRoomsMin, filterSizeMin].forEach(input => input.addEventListener("input", renderApartmentResults));
-    filterFloor.addEventListener("change", renderApartmentResults);
+    function openApartmentListOnMobile() {
+      if (!window.matchMedia("(max-width: 900px)").matches) return;
+      const section = document.querySelector('[data-section="apartments"]');
+      section?.classList.remove("is-collapsed");
+      section?.querySelector(".section-toggle")?.setAttribute("aria-expanded", "true");
+    }
+
+    [filterPriceMax, filterRoomsMin, filterSizeMin].forEach(input => input.addEventListener("input", () => {
+      renderApartmentResults();
+      openApartmentListOnMobile();
+    }));
+    filterFloor.addEventListener("change", () => {
+      renderApartmentResults();
+      openApartmentListOnMobile();
+    });
 
     availabilityButton.addEventListener("click", () => {
       availabilityToggle.checked = !availabilityToggle.checked;
       availabilityButton.classList.toggle("active", availabilityToggle.checked);
       availabilityButton.setAttribute("aria-pressed", String(availabilityToggle.checked));
       renderApartmentResults();
+      openApartmentListOnMobile();
     });
 
     sortButtons.forEach(button => button.addEventListener("click", () => {
@@ -3366,6 +3391,7 @@
         item.querySelector(".arrow").textContent = active ? (activeSortDirection === 1 ? "↑" : "↓") : "";
       });
       renderApartmentResults();
+      openApartmentListOnMobile();
     }));
 
     /* =========================================================
