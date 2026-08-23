@@ -1099,6 +1099,34 @@
       .compass { width:60px; height:60px; }
       .finder-control { font-size:16px; }
     }
+
+    /* Mobile fullscreen navigator with menu over the lower blur */
+    @media (max-width:900px) {
+      html,body { width:100%; height:100%; min-height:100%; overflow:hidden; background:#111; }
+      body { overflow:hidden; }
+      .app { position:relative; width:100%; height:100dvh; min-height:100dvh; overflow:hidden; background:#111; }
+      .viewer-area { position:absolute; inset:0; width:100%; height:100dvh; min-height:0; overflow:hidden; }
+      #viewerCanvasWrapper { position:absolute; inset:0; width:100%; height:100%; }
+      .mobile-blur-bg { inset:-50px; width:calc(100% + 100px); height:calc(100% + 100px); object-fit:cover; filter:blur(16px) brightness(.95); transform:scale(1.06); opacity:1; }
+      #orbitImage { object-fit:contain; object-position:center center; }
+      .panel { position:absolute; left:0; right:0; bottom:0; top:auto; z-index:180; width:100%; height:auto; min-height:0; max-height:48dvh; padding:8px 10px max(10px,env(safe-area-inset-bottom)); overflow:visible; border:0; background:transparent; box-shadow:none; }
+      .panel-view { width:100%; min-height:0; max-height:46dvh; overflow:hidden; border:1px solid rgba(255,255,255,.7); border-radius:17px; background:rgba(255,255,255,.94); box-shadow:0 8px 28px rgba(0,0,0,.2); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+      .panel-view.is-active { display:flex; }
+      .brand-header { padding:9px 12px 10px; }
+      .brand-logo { width:145px; height:30px; margin:0 auto 8px; }
+      .availability-summary { gap:5px; }
+      .summary-status { padding:6px 4px 5px; }
+      .summary-dot { margin-bottom:3px; }
+      .summary-number { font-size:12px; }
+      .summary-label { font-size:8px; }
+      .section-toggle { padding:10px 14px; }
+      .section-block.is-collapsed .section-toggle { padding-bottom:10px; }
+      .section-icon { width:22px; height:22px; font-size:13px; }
+      .section-title { font-size:13px; }
+      .finder { max-height:46dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+      .finder-results,.panel-content { max-height:34dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+      .apartment-tooltip.mobile-pinned { position:absolute; left:12px !important; top:calc(50dvh + 45px) !important; bottom:auto; }
+    }
   </style>
 </head>
 
