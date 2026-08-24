@@ -1312,37 +1312,11 @@
        currentFrame is zero-based: 0 = Bild 1, 1 = Bild 2.
        Every form keeps editable fractions underneath it.
     ========================================================= */
-    // Manuelle Feinjustierung pro Bild, aktuell überall neutral.
-    // x: positiv = rechts, negativ = links; y: positiv = unten, negativ = oben.
-    // Die Kommentare zeigen die früher verwendeten Abweichungen.
-    const GRID_FRAME_OFFSETS = {
-      1:  { x: 0, y: 0 },
-      2:  { x: 0, y: 0 }, // früher: x 145, y 55
-      3:  { x: 0, y: 0 }, // früher: x 5,   y 5
-      4:  { x: 65, y: 55 }, // früher: x 65,  y 55
-      5:  { x: 0, y: 0 }, // früher: x 95,  y 55
-      6:  { x: 0, y: 0 }, // früher: x 235, y 125
-      7:  { x: 300, y: 180 }, // früher: x 123, y 67
-      8:  { x: 0, y: 0 }, // früher: x 185, y 210
-      9:  { x: 0, y: 0 },
-      10: { x: 0, y: 0 },
-      11: { x: 0, y: 0 },
-      12: { x: 0, y: 0 },
-      13: { x: 0, y: 0 },
-      14: { x: 0, y: 0 },
-      15: { x: 0, y: 0 },
-      16: { x: 0, y: 0 },
-      17: { x: 0, y: 0 },
-      18: { x: 0, y: 0 },
-      19: { x: 0, y: 0 },
-      20: { x: 0, y: 0 },
-      21: { x: 0, y: 0 },
-      22: { x: 0, y: 0 },
-      23: { x: 0, y: 0 },
-      24: { x: 0, y: 0 },
-      25: { x: 0, y: 0 },
-      26: { x: 0, y: 0 }
-    };
+    // Alle Masken starten exakt auf den 4000×2250-Bildkoordinaten der SVGs.
+    const GRID_FRAME_OFFSETS = Object.fromEntries(
+      Array.from({ length: TOTAL_FRAMES }, (_, frameIndex) => [frameIndex, { x: 0, y: 0 }])
+    );
+    GRID_FRAME_OFFSETS[3] = { x: 65, y: 55 }; // Bild 4
 
     const FRAME_GRIDS = {
       0: [
@@ -2563,13 +2537,6 @@
       [1, 2, 3, 4]
     ];
 
-    const sideApartments = [
-      [39, 35, 31],
-      [29, 25, 21],
-      [19, 15, 11],
-      [9, 5, 1]
-    ];
-
     FRAME_GRIDS[0] = [
       upgradedQuadArea("Fassade", [
         { x: 1024, y: 866 }, { x: 3166, y: 842 },
@@ -2658,12 +2625,12 @@
         { x: 2037.81, y: 1356 }, { x: 2592, y: 517 },
         { x: 2539, y: 933 }, { x: 2008, y: 1947 }
       ], 4, 4, frontApartments),
-      upgradedPathArea("Top 45", "M1688 940L1598 1231L1069 1093L1167 827L1199 812L1678 915L1912 807L1777 940L1705 923L1688 940Z", 45),
+      upgradedPathArea("Top 45 und Top 41", "M1688 940L1598 1231L1069 1093L1167 827L1199 812L1678 915L1912 807L1777 940L1705 923L1688 940Z", [45, 41]),
       upgradedPathArea("Top 41", "M2030 1343L1601 1232L1688 940L1706 923L1779 940L1913 810H1932L1944 804L1964 810L2010 849L2016 839H2030L2038 832L2195 863V876H2214V884L2200 904L2195 1009L2230 1045L2030 1343Z", 41),
       upgradedPathArea("Top 42", "M2166 607L2395 801L2260 1003L2274 806L1998 752L2150 600L2166 607Z", 42),
       upgradedPathArea("Top 43", "M2497 649L2393 800L2165 607L2150 600L2271 481H2279L2288 476H2298L2333 504L2354 492L2479 512V518H2488V526L2479 540L2471 626L2497 649Z", 43),
-      upgradedPathArea("Top 46", "M2136 598H2152L2005 746L1984 740L1890 723L1914 704L2136 598Z", 46),
-      upgradedPathArea("Top 47", "M2261 479H2274L2153 597H2136L1914 703L2053 580L2261 479Z", 47),
+      upgradedPathArea("Top 45 Zusatzfläche", "M2136 598H2152L2005 746L1984 740L1890 723L1914 704L2136 598Z", 45),
+      upgradedPathArea("Top 46 und Top 47", "M2261 479H2274L2153 597H2136L1914 703L2053 580L2261 479Z", [46, 47]),
       upgradedPathArea("Top 44", "M2360 386L2309 438L2333 446L2525 470L2513 628L2586 513L2533 481V470L2542 451L2525 446L2464 438L2382 391L2360 386Z", 44),
       upgradedPathArea("Top 48", "M1967 336L2359 387L2309 437L2197 418L2162 449L2093 437L2058 463L2053 517L1912 495L1957 343L1967 336Z", 48),
       upgradedPathArea("Top 40", "M1905 622L1910 502L2051 522V576L1985 632L1905 622Z", 40),
@@ -2676,10 +2643,10 @@
 
     // Bild 9: linke Seite, unten von links nach rechts Top 9 | 5 | 1.
     FRAME_GRIDS[8] = [
-      upgradedQuadArea("Hintere Fassade", [
+      upgradedQuadArea("Rechte Fassade", [
         { x: 2014, y: 1420 }, { x: 3098, y: 1200 },
         { x: 3008, y: 1806 }, { x: 2020, y: 2074 }
-      ], 4, 1, [[40], [30], [20], [10]]),
+      ], 4, 4, frontApartments),
       ...mappedSvgAreas([
         ["Top 39", "M1779.5 580.5L1588.5 604L1592 725.5L1784.5 706.5L1779.5 580.5Z", 39],
         ["Top 29", "M1592.5 834V726.5L1784 706.5V810.5L1592.5 834Z", 29],
@@ -2701,7 +2668,7 @@
       upgradedQuadArea("Rechte Fassade", [
         { x: 2376, y: 1422 }, { x: 3157, y: 1073 },
         { x: 3065, y: 1649 }, { x: 2337, y: 2077 }
-      ], 4, 3, sideApartments),
+      ], 4, 4, frontApartments),
       ...mappedSvgAreas([
         ["Top 39", "M1637 737L1736 801L1755 793V705L1632 626L1637 737Z", 39],
         ["Top 29", "M1642 846L1742 919L1758 913V876L1716 846V801H1735L1637 736L1642 846Z", 29],
@@ -2723,7 +2690,7 @@
       upgradedQuadArea("Rechte Fassade", [
         { x: 2667, y: 1326 }, { x: 3154, y: 963 },
         { x: 3072, y: 1460 }, { x: 2596, y: 1929 }
-      ], 4, 3, sideApartments),
+      ], 4, 4, frontApartments),
       ...mappedSvgAreas([
         ["Top 39", "M1232 723L1214 700L1408 641L1432 758L1422 764L1427 784L1301 821L1273 811L1237 821L1223 741L1232 733V723Z", 39],
         ["Top 29", "M1252 942L1238 823L1276 810L1303 823L1423 784V763L1432 756L1450 865L1437 873L1443 892L1320 935L1293 927L1252 942Z", 29],
@@ -2745,7 +2712,7 @@
       upgradedQuadArea("Rechte Fassade", [
         { x: 2762, y: 1138 }, { x: 2877, y: 814 },
         { x: 2843, y: 1246 }, { x: 2703, y: 1722 }
-      ], 4, 3, sideApartments),
+      ], 4, 4, frontApartments),
       ...mappedSvgAreas([
         ["Top 39", "M1395 851L1383 743L1155 700L1171 788L1191 793V803L1395 851Z", 39],
         ["Top 29", "M1412 962L1397 852L1190 802L1201 834L1183 844L1195 900H1212L1217 917L1412 962Z", 29],
@@ -2777,13 +2744,77 @@
       ["Top 11", "M1372 1135L1729 1159L1722 1043L1544 1031L1527 1063L1377 1055L1372 1021H1358L1372 1135Z", 11]
     ]);
 
+    // Aktualisierte vollständige SVG-Masken für Bild 7.
+    FRAME_GRIDS[6] = [
+      upgradedQuadArea("Linke Fassade", [
+        { x: 1379, y: 1226 }, { x: 2506, y: 1359 },
+        { x: 2433, y: 1951 }, { x: 1430, y: 1798 }
+      ], 4, 3, [
+        [31, 35, 39], [21, 25, 29], [11, 15, 19], [1, 5, 9]
+      ]),
+      ...mappedSvgAreas([
+        ["Top 41 und Top 45", "M2013 1293L1382 1219L1439 926L1457 906L1931 950L2180 826L2136 971L2063 964L2056 986L2013 1293Z", [41, 45]],
+        ["Top 42", "M2501 1349L2016 1292L2056 986L2065 964L2137 972L2182 825L2203 830L2209 820L2229 825L2285 864L2292 846H2307L2312 838L2482 851V864H2501L2493 979V991H2482V1005L2512 1025L2501 1349Z", 42],
+        ["Top 44", "M2282 617L2525 761V786L2313 769L2241 761H2223L2261 612L2282 617Z", 44],
+        ["Top 43", "M2244 613H2261L2223 750H2201L2051 737L2034 780L1977 775L2003 718L2244 613Z", 43],
+        ["Top 47", "M2263 610L2307 460H2324L2363 492L2368 478H2382V472L2508 478V486H2517V546V555H2508V590L2530 616L2525 761L2282 616L2263 610Z", 47],
+        ["Top 46", "M2306 464L2265 612H2242L2003 718L2065 588L2285 464H2306Z", 46],
+        ["Top 47 Zusatzfläche", "M2521 435L2332 423L2302 416L2316 368H2345L2413 405L2521 416V435Z", 47],
+        ["Top 48", "M1904 343L2314 368L2302 415L2196 410L2185 446L2083 437L2065 468V525L1872 512L1897 352L1904 343Z", 48],
+        ["Top 40", "M1868 640L1873 519L2064 530V572L2025 651L1868 640Z", 40],
+        ["Top 30", "M1869 741V642L2025 651L2006 691H1982L1953 746L1869 741Z", 30],
+        ["Top 20", "M1870 827V743L1954 748V772H1906L1881 827H1870Z", 20],
+        ["Top 20 Zusatzfläche", "M1957 743V773H1970L1983 743L2008 695L1983 690L1957 743Z", 20]
+      ])
+    ];
+
+    // Aktualisierte vollständige SVG-Masken für Bild 8.
+    FRAME_GRIDS[7] = [
+      upgradedQuadArea("Linke Fassade", [
+        { x: 1764, y: 1337 }, { x: 2975, y: 1313 },
+        { x: 2896, y: 1968 }, { x: 1778, y: 1981 }
+      ], 4, 3, [
+        [31, 35, 39], [21, 25, 29], [11, 15, 19], [1, 5, 9]
+      ]),
+      ...mappedSvgAreas([
+        ["Top 12", "M2002 974V922H2021L2026 974H2002Z", 12],
+        ["Top 22", "M2024 904H2095L2103 973H2024V904Z", 22],
+        ["Top 32 und Top 33", "M2004 859V818H2070L2078 874V903H2021V912H2010L2004 859Z", [32, 33]],
+        ["Top 40", "M2002 708H2066L2072 764V802H2010L2002 764V708Z", 40],
+        ["Top 30", "M1834 928V857H1998L2007 913H2021V923L1834 928Z", 30],
+        ["Top 44", "M2488 1311L2967 1304L2801 1040L2812 941H2827V933L2746 817L2737 825L2730 809L2560 817V825H2542L2549 852L2480 809H2464L2528 966H2449L2459 991L2488 1311Z", 44],
+        ["Top 41 und Top 45", "M2488 1311L1767 1325L1774 1003V981L2180 971L2441 817H2463L2527 963H2450L2458 993L2488 1311Z", [41, 45]],
+        ["Top 42", "M2338 595L2091 748L2120 935V789H2267V748L2425 740L2358 595H2338Z", 42],
+        ["Top 46", "M2299 461L2359 595H2339L2088 748L2065 600L2281 461H2299Z", 46],
+        ["Top 43", "M2697 745L2450 750H2429L2362 604H2382L2569 694H2583H2663L2697 745Z", 43],
+        ["Top 47", "M2524 598L2583 694H2568L2383 606H2363L2299 458H2314L2358 484V465H2370V458H2494V465H2503L2539 521V528H2530L2524 598Z", 47],
+        ["Top 47 Zusatzfläche", "M2282 424L2257 371H2272L2329 400H2452L2468 419L2282 424Z", 47],
+        ["Top 48", "M1835 380L2258 370L2276 415L2171 420V454H2057V542H1830L1835 388V380Z", 48],
+        ["Top 40 Zusatzfläche", "M1830 664V552L2049 544V664H1830Z", 40],
+        ["Top 30 Zusatzfläche", "M2048 665H1831V764H2002V705H2048V665Z", 30],
+        ["Top 20", "M2002 765H1832V857H2002V821L2056 816V801H2007L2002 765Z", 20]
+      ])
+    ];
+
+    // Fehlende Dachgeschossflächen für Bild 9 ergänzen; Fassaden bleiben wie oben gemappt.
+    FRAME_GRIDS[8].push(...mappedSvgAreas([
+      ["Top 42", "M2581 970L2674 1276L2028 1404L1926 1053L2190 1010L2461 810L2625 941L2555 950L2581 970Z", 42],
+      ["Top 44", "M2674 1274L2581 970L2556 950L2625 940L2464 811L2485 801V791H2496L2556 827L2550 811V801H2566V791L2715 770L2729 776L2866 870V885H2850L2838 1004L3090 1190L2674 1274Z", 44],
+      ["Top 45", "M2203 601L1957 781L1835 636L2049 474H2066L2223 601H2203Z", 45],
+      ["Top 41", "M2119 976L1959 781L2204 600H2223L2394 734L2375 740L2263 754V800L2119 821V976Z", 41],
+      ["Top 46", "M2242 600H2226L2064 475V469H2078L2123 495L2118 475H2129V469L2251 458L2330 511V521H2315V611L2417 687L2242 600Z", 46],
+      ["Top 43", "M2395 735L2226 602H2244L2418 686L2563 667L2632 717L2429 740L2418 730L2395 735Z", 43],
+      ["Top 47", "M2014.5 435.5L1955.5 386H1965.5L2026 415.5L2155.5 400L2189.5 422L2014.5 435.5Z", 47],
+      ["Top 48", "M2014 434.5L1956.5 386L1544 421.5V430L1585.5 596.5L1781.5 574.5L1806.5 603.5L1802.5 487.5L1916.5 474V440.5L2014 434.5Z", 48]
+    ]));
+
     // Die Wohnungen in Bild 10 überlappen im SVG teilweise als Sammelflächen.
     // Ein gemeinsames Perspektivraster hält jede Wohnung separat anklickbar.
     FRAME_GRIDS[9] = [
       upgradedQuadArea("Rechte Fassade", [
         { x: 2376, y: 1422 }, { x: 3157, y: 1073 },
         { x: 3065, y: 1649 }, { x: 2337, y: 2077 }
-      ], 4, 3, sideApartments),
+      ], 4, 4, frontApartments),
       upgradedQuadArea("Linke Fassade", [
         { x: 1414, y: 676 }, { x: 1933, y: 814 },
         { x: 1808, y: 1133 }, { x: 1652, y: 1047 }
@@ -2795,20 +2826,6 @@
       ])
     ];
 
-    // Bild 9: vorne die linke Gebäudeseite, hinten nur Top 40/30/20/10.
-    FRAME_GRIDS[8] = [
-      upgradedQuadArea("Vordere linke Fassade", [
-        { x: 2014, y: 1420 }, { x: 3098, y: 1200 },
-        { x: 3008, y: 1806 }, { x: 2020, y: 2074 }
-      ], 4, 3, sideApartments),
-      ...mappedSvgAreas([
-        ["Top 40", "M1779.5 580.5L1588.5 604L1592 725.5L1784.5 706.5L1779.5 580.5Z", 40],
-        ["Top 30", "M1592.5 834V726.5L1784 706.5V810.5L1592.5 834Z", 30],
-        ["Top 20", "M1594 924.5V835.5L1786 811.5V899.5L1594 924.5Z", 20],
-        ["Top 10", "M1786 976.5V900.5L1597.5 924.5V1000.5L1786 976.5Z", 10]
-      ])
-    ];
-
     // Ältere Shots ebenfalls etagenrichtig machen: niedrige Top-Nummern unten.
     Object.values(FRAME_GRIDS).flat().forEach(area => {
       if (area.rows !== 4 || !Array.isArray(area.apartments) || area.apartments.length !== 4) return;
@@ -2817,16 +2834,6 @@
       if (firstRow.some(number => number < 10) && lastRow.some(number => number >= 30)) {
         area.apartments.reverse();
       }
-    });
-
-    // Nur Bild 5–8: Seitenfassade auch horizontal drehen.
-    // Ergebnis im EG von links nach rechts: Top 9 | Top 5 | Top 1.
-    [2, 4, 5, 6, 7].forEach(frameIndex => {
-      (FRAME_GRIDS[frameIndex] || []).forEach(area => {
-        if (area.rows === 4 && area.cols === 3 && Array.isArray(area.apartments)) {
-          area.apartments.forEach(row => row.reverse());
-        }
-      });
     });
 
     /*
@@ -3523,7 +3530,7 @@
 
         if (config.fullFrame) {
           // New workflow: SVG coordinates are already absolute in the 4000x2250 photo.
-          const frameOffset = GRID_FRAME_OFFSETS[currentFrame + 1] || { x: 0, y: 0 };
+          const frameOffset = GRID_FRAME_OFFSETS[currentFrame] || { x: 0, y: 0 };
           const offsetScaleX = shownWidth / config.svgWidth;
           const offsetScaleY = shownHeight / config.svgHeight;
 
