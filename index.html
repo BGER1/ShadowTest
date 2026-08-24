@@ -1316,15 +1316,14 @@
     // x: positiv = rechts, negativ = links; y: positiv = unten, negativ = oben.
     // Die Kommentare zeigen die früher verwendeten Abweichungen.
     const GRID_FRAME_OFFSETS = {
-      0:  { x: 0, y: 0 },
-      1:  { x: 0, y: 0 }, // früher: x 145, y 55
-      2:  { x: 0, y: 0 }, // früher: x 5,   y 5
-      3:  { x: 0, y: 0 }, // früher: x 65,  y 55
-      4:  { x: 0, y: 0 }, // früher: x 95,  y 55
-      5:  { x: 0, y: 0 }, // früher: x 235, y 125
-      6:  { x: 0, y: 0 }, // früher: x 123, y 67
-      7:  { x: 0, y: 0 }, // früher: x 185, y 210
-      8:  { x: 0, y: 0 },
+      1:  { x: 0, y: 0 },
+      2:  { x: 0, y: 0 }, // früher: x 145, y 55
+      3:  { x: 0, y: 0 }, // früher: x 5,   y 5
+      4:  { x: 0, y: 0 }, // früher: x 65,  y 55
+      5:  { x: 0, y: 0 }, // früher: x 95,  y 55
+      6:  { x: 0, y: 0 }, // früher: x 235, y 125
+      7:  { x: 0, y: 0 }, // früher: x 123, y 67
+      8:  { x: 0, y: 0 }, // früher: x 185, y 210
       9:  { x: 0, y: 0 },
       10: { x: 0, y: 0 },
       11: { x: 0, y: 0 },
@@ -1341,7 +1340,8 @@
       22: { x: 0, y: 0 },
       23: { x: 0, y: 0 },
       24: { x: 0, y: 0 },
-      25: { x: 0, y: 0 }
+      25: { x: 0, y: 0 },
+      26: { x: 0, y: 0 }
     };
 
     const FRAME_GRIDS = {
@@ -2353,7 +2353,7 @@
           rowFractionsLeft:      [0,1],
           rowFractionsRight:     [0,1],
 
-          apartments: [[45]]
+          apartments: [[[45,41,46]]]
           
         },
         {
@@ -2389,7 +2389,7 @@
           rowFractionsLeft:      [0,1],
           rowFractionsRight:     [0,1],
 
-          apartments: [[41,42,43,44]]
+          apartments: [[[45,41,46],42,43,44]]
           
         },
         {
@@ -2425,7 +2425,7 @@
           rowFractionsLeft:      [0,1],
           rowFractionsRight:     [0,1],
 
-          apartments: [[46]]
+          apartments: [[[45,41,46]]]
           
         },
         {
@@ -2658,12 +2658,12 @@
         { x: 2037.81, y: 1356 }, { x: 2592, y: 517 },
         { x: 2539, y: 933 }, { x: 2008, y: 1947 }
       ], 4, 4, frontApartments),
-      upgradedPathArea("Top 45 und Top 41", "M1688 940L1598 1231L1069 1093L1167 827L1199 812L1678 915L1912 807L1777 940L1705 923L1688 940Z", [45, 41]),
-      upgradedPathArea("Top 41", "M2030 1343L1601 1232L1688 940L1706 923L1779 940L1913 810H1932L1944 804L1964 810L2010 849L2016 839H2030L2038 832L2195 863V876H2214V884L2200 904L2195 1009L2230 1045L2030 1343Z", 41),
+      upgradedPathArea("Top 45, 41 und 46", "M1688 940L1598 1231L1069 1093L1167 827L1199 812L1678 915L1912 807L1777 940L1705 923L1688 940Z", [45, 41, 46]),
+      upgradedPathArea("Top 45, 41 und 46 Zusatzfläche", "M2030 1343L1601 1232L1688 940L1706 923L1779 940L1913 810H1932L1944 804L1964 810L2010 849L2016 839H2030L2038 832L2195 863V876H2214V884L2200 904L2195 1009L2230 1045L2030 1343Z", [45, 41, 46]),
       upgradedPathArea("Top 42", "M2166 607L2395 801L2260 1003L2274 806L1998 752L2150 600L2166 607Z", 42),
       upgradedPathArea("Top 43", "M2497 649L2393 800L2165 607L2150 600L2271 481H2279L2288 476H2298L2333 504L2354 492L2479 512V518H2488V526L2479 540L2471 626L2497 649Z", 43),
-      upgradedPathArea("Top 45 Zusatzfläche", "M2136 598H2152L2005 746L1984 740L1890 723L1914 704L2136 598Z", 45),
-      upgradedPathArea("Top 46 und Top 47", "M2261 479H2274L2153 597H2136L1914 703L2053 580L2261 479Z", [46, 47]),
+      upgradedPathArea("Top 45, 41 und 46 Zusatzfläche", "M2136 598H2152L2005 746L1984 740L1890 723L1914 704L2136 598Z", [45, 41, 46]),
+      upgradedPathArea("Top 45, 41 und 46 Dachfläche", "M2261 479H2274L2153 597H2136L1914 703L2053 580L2261 479Z", [45, 41, 46]),
       upgradedPathArea("Top 44", "M2360 386L2309 438L2333 446L2525 470L2513 628L2586 513L2533 481V470L2542 451L2525 446L2464 438L2382 391L2360 386Z", 44),
       upgradedPathArea("Top 48", "M1967 336L2359 387L2309 437L2197 418L2162 449L2093 437L2058 463L2053 517L1912 495L1957 343L1967 336Z", 48),
       upgradedPathArea("Top 40", "M1905 622L1910 502L2051 522V576L1985 632L1905 622Z", 40),
@@ -2676,10 +2676,10 @@
 
     // Bild 9: linke Seite, unten von links nach rechts Top 9 | 5 | 1.
     FRAME_GRIDS[8] = [
-      upgradedQuadArea("Rechte Fassade", [
+      upgradedQuadArea("Hintere Fassade", [
         { x: 2014, y: 1420 }, { x: 3098, y: 1200 },
         { x: 3008, y: 1806 }, { x: 2020, y: 2074 }
-      ], 4, 3, sideApartments),
+      ], 4, 1, [[40], [30], [20], [10]]),
       ...mappedSvgAreas([
         ["Top 39", "M1779.5 580.5L1588.5 604L1592 725.5L1784.5 706.5L1779.5 580.5Z", 39],
         ["Top 29", "M1592.5 834V726.5L1784 706.5V810.5L1592.5 834Z", 29],
@@ -2807,7 +2807,7 @@
 
     // Nur Bild 5–8: Seitenfassade auch horizontal drehen.
     // Ergebnis im EG von links nach rechts: Top 9 | Top 5 | Top 1.
-    [4, 5, 6, 7].forEach(frameIndex => {
+    [2, 4, 5, 6, 7].forEach(frameIndex => {
       (FRAME_GRIDS[frameIndex] || []).forEach(area => {
         if (area.rows === 4 && area.cols === 3 && Array.isArray(area.apartments)) {
           area.apartments.forEach(row => row.reverse());
@@ -3509,7 +3509,7 @@
 
         if (config.fullFrame) {
           // New workflow: SVG coordinates are already absolute in the 4000x2250 photo.
-          const frameOffset = GRID_FRAME_OFFSETS[currentFrame] || { x: 0, y: 0 };
+          const frameOffset = GRID_FRAME_OFFSETS[currentFrame + 1] || { x: 0, y: 0 };
           const offsetScaleX = shownWidth / config.svgWidth;
           const offsetScaleY = shownHeight / config.svgHeight;
 
