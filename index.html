@@ -1079,8 +1079,12 @@
     .zoom-track span { display:block; width:0; height:100%; border-radius:inherit; background:#202126; transition:width .12s ease; }
     #zoomValue { min-width:25px; color:#202126; font-size:10px; font-weight:800; text-align:right; }
     .sort-icon { position:relative; background:#f0f0f1; }
-    .sort-icon::before { content:""; position:absolute; left:50%; top:7px; width:12px; height:1.5px; background:#24252a; transform:translateX(-50%); box-shadow:0 4px 0 #24252a,0 8px 0 #24252a; }
-    .sort-icon::after { display:none; }
+    .sort-icon::before { content:"↑"; position:absolute; left:5px; top:3px; color:#24252a; font-size:15px; font-weight:700; line-height:20px; }
+    .sort-icon::after { content:"↓"; position:absolute; right:5px; top:3px; display:block; color:#24252a; font-size:15px; font-weight:700; line-height:20px; }
+    .finder { display:flex; flex-direction:column; }
+    .finder [data-section="sorting"] { order:1; border-top:0; }
+    .finder [data-section="filters"] { order:2; border-top:1px dashed #dedee1; }
+    .finder [data-section="apartments"] { order:3; }
     .summary-dot.verfuegbar { width:16px !important; height:16px !important; background:#00c853 !important; border:2px solid #dff9e8; box-shadow:0 0 0 4px rgba(0,200,83,.18),0 0 16px 5px rgba(0,200,83,.65) !important; }
 
     @media (max-width:900px) {
@@ -2613,6 +2617,32 @@
       upgradedPathArea("Top 40", "M2039 628L2044 492L2144 513V583L2039 628Z", 40)
     ];
 
+    FRAME_GRIDS[5] = [
+      upgradedQuadArea("Linke Fassade", [
+        { x: 1066, y: 1100 }, { x: 2036, y: 1356 },
+        { x: 2005, y: 1948 }, { x: 1139, y: 1692 }
+      ], 4, 3, [
+        [31, 35, 39],
+        [21, 25, 29],
+        [11, 15, 19],
+        [1, 5, 9]
+      ]),
+      upgradedQuadArea("Fassade", [
+        { x: 2037.81, y: 1356 }, { x: 2592, y: 517 },
+        { x: 2539, y: 933 }, { x: 2008, y: 1947 }
+      ], 4, 4, frontApartments),
+      upgradedPathArea("Top 45 und Top 41", "M1688 940L1598 1231L1069 1093L1167 827L1199 812L1678 915L1912 807L1777 940L1705 923L1688 940Z", [45, 41]),
+      upgradedPathArea("Top 41", "M2030 1343L1601 1232L1688 940L1706 923L1779 940L1913 810H1932L1944 804L1964 810L2010 849L2016 839H2030L2038 832L2195 863V876H2214V884L2200 904L2195 1009L2230 1045L2030 1343Z", 41),
+      upgradedPathArea("Top 42", "M2166 607L2395 801L2260 1003L2274 806L1998 752L2150 600L2166 607Z", 42),
+      upgradedPathArea("Top 43", "M2497 649L2393 800L2165 607L2150 600L2271 481H2279L2288 476H2298L2333 504L2354 492L2479 512V518H2488V526L2479 540L2471 626L2497 649Z", 43),
+      upgradedPathArea("Top 45 Zusatzfläche", "M2136 598H2152L2005 746L1984 740L1890 723L1914 704L2136 598Z", 45),
+      upgradedPathArea("Top 46 und Top 47", "M2261 479H2274L2153 597H2136L1914 703L2053 580L2261 479Z", [46, 47]),
+      upgradedPathArea("Top 44", "M2360 386L2309 438L2333 446L2525 470L2513 628L2586 513L2533 481V470L2542 451L2525 446L2464 438L2382 391L2360 386Z", 44),
+      upgradedPathArea("Top 48", "M1967 336L2359 387L2309 437L2197 418L2162 449L2093 437L2058 463L2053 517L1912 495L1957 343L1967 336Z", 48),
+      upgradedPathArea("Top 40", "M1905 622L1910 502L2051 522V576L1985 632L1905 622Z", 40),
+      upgradedPathArea("Top 30", "M1907 698V624L1987 633L1907 698Z", 30)
+    ];
+
     // Ältere Shots ebenfalls etagenrichtig machen: niedrige Top-Nummern unten.
     Object.values(FRAME_GRIDS).flat().forEach(area => {
       if (area.rows !== 4 || !Array.isArray(area.apartments) || area.apartments.length !== 4) return;
@@ -3597,8 +3627,11 @@
         zoomIndicator.classList.remove("is-visible");
       }
       menuSections.forEach(section => {
-        if (!mobile) section.classList.remove("is-collapsed");
-        else if (firstRun) section.classList.add("is-collapsed");
+        if (!mobile && firstRun) {
+          section.classList.toggle("is-collapsed", section.dataset.section === "filters");
+        } else if (mobile && firstRun) {
+          section.classList.add("is-collapsed");
+        }
         const toggle = section.querySelector(".section-toggle");
         if (toggle) toggle.setAttribute("aria-expanded", String(!section.classList.contains("is-collapsed")));
       });
@@ -3606,7 +3639,6 @@
 
     menuSections.forEach(section => {
       section.querySelector(".section-toggle")?.addEventListener("click", () => {
-        if (!window.matchMedia("(max-width: 900px)").matches) return;
         section.classList.toggle("is-collapsed");
         section.querySelector(".section-toggle").setAttribute("aria-expanded", String(!section.classList.contains("is-collapsed")));
       });
