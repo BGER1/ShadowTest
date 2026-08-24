@@ -1312,23 +1312,10 @@
        currentFrame is zero-based: 0 = Bild 1, 1 = Bild 2.
        Every form keeps editable fractions underneath it.
     ========================================================= */
-    const GRID_FRAME_OFFSETS = {
-      // Zero-based frame index: 1 = Ansicht 2, 2 = Ansicht 3, etc.
-      // Positive x = right; positive y = down. Values are original 4000x2250 pixels.
-      1: { x: 0, y: 0 },
-      2: { x: 0, y: 0 },
-      3: { x: 65, y: 55 },
-      4: { x: 0, y: 0 },
-      5: { x: 0, y: 0 },
-      6: { x: 0, y: 0 },
-      7: { x: 0, y: 0 }
-      8: { x: 0, y: 0 }
-    9: { x: 0, y: 0 }
-    10: { x: 0, y: 0 }
-    11: { x: 0, y: 0 }
-    12: { x: 0, y: 0 }
-    13: { x: 0, y: 0 }
-    };
+    // Alle Masken starten exakt auf den 4000×2250-Bildkoordinaten der SVGs.
+    const GRID_FRAME_OFFSETS = Object.fromEntries(
+      Array.from({ length: TOTAL_FRAMES }, (_, frameIndex) => [frameIndex, { x: 0, y: 0 }])
+    );
 
     const FRAME_GRIDS = {
       0: [
@@ -3184,6 +3171,26 @@
       "verkauft", "verfügbar", "reserviert", "verfügbar"
     ];
 
+    const interiorGalleryPool = [
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1615874694520-474822394e73?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1600566753051-f0b89df2dd90?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=82"
+    ];
+
+    function getInteriorGallery(topNumber) {
+      const start = ((topNumber - 1) * 3) % interiorGalleryPool.length;
+      return [0, 1, 2].map(offset => interiorGalleryPool[(start + offset) % interiorGalleryPool.length]);
+    }
+
     const apartments = Array.from({ length: 48 }, (_, index) => {
       const top = index + 1;
       const row = Math.floor(index / 4);
@@ -3200,11 +3207,7 @@
         orientation: ["Süd", "West", "Ost", "Süd-West"][col],
         outdoor: row === 0 ? "Terrasse" : "Balkon",
         plan: `https://placehold.co/900x650/f4f4f4/333333?text=Demo+Grundriss+Top+${top}`,
-        gallery: [
-          `https://picsum.photos/seed/top-${top}-living/900/600`,
-          `https://picsum.photos/seed/top-${top}-kitchen/700/525`,
-          `https://picsum.photos/seed/top-${top}-bedroom/700/525`
-        ]
+        gallery: getInteriorGallery(top)
       };
     });
 
@@ -3262,11 +3265,7 @@
           orientation: "—",
           outdoor: "—",
           plan: `https://placehold.co/900x650/f4f4f4/333333?text=Demo+Grundriss+Top+${topNumber}`,
-          gallery: [
-            `https://picsum.photos/seed/top-${topNumber}-living/900/600`,
-            `https://picsum.photos/seed/top-${topNumber}-kitchen/700/525`,
-            `https://picsum.photos/seed/top-${topNumber}-bedroom/700/525`
-          ]
+          gallery: getInteriorGallery(topNumber)
         };
       }
 
