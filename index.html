@@ -997,7 +997,7 @@
     .panel { width:420px; padding:14px; background:var(--shell); border:0; box-shadow:-12px 0 34px rgba(0,0,0,.16); }
     .panel-view { overflow:hidden; background:var(--surface); border:1px solid rgba(255,255,255,.7); border-radius:20px; box-shadow:0 4px 18px rgba(0,0,0,.04); }
     .brand-header { padding:20px 20px 16px; border-bottom:1px solid var(--line); }
-    .brand-logo { display:block; width:210px; max-width:82%; height:54px; margin:0 auto 17px; object-fit:contain; }
+    .brand-logo { display:none !important; }
     .availability-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
     .summary-status { min-width:0; padding:9px 5px 8px; border:1px solid var(--line); border-radius:11px; text-align:center; background:#fafafa; }
     .summary-dot { display:block; width:13px; height:13px; margin:0 auto 5px; border-radius:50%; }
@@ -2533,10 +2533,10 @@
     });
 
     const frontApartments = [
-      [1, 2, 3, 4],
-      [11, 12, 13, 14],
+      [31, 32, 33, 34],
       [21, 22, 23, 24],
-      [31, 32, 33, 34]
+      [11, 12, 13, 14],
+      [1, 2, 3, 4]
     ];
 
     FRAME_GRIDS[0] = [
@@ -2574,10 +2574,10 @@
         { x: 1063, y: 706 }, { x: 1238, y: 1090 },
         { x: 1301, y: 1662 }, { x: 1120, y: 1162 }
       ], 4, 3, [
-        [1, 5, 9],
-        [11, 15, 19],
+        [31, 35, 39],
         [21, 25, 29],
-        [31, 35, 39]
+        [11, 15, 19],
+        [1, 5, 9]
       ]),
       upgradedPathArea("Top 41", "M1241 1083.5L1155 884.5L1313 703.5L1352.5 694.5L1365.5 710.5L1643 662L1651.5 670.5L1671 666.5L1677.5 674L1693.5 714L1705.5 710.5L1767 774.5V783.5L1774.5 790.5V920.5L1789.5 967.5L1241 1083.5Z", 41),
       upgradedPathArea("Top 42", "M2202.5 586.5L2336.5 848.5L1872.5 946.5V745.5L1777.5 656L2202.5 586.5Z", 42),
@@ -2586,6 +2586,42 @@
       upgradedPathArea("Top 45", "M1312 703L1154 885L1065.5 692L1194.5 521.5L1227 517L1374 642L1416.5 699.5L1364 709L1351 695L1312 703Z", 45),
       upgradedPathArea("Top 48", "M2531.5 341.5L2444.5 456.5L2494.5 447.5L2513.5 456.5L2577 447.5L2657.5 485.5V494H2665L2856.5 461.5L2553.5 338L2531.5 341.5Z", 48)
     ];
+
+    FRAME_GRIDS[4] = [
+      upgradedQuadArea("Fassade", [
+        { x: 1733, y: 1335 }, { x: 2764, y: 583 },
+        { x: 2704, y: 1002 }, { x: 1751, y: 1931 }
+      ], 4, 4, frontApartments),
+      upgradedQuadArea("Linke Fassade", [
+        { x: 970, y: 952 }, { x: 1733, y: 1337 },
+        { x: 1751, y: 1931 }, { x: 1062, y: 1498 }
+      ], 4, 3, [
+        [31, 35, 39],
+        [21, 25, 29],
+        [11, 15, 19],
+        [1, 5, 9]
+      ]),
+      upgradedPathArea("Top 45", "M1084 708L975 946L1394 1152L1515 884L1535 864L1118 694L1084 708Z", 45),
+      upgradedPathArea("Top 41", "M1515 885L1396 1152L1732 1323L2083 1067L2053 1028V900H2062V885H2046V872L1900 821L1879 834L1836 782H1822L1597 892L1535 864L1515 885Z", 41),
+      upgradedPathArea("Top 41 Zusatzfläche", "M1807 787L1598 891L1566 878L1574 873L1787 781L1807 787Z", 41),
+      upgradedPathArea("Top 42", "M2172 612L1921 746L2144 825L2135 1030L2384 848L2172 612Z", 42),
+      upgradedPathArea("Top 43", "M2384 849L2174 611L2384 501L2417 530L2436 522L2560 556V565H2571L2555 679L2580 706L2384 849Z", 43),
+      upgradedPathArea("Top 42 Zusatzfläche", "M2140 602L2172 611L1922 745L1888 731L1879 718L1984 666L2140 602Z", 42),
+      upgradedPathArea("Top 47", "M2383 502L2173 610L2144 602L1984 666L2144 583L2344 495L2360 502L2371 495L2383 502Z", 47),
+      upgradedPathArea("Top 44", "M2530 423L2440 471L2632 520L2610 686L2759 577L2530 423Z", 44),
+      upgradedPathArea("Top 48", "M2046 481L2111 327L2126 321L2510 415L2417 460L2302 426L2251 453L2200 438L2150 460L2145 511L2046 481Z", 48),
+      upgradedPathArea("Top 40", "M2039 628L2044 492L2144 513V583L2039 628Z", 40)
+    ];
+
+    // Ältere Shots ebenfalls etagenrichtig machen: niedrige Top-Nummern unten.
+    Object.values(FRAME_GRIDS).flat().forEach(area => {
+      if (area.rows !== 4 || !Array.isArray(area.apartments) || area.apartments.length !== 4) return;
+      const firstRow = area.apartments[0].flat(Infinity).filter(Number.isFinite);
+      const lastRow = area.apartments[3].flat(Infinity).filter(Number.isFinite);
+      if (firstRow.some(number => number < 10) && lastRow.some(number => number >= 30)) {
+        area.apartments.reverse();
+      }
+    });
 
     /*
       Compass calibration:
