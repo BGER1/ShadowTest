@@ -1312,10 +1312,37 @@
        currentFrame is zero-based: 0 = Bild 1, 1 = Bild 2.
        Every form keeps editable fractions underneath it.
     ========================================================= */
-    // Alle Masken starten exakt auf den 4000×2250-Bildkoordinaten der SVGs.
-    const GRID_FRAME_OFFSETS = Object.fromEntries(
-      Array.from({ length: TOTAL_FRAMES }, (_, frameIndex) => [frameIndex, { x: 0, y: 0 }])
-    );
+    // Manuelle Feinjustierung pro Bild, aktuell überall neutral.
+    // x: positiv = rechts, negativ = links; y: positiv = unten, negativ = oben.
+    // Die Kommentare zeigen die früher verwendeten Abweichungen.
+    const GRID_FRAME_OFFSETS = {
+      0:  { x: 0, y: 0 },
+      1:  { x: 0, y: 0 }, // früher: x 145, y 55
+      2:  { x: 0, y: 0 }, // früher: x 5,   y 5
+      3:  { x: 0, y: 0 }, // früher: x 65,  y 55
+      4:  { x: 0, y: 0 }, // früher: x 95,  y 55
+      5:  { x: 0, y: 0 }, // früher: x 235, y 125
+      6:  { x: 0, y: 0 }, // früher: x 123, y 67
+      7:  { x: 0, y: 0 }, // früher: x 185, y 210
+      8:  { x: 0, y: 0 },
+      9:  { x: 0, y: 0 },
+      10: { x: 0, y: 0 },
+      11: { x: 0, y: 0 },
+      12: { x: 0, y: 0 },
+      13: { x: 0, y: 0 },
+      14: { x: 0, y: 0 },
+      15: { x: 0, y: 0 },
+      16: { x: 0, y: 0 },
+      17: { x: 0, y: 0 },
+      18: { x: 0, y: 0 },
+      19: { x: 0, y: 0 },
+      20: { x: 0, y: 0 },
+      21: { x: 0, y: 0 },
+      22: { x: 0, y: 0 },
+      23: { x: 0, y: 0 },
+      24: { x: 0, y: 0 },
+      25: { x: 0, y: 0 }
+    };
 
     const FRAME_GRIDS = {
       0: [
@@ -2536,6 +2563,13 @@
       [1, 2, 3, 4]
     ];
 
+    const sideApartments = [
+      [39, 35, 31],
+      [29, 25, 21],
+      [19, 15, 11],
+      [9, 5, 1]
+    ];
+
     FRAME_GRIDS[0] = [
       upgradedQuadArea("Fassade", [
         { x: 1024, y: 866 }, { x: 3166, y: 842 },
@@ -2645,7 +2679,7 @@
       upgradedQuadArea("Rechte Fassade", [
         { x: 2014, y: 1420 }, { x: 3098, y: 1200 },
         { x: 3008, y: 1806 }, { x: 2020, y: 2074 }
-      ], 4, 4, frontApartments),
+      ], 4, 3, sideApartments),
       ...mappedSvgAreas([
         ["Top 39", "M1779.5 580.5L1588.5 604L1592 725.5L1784.5 706.5L1779.5 580.5Z", 39],
         ["Top 29", "M1592.5 834V726.5L1784 706.5V810.5L1592.5 834Z", 29],
@@ -2667,7 +2701,7 @@
       upgradedQuadArea("Rechte Fassade", [
         { x: 2376, y: 1422 }, { x: 3157, y: 1073 },
         { x: 3065, y: 1649 }, { x: 2337, y: 2077 }
-      ], 4, 4, frontApartments),
+      ], 4, 3, sideApartments),
       ...mappedSvgAreas([
         ["Top 39", "M1637 737L1736 801L1755 793V705L1632 626L1637 737Z", 39],
         ["Top 29", "M1642 846L1742 919L1758 913V876L1716 846V801H1735L1637 736L1642 846Z", 29],
@@ -2689,7 +2723,7 @@
       upgradedQuadArea("Rechte Fassade", [
         { x: 2667, y: 1326 }, { x: 3154, y: 963 },
         { x: 3072, y: 1460 }, { x: 2596, y: 1929 }
-      ], 4, 4, frontApartments),
+      ], 4, 3, sideApartments),
       ...mappedSvgAreas([
         ["Top 39", "M1232 723L1214 700L1408 641L1432 758L1422 764L1427 784L1301 821L1273 811L1237 821L1223 741L1232 733V723Z", 39],
         ["Top 29", "M1252 942L1238 823L1276 810L1303 823L1423 784V763L1432 756L1450 865L1437 873L1443 892L1320 935L1293 927L1252 942Z", 29],
@@ -2711,7 +2745,7 @@
       upgradedQuadArea("Rechte Fassade", [
         { x: 2762, y: 1138 }, { x: 2877, y: 814 },
         { x: 2843, y: 1246 }, { x: 2703, y: 1722 }
-      ], 4, 4, frontApartments),
+      ], 4, 3, sideApartments),
       ...mappedSvgAreas([
         ["Top 39", "M1395 851L1383 743L1155 700L1171 788L1191 793V803L1395 851Z", 39],
         ["Top 29", "M1412 962L1397 852L1190 802L1201 834L1183 844L1195 900H1212L1217 917L1412 962Z", 29],
@@ -2749,7 +2783,7 @@
       upgradedQuadArea("Rechte Fassade", [
         { x: 2376, y: 1422 }, { x: 3157, y: 1073 },
         { x: 3065, y: 1649 }, { x: 2337, y: 2077 }
-      ], 4, 4, frontApartments),
+      ], 4, 3, sideApartments),
       upgradedQuadArea("Linke Fassade", [
         { x: 1414, y: 676 }, { x: 1933, y: 814 },
         { x: 1808, y: 1133 }, { x: 1652, y: 1047 }
@@ -2769,6 +2803,16 @@
       if (firstRow.some(number => number < 10) && lastRow.some(number => number >= 30)) {
         area.apartments.reverse();
       }
+    });
+
+    // Nur Bild 5–8: Seitenfassade auch horizontal drehen.
+    // Ergebnis im EG von links nach rechts: Top 9 | Top 5 | Top 1.
+    [4, 5, 6, 7].forEach(frameIndex => {
+      (FRAME_GRIDS[frameIndex] || []).forEach(area => {
+        if (area.rows === 4 && area.cols === 3 && Array.isArray(area.apartments)) {
+          area.apartments.forEach(row => row.reverse());
+        }
+      });
     });
 
     /*
