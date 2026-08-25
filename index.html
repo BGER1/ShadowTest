@@ -1065,7 +1065,7 @@
 
     @media (max-width:900px) {
       .viewer-area { height:64vh; min-height:420px; }
-      .mobile-blur-bg { inset:-45px; width:calc(100% + 90px); height:calc(100% + 90px); filter:blur(13px) brightness(1.04); }
+      .mobile-blur-bg { inset:-45px; width:calc(100% + 90px); height:calc(100% + 90px); filter:blur(4px) brightness(1.04); }
       .section-toggle { cursor:pointer; }
       .panel-view { min-height:0; }
       .finder-results { max-height:340px; }
@@ -1218,6 +1218,33 @@
 
       .availability-summary {
         background:#EDEBE6;
+      }
+
+      .viewer-area {
+        inset:14px 448px 14px 14px;
+        border-radius:22px;
+      }
+
+      #viewerCanvasWrapper {
+        border-radius:inherit;
+      }
+
+      .panel {
+        top:14px;
+        right:14px;
+        bottom:14px;
+        width:420px;
+        height:auto;
+        padding:0;
+        overflow:hidden;
+        border:0;
+        border-radius:22px;
+        box-shadow:0 8px 28px rgba(28,30,25,.10);
+      }
+
+      .panel-view {
+        border:0;
+        border-radius:22px;
       }
     }
 
