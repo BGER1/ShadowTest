@@ -6,7 +6,7 @@
   <title>Wohnungsnavigator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fahkwang:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Grid test: frame 1 = 4x4 apartment overlay -->
 
   <style>
@@ -1125,14 +1125,14 @@
       --finder-sold:#a2503b;
     }
     .panel { padding:14px; background:#ebe8df; }
-    #finderView { background:var(--finder-bg); color:var(--finder-ink); border:0; border-radius:22px; box-shadow:none; }
+    #finderView { background:var(--finder-bg); color:var(--finder-ink); border:0; border-radius:22px; box-shadow:none; font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif; font-weight:300; }
     .brand-header { padding:27px 28px 25px; border:0; }
-    .project-eyebrow { margin:0 0 5px; color:#9b826c; font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; }
-    .project-title { margin:0 0 22px; color:#171914; font-family:'Fraunces',Georgia,serif; font-size:25px; font-weight:500; line-height:1.08; letter-spacing:-.02em; }
-    .availability-summary { display:block; padding:18px 20px 16px; background:var(--finder-surface); border:1px solid var(--finder-line); border-radius:15px; }
-    .availability-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:13px; }
+    .project-eyebrow { margin:0 0 5px; color:#9b826c; font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif; font-size:11px; font-weight:300; letter-spacing:.14em; text-transform:uppercase; }
+    .project-title { margin:0 0 22px; color:#171914; font-family:'Fahkwang',Georgia,serif; font-size:25px; font-weight:500; line-height:1.15; letter-spacing:-.02em; }
+    .availability-summary { display:block; padding:18px 20px 16px; background:var(--finder-surface); border:1px solid var(--finder-line); border-radius:15px; font-family:Arial,Helvetica,sans-serif; font-weight:400; }
+    .availability-head { display:flex; align-items:baseline; justify-content:flex-end; margin-bottom:13px; }
     .availability-label { color:var(--finder-muted); font-size:12px; font-weight:500; }
-    .availability-total { color:var(--finder-soft); font-family:'Fraunces',Georgia,serif; font-size:16px; }
+    .availability-total { color:var(--finder-soft); font-family:Georgia,'Times New Roman',serif; font-size:16px; font-weight:400; }
     .availability-bar { display:flex; height:7px; margin-bottom:15px; overflow:hidden; border-radius:99px; background:var(--finder-line); }
     .availability-segment { height:100%; }
     .availability-segment.verfuegbar { background:var(--finder-free); }
@@ -1140,7 +1140,7 @@
     .availability-segment.verkauft { background:var(--finder-sold); }
     .availability-legend { display:flex; justify-content:space-between; }
     .summary-status { min-width:0; padding:0; border:0; border-radius:0; background:transparent; text-align:left; }
-    .summary-number { display:block; margin-bottom:3px; color:var(--finder-ink); font-family:'Fraunces',Georgia,serif; font-size:20px; font-weight:500; }
+    .summary-number { display:block; margin-bottom:3px; color:var(--finder-ink); font-family:Georgia,'Times New Roman',serif; font-size:20px; font-weight:400; }
     .summary-label { display:flex; align-items:center; gap:6px; color:var(--finder-muted); font-size:10px; font-weight:500; letter-spacing:.07em; text-transform:uppercase; }
     .summary-dot { display:inline-block !important; width:6px !important; height:6px !important; margin:0 !important; border:0 !important; box-shadow:none !important; }
     .summary-dot.verfuegbar { width:6px !important; height:6px !important; background:var(--finder-free) !important; box-shadow:none !important; }
@@ -1149,8 +1149,8 @@
     .finder { padding:0 28px 28px; gap:0; overflow:auto; }
     .section-block,.finder [data-section="filters"] { border-top:0; border-bottom:1px solid var(--finder-line-strong); }
     .section-toggle { padding:17px 2px 11px; background:transparent; cursor:pointer; }
-    .section-toggle .section-title { gap:10px; color:var(--finder-ink); font-family:'Fraunces',Georgia,serif; font-size:18px; font-weight:500; }
-    .section-icon { width:18px; height:18px; color:var(--finder-accent); background:transparent; border-radius:0; font-family:'Inter',sans-serif; font-size:16px; }
+    .section-toggle .section-title { gap:10px; color:var(--finder-ink); font-family:'Fahkwang',Georgia,serif; font-size:17px; font-weight:500; }
+    .section-icon { width:18px; height:18px; color:var(--finder-accent); background:transparent; border-radius:0; font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif; font-size:16px; }
     .sort-icon::before { left:0; top:-1px; font-size:14px; color:var(--finder-accent); }
     .sort-icon::after { right:0; top:-1px; font-size:14px; color:var(--finder-accent); }
     .section-chevron { color:var(--finder-muted); font-size:11px; }
@@ -1162,8 +1162,8 @@
     .finder-controls { padding:5px 0 18px; }
     .filter-fields { gap:16px 17px; }
     .filter-field { gap:6px; color:var(--finder-muted); font-size:10px; font-weight:600; letter-spacing:.09em; }
-    .finder-control { height:38px; padding:2px 0 8px; color:var(--finder-ink); background:transparent; border:0; border-bottom:1px solid var(--finder-line-strong); border-radius:0; font-family:'Fraunces',Georgia,serif; font-size:15px; }
-    .finder-control::placeholder { color:#b7b29f; font-family:'Inter',sans-serif; font-size:12px; }
+    .finder-control { height:38px; padding:2px 0 8px; color:var(--finder-ink); background:transparent; border:0; border-bottom:1px solid var(--finder-line-strong); border-radius:0; font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif; font-size:14px; font-weight:300; }
+    .finder-control::placeholder { color:#b7b29f; font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif; font-size:12px; font-weight:300; }
     .finder-control:focus { background:transparent; border-color:var(--finder-accent); box-shadow:none; }
     .filter-reset { border-color:var(--finder-line-strong); background:transparent; color:var(--finder-muted); }
     .apartments-section { border-bottom:0; }
@@ -1171,13 +1171,21 @@
     .finder-results { padding:18px 0 4px; }
     .apartment-result { margin:0; padding:15px 2px; border:0; border-bottom:1px solid var(--finder-line); border-radius:0; background:transparent; box-shadow:none; }
     .apartment-result:hover,.apartment-result.selected { background:rgba(52,73,46,.04); border-color:var(--finder-line); box-shadow:none; }
-    .result-title { color:var(--finder-ink); font-family:'Fraunces',Georgia,serif; font-size:17px; font-weight:500; }
+    .result-title { color:var(--finder-ink); font-family:'Fahkwang',Georgia,serif; font-size:16px; font-weight:500; }
     .result-meta { color:var(--finder-muted); font-size:12px; }
     .result-status { padding:5px 10px 5px 8px; border-radius:999px; font-size:11px; font-weight:500; text-transform:capitalize; }
     .result-status .status-dot { display:inline-block; width:6px; height:6px; margin-right:5px; }
     .result-status:has(.status-verfuegbar) { color:var(--finder-free); background:#e9f2ea; }
     .result-status:has(.status-reserviert) { color:var(--finder-reserved); background:#f7efde; }
     .result-status:has(.status-verkauft) { color:var(--finder-sold); background:#f5e9e3; }
+    .sort-button,.filter-field,.finder-count,.result-meta,.result-status,.filter-reset {
+      font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif;
+      font-weight:300;
+    }
+    .availability-summary .summary-label {
+      font-family:Arial,Helvetica,sans-serif;
+      font-weight:400;
+    }
 
     @media (max-width:900px) {
       .panel { padding:10px; background:#ebe8df; }
@@ -3369,7 +3377,6 @@
 
       availabilitySummary.innerHTML = `
         <div class="availability-head">
-          <span class="availability-label">Verfügbarkeit</span>
           <span class="availability-total">${apartments.length} Einheiten</span>
         </div>
         <div class="availability-bar" aria-hidden="true">
