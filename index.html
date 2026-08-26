@@ -1093,7 +1093,7 @@
     @media (max-width:900px) {
       .zoom-controls { display:none !important; }
       .compass { width:64px; height:64px; }
-      .apartment-tooltip.mobile-pinned { position:absolute; left:12px !important; right:auto; top:calc(max(64vh, 420px) - 105px) !important; bottom:auto; display:block; z-index:80; pointer-events:none; }
+      .apartment-tooltip.mobile-pinned { position:fixed; right:auto; bottom:auto; display:block; z-index:80; pointer-events:none; }
     }
 
     /* Compact transparent compass and balanced availability dots */
@@ -1293,9 +1293,7 @@
         height:46px;
       }
 
-      .apartment-tooltip.mobile-pinned {
-        top:calc(max(44vh, 300px) - 105px) !important;
-      }
+      .apartment-tooltip.mobile-pinned { position:fixed; }
     }
 
   </style>
@@ -3039,13 +3037,13 @@
         ["Top 41", "M2470 364.5L2419 396H2393L2270 377.5L2290.5 364.5L2393 382L2443 364.5H2470Z", 41],
         ["Top 45", "M2800 407L2473 363.5L2422.5 397.5L2488 407V429.5L2572.5 443.5V534.5L2593 507.5L2776.5 534.5L2806.5 434.5L2800 407Z", 45],
         ["Top 34", "M2443 798.5V676L2335 787.5L2340.5 863.5L2416.5 878.5L2452.5 857.5V821L2459 811V798.5H2443Z", 34],
-        ["Top 34 Zusatzfläche", "M2276.5 851L2335 790L2340.5 863.5L2276.5 851Z", 34],
+        ["Top 37", "M2276.5 851L2335 790L2340.5 863.5L2276.5 851Z", 37],
         ["Top 36", "M2530.5 583.5L2445.5 674.5V770L2501.5 713.5L2549 720L2580.5 681V646L2530.5 639.5V583.5Z", 36],
         ["Top 36 Zusatzfläche", "M2532.5 638.5V583.5L2596.5 517V613.5L2568 644.5L2532.5 638.5Z", 36],
         ["Top 26", "M2445 799.5V768.5L2500 713.5L2534 718.5V730L2585.5 737.5V763.5L2549 817.5L2500 807L2491.5 817.5L2460 811V799.5H2445Z", 26],
-        ["Top 37", "M2536.5 812.5L2501.5 807L2486.5 822V878.5L2545.5 887.5L2565.5 822H2536.5V812.5Z", 37],
+        ["Top 16", "M2536.5 812.5L2501.5 807L2486.5 822V878.5L2545.5 887.5L2565.5 822H2536.5V812.5Z", 16],
         ["Top 26 Zusatzfläche", "M2536.5 731V720H2551.5L2582.5 680V648.5L2565.5 642.5L2596.5 617.5V697L2565.5 735L2536.5 731Z", 26],
-        ["Top 37 Zusatzfläche", "M2588 762.5L2552.5 817L2596.5 824.5V700L2564 737.5H2588V762.5Z", 37],
+        ["Top 16 Zusatzfläche", "M2588 762.5L2552.5 817L2596.5 824.5V700L2564 737.5H2588V762.5Z", 16],
         ["Top 39", "M2596.5 614.5V517L2779 542V614.5L2739 609.5L2725.5 627L2622.5 614.5H2596.5Z", 39],
         ["Top 29", "M2598 700V617L2620 613.5L2726.5 629.5L2735.5 613.5L2775.5 617V695H2738L2726.5 711L2620 695L2598 700Z", 29],
         ["Top 19", "M2725.5 796L2596.5 773.5V700L2620.5 694.5L2725.5 710L2741.5 694.5H2776.5V773.5H2741.5L2725.5 796Z", 19],
@@ -3641,6 +3639,7 @@
     let dragDistance = 0;
     let suppressNextApartmentClick = false;
     let pendingApartmentFromGrid = null;
+    let lastApartmentPointerPosition = null;
     let hasInteracted = false;
 
     function startDragging(event) {
@@ -3715,7 +3714,7 @@
         const apartmentToOpen = pendingApartmentFromGrid;
         pendingApartmentFromGrid = null;
         suppressNextApartmentClick = true;
-        selectApartment(apartmentToOpen);
+        selectApartment(apartmentToOpen, lastApartmentPointerPosition);
       } else {
         pendingApartmentFromGrid = null;
       }
@@ -3903,6 +3902,9 @@
     function showApartmentTooltip(apartment, event) {
       fillApartmentTooltip(apartment);
       apartmentTooltip.classList.remove("mobile-pinned");
+      apartmentTooltip.style.removeProperty("position");
+      apartmentTooltip.style.removeProperty("left");
+      apartmentTooltip.style.removeProperty("top");
       apartmentTooltip.classList.add("is-visible");
       moveApartmentTooltip(event);
     }
@@ -3918,6 +3920,33 @@
     function hideApartmentTooltip() {
       if (apartmentTooltip.classList.contains("mobile-pinned")) return;
       apartmentTooltip.classList.remove("is-visible");
+    }
+
+    function pinMobileApartmentTooltip(apartment, pointerPosition) {
+      fillApartmentTooltip(apartment);
+      apartmentTooltip.classList.add("is-visible", "mobile-pinned");
+
+      const fallback = {
+        x: Math.round(window.innerWidth / 2),
+        y: Math.round(window.innerHeight / 2)
+      };
+      const point = pointerPosition || fallback;
+      const gap = 14;
+      const width = apartmentTooltip.offsetWidth || 175;
+      const height = apartmentTooltip.offsetHeight || 95;
+
+      let left = point.x + gap;
+      let top = point.y + gap;
+
+      if (left + width > window.innerWidth - 8) left = point.x - width - gap;
+      if (top + height > window.innerHeight - 8) top = point.y - height - gap;
+
+      left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
+      top = Math.max(8, Math.min(top, window.innerHeight - height - 8));
+
+      apartmentTooltip.style.setProperty("position", "fixed", "important");
+      apartmentTooltip.style.setProperty("left", `${left}px`, "important");
+      apartmentTooltip.style.setProperty("top", `${top}px`, "important");
     }
 
     function attachApartmentInteraction(shape, apartmentRefs, configName) {
@@ -3955,13 +3984,14 @@
 
       shape.addEventListener("pointermove", moveApartmentTooltip);
 
-      shape.addEventListener("pointerdown", () => {
+      shape.addEventListener("pointerdown", event => {
         /*
           If a shared surface contains several apartments, clicking it opens
           the first apartment named in the Figma layer. All referenced
           apartments still participate in the linked hover.
         */
         pendingApartmentFromGrid = primaryApartment;
+        lastApartmentPointerPosition = { x: event.clientX, y: event.clientY };
       });
 
       shape.addEventListener("click", event => {
@@ -3972,7 +4002,7 @@
           return;
         }
 
-        selectApartment(primaryApartment);
+        selectApartment(primaryApartment, { x: event.clientX, y: event.clientY });
       });
     }
 
@@ -4432,13 +4462,12 @@
       detailsCard.classList.remove("is-hidden");
     }
 
-    function selectApartment(apartment) {
+    function selectApartment(apartment, pointerPosition = null) {
       selectedApartmentId = apartment.id;
       populateFullDetails(apartment);
 
       if (window.matchMedia("(max-width: 900px)").matches) {
-        fillApartmentTooltip(apartment);
-        apartmentTooltip.classList.add("is-visible", "mobile-pinned");
+        pinMobileApartmentTooltip(apartment, pointerPosition);
       } else {
         apartmentTooltip.classList.remove("mobile-pinned");
       }
