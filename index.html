@@ -3138,17 +3138,18 @@
     ]);
 
     // Bild 7: vollständig neu aus 7(5).svg.
-    // Zuordnung folgt der bestätigten Kontinuität von Bild 8:
-    // Seitenfassade unverändert, Dach-/Rückseitenflächen logisch weitergeführt.
+    // Seitenfassade gespiegelt wie von dir vorgegeben:
+    // unten 9-5-1, darüber 19-15-11, dann 29-25-21, oben 39-35-31.
+    // Kleine Zusatzfläche zwischen 20/30/46/47 ist die Terrasse von Top 37.
     FRAME_GRIDS[7] = [
       upgradedQuadArea("Linke Fassade", [
         { x: 1379, y: 1226 }, { x: 2506, y: 1359 },
         { x: 2433, y: 1951 }, { x: 1430, y: 1798 }
       ], 4, 3, [
-        [31, 35, 39],
-        [21, 25, 29],
-        [11, 15, 19],
-        [1, 5, 9]
+        [39, 35, 31],
+        [29, 25, 21],
+        [19, 15, 11],
+        [9, 5, 1]
       ]),
       ...mappedSvgAreas([
         ["Top 45", "M2013 1293L1382 1219L1439 926L1457 906L1931 950L2180 826L2136 971L2063 964L2056 986L2013 1293Z", 45],
@@ -3162,7 +3163,7 @@
         ["Top 40", "M1868 640L1873 519L2064 530V572L2025 651L1868 640Z", 40],
         ["Top 30", "M1869 741V642L2025 651L2006 691H1982L1953 746L1869 741Z", 30],
         ["Top 20", "M1870 827V743L1954 748V772H1906L1881 827H1870Z", 20],
-        ["Top 20 Zusatzfläche", "M1957 743V773H1970L1983 743L2008 695L1983 690L1957 743Z", 20]
+        ["Top 37 Terrasse", "M1957 743V773H1970L1983 743L2008 695L1983 690L1957 743Z", 37]
       ])
     ];
 
