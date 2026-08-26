@@ -3020,10 +3020,15 @@
 
     // Bild 22: vollständige Maske aus 22.svg.
     FRAME_GRIDS[22] = [
-      upgradedQuadArea("Rechte Fassade", [
+      upgradedQuadArea("Seitliche Fassade", [
         { x:2111, y:1154 }, { x:3179, y:987 },
         { x:3101, y:1453 }, { x:2137, y:1645 }
-      ], 4, 4, frontApartments),
+      ], 4, 3, [
+        [34, 38, 40],
+        [24, 28, 30],
+        [14, 18, 20],
+        [4, 8, 10]
+      ]),
       ...mappedSvgAreas([
         ["Top 48", "M2389 842L2115 1141L3181.5 973.5L3090 748.5L3067.5 733.5L2547.5 803.5L2314 714.5H2294L2402.5 828.5L2389 842Z", 48],
         ["Top 44", "M2117.5 1141L1981 894.5L2018.5 868.5L2011 783.5L2002.5 767V757H2018.5V746L2186.5 728.5L2192.5 734.5H2202.5L2215 746L2265 708.5H2286.5L2404 829.5L2389 843.5L2117.5 1141Z", 44],
@@ -3099,7 +3104,7 @@
         columnFractionsTop:    [0, 0.4, 0.7, 1],
         columnFractionsBottom: [0, 0.4, 0.7, 1],
         rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
-        rowFractionsRight:     [0, 0.24, 0.47, 0.70, 0,97]
+        rowFractionsRight:     [0, 0.24, 0.47, 0.70, 0.97]
       },
       upgradedQuadArea("Top 34 / Top 24", [
         { x:1938, y:903 }, { x:2277, y:1134 },
