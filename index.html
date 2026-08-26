@@ -1272,9 +1272,33 @@
     }
 
     @media (max-width:900px) {
+      html,
+      body {
+        background:#ebe8df;
+        overscroll-behavior-y:auto;
+      }
+
+      .app {
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        min-height:100dvh;
+        padding:10px;
+        background:#ebe8df;
+      }
+
       .viewer-area {
+        flex:0 0 auto;
+        width:100%;
         height:44vh;
         min-height:300px;
+        border-radius:22px;
+        box-shadow:0 8px 24px rgba(28,30,25,.10);
+      }
+
+      #viewerCanvasWrapper {
+        border-radius:inherit;
+        touch-action:pan-y;
       }
 
       .mobile-blur-bg {
@@ -1291,6 +1315,76 @@
         left:12px;
         width:46px;
         height:46px;
+      }
+
+      .panel {
+        width:100%;
+        min-height:0;
+        padding:0;
+        overflow:visible;
+        border:0;
+        border-radius:22px;
+        background:transparent;
+        box-shadow:0 8px 24px rgba(28,30,25,.08);
+      }
+
+      .panel-view {
+        min-height:0;
+        overflow:visible;
+        border:0;
+        border-radius:22px;
+      }
+
+      .panel-content,
+      .finder,
+      .finder-results {
+        max-height:none;
+        overflow:visible;
+      }
+
+      .finder {
+        gap:8px;
+      }
+
+      .section-block,
+      .finder [data-section="filters"] {
+        overflow:hidden;
+        margin:0;
+        border:1px solid var(--finder-line);
+        border-radius:15px;
+        background:rgba(255,255,255,.78);
+      }
+
+      .section-toggle {
+        min-height:54px;
+        padding:15px 16px;
+      }
+
+      .section-block.is-collapsed .section-toggle {
+        padding:15px 16px;
+      }
+
+      .sort-section,
+      .finder-controls,
+      .finder-results {
+        padding-right:16px;
+        padding-left:16px;
+      }
+
+      .apartment-result {
+        margin-bottom:8px;
+        padding:14px;
+        border:1px solid var(--finder-line);
+        border-radius:14px;
+        background:#fff;
+      }
+
+      .apartment-result:hover,
+      .apartment-result.selected {
+        border-color:var(--finder-line-strong);
+        border-radius:14px;
+        background:#f9f8f4;
+        box-shadow:0 5px 14px rgba(28,30,25,.06);
       }
 
       .apartment-tooltip.mobile-pinned { position:fixed; }
@@ -2886,6 +2980,9 @@
         ["Top 46", "M2130 588L1937 814L2198 981L2205 826L2318 790L2323 740L2434 713L2161 578L2130 588Z", 46],
         ["Top 47", "M1932 471L2162 578L2129 587L1938 813L1725 675L1918 485L1932 471Z", 47],
         ["Top 48", "M1633 618L1409 671L1324 501L1330 485L1766 397L1865 442L1771 458V495L1665 521L1672 643L1633 618Z", 48],
+        ["Top 42", "M2440 628L2569 667L2474 706L2455 701L2434 712L2320 677L2440 628Z", 42],
+        ["Top 43", "M2105 507L2111 561L2013 535L1875 492V482H1887V475L1975 450L2120 492V499L2105 507Z", 43],
+        ["Top 44", "M1766 430L1882 400L1959 421L1845 453L1766 430Z", 44],
         ["Top 36", "M1933 940V823L2281 1049L2203 1075L2184 1049L2051 1090L1964 1032V986L1991 976L1933 940Z", 36],
         ["Top 37", "M1844 883L1934 939V821L1753 703V794L1715 806V843L1784 896L1844 883Z", 37],
         ["Top 40", "M1637 737L1736 801L1755 793V705L1632 626L1637 737Z", 40],
@@ -3863,6 +3960,9 @@
 
     let isDragging = false;
     let lastX = 0;
+    let gestureStartX = 0;
+    let gestureStartY = 0;
+    let gestureAxis = null;
     let dragAccumulator = 0;
     let dragDistance = 0;
     let suppressNextApartmentClick = false;
@@ -3880,15 +3980,20 @@
 
       isDragging = true;
       lastX = event.clientX;
+      gestureStartX = event.clientX;
+      gestureStartY = event.clientY;
+      gestureAxis = event.pointerType === "mouse" ? "horizontal" : null;
       dragAccumulator = 0;
       dragDistance = 0;
       suppressNextApartmentClick = false;
 
       wrapper.classList.add("is-dragging");
 
-      try {
-        wrapper.setPointerCapture(event.pointerId);
-      } catch (error) {}
+      if (event.pointerType === "mouse") {
+        try {
+          wrapper.setPointerCapture(event.pointerId);
+        } catch (error) {}
+      }
 
       if (!hasInteracted) {
         hasInteracted = true;
@@ -3899,6 +4004,25 @@
     function moveDragging(event) {
       if (!isDragging) {
         return;
+      }
+
+      if (event.pointerType !== "mouse" && gestureAxis === null) {
+        const totalX = event.clientX - gestureStartX;
+        const totalY = event.clientY - gestureStartY;
+
+        if (Math.hypot(totalX, totalY) < 8) return;
+
+        if (Math.abs(totalY) > Math.abs(totalX)) {
+          isDragging = false;
+          pendingApartmentFromGrid = null;
+          wrapper.classList.remove("is-dragging");
+          return;
+        }
+
+        gestureAxis = "horizontal";
+        try {
+          wrapper.setPointerCapture(event.pointerId);
+        } catch (error) {}
       }
 
       const movement = event.clientX - lastX;
@@ -4629,8 +4753,8 @@
         zoomIndicator.classList.remove("is-visible");
       }
       menuSections.forEach(section => {
-        if (firstRun) {
-          section.classList.toggle("is-collapsed", section.dataset.section !== "apartments");
+        if (firstRun && mobile) {
+          section.classList.add("is-collapsed");
         }
         const toggle = section.querySelector(".section-toggle");
         if (toggle) toggle.setAttribute("aria-expanded", String(!section.classList.contains("is-collapsed")));
