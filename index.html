@@ -1274,17 +1274,17 @@
     @media (max-width:900px) {
       html,
       body {
-        background:#ebe8df;
+        background:#fff;
         overscroll-behavior-y:auto;
       }
 
       .app {
         display:flex;
         flex-direction:column;
-        gap:10px;
+        gap:0;
         min-height:100dvh;
-        padding:10px;
-        background:#ebe8df;
+        padding:0;
+        background:#fff;
       }
 
       .viewer-area {
@@ -1292,8 +1292,8 @@
         width:100%;
         height:44vh;
         min-height:300px;
-        border-radius:22px;
-        box-shadow:0 8px 24px rgba(28,30,25,.10);
+        border-radius:0;
+        box-shadow:none;
       }
 
       #viewerCanvasWrapper {
@@ -1318,16 +1318,18 @@
         padding:0;
         overflow:visible;
         border:0;
-        border-radius:22px;
-        background:transparent;
-        box-shadow:0 8px 24px rgba(28,30,25,.08);
+        border-radius:0;
+        background:#fff;
+        box-shadow:none;
       }
 
-      .panel-view {
+      .panel-view,
+      #finderView {
         min-height:0;
         overflow:visible;
         border:0;
-        border-radius:22px;
+        border-radius:0;
+        box-shadow:none;
       }
 
       .panel-content,
@@ -3159,30 +3161,39 @@
       ])
     ];
 
-    // Aktualisierte vollständige SVG-Masken für Bild 8.
+    // Bild 8: vollständig neu aus 8(4).svg, abgeleitet aus dem bestätigten Bild 9.
     FRAME_GRIDS[8] = [
-      upgradedQuadArea("Linke Fassade", [
-        { x: 1764, y: 1337 }, { x: 2975, y: 1313 },
-        { x: 2896, y: 1968 }, { x: 1778, y: 1981 }
-      ], 4, 3, [
-        [31, 35, 39], [21, 25, 29], [11, 15, 19], [1, 5, 9]
-      ]),
+      {
+        ...upgradedQuadArea("Rechte Seitenfassade", [
+          { x:1764, y:1337 }, { x:2975, y:1313 },
+          { x:2896, y:1968 }, { x:1778, y:1981 }
+        ], 4, 3, [
+          [39, 35, 31],
+          [29, 25, 21],
+          [19, 15, 11],
+          [9, 5, 1]
+        ]),
+        columnFractionsTop:    [0, 0.333, 0.667, 1],
+        columnFractionsBottom: [0, 0.333, 0.667, 1],
+        rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
+        rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1]
+      },
       ...mappedSvgAreas([
-        ["Top 12", "M2002 974V922H2021L2026 974H2002Z", 12],
-        ["Top 22", "M2024 904H2095L2103 973H2024V904Z", 22],
-        ["Top 32 und Top 33", "M2004 859V818H2070L2078 874V903H2021V912H2010L2004 859Z", [32, 33]],
-        ["Top 40", "M2002 708H2066L2072 764V802H2010L2002 764V708Z", 40],
-        ["Top 30", "M1834 928V857H1998L2007 913H2021V923L1834 928Z", 30],
-        ["Top 44", "M2488 1311L2967 1304L2801 1040L2812 941H2827V933L2746 817L2737 825L2730 809L2560 817V825H2542L2549 852L2480 809H2464L2528 966H2449L2459 991L2488 1311Z", 44],
-        ["Top 41 und Top 45", "M2488 1311L1767 1325L1774 1003V981L2180 971L2441 817H2463L2527 963H2450L2458 993L2488 1311Z", [41, 45]],
-        ["Top 42", "M2338 595L2091 748L2120 935V789H2267V748L2425 740L2358 595H2338Z", 42],
-        ["Top 46", "M2299 461L2359 595H2339L2088 748L2065 600L2281 461H2299Z", 46],
-        ["Top 43", "M2697 745L2450 750H2429L2362 604H2382L2569 694H2583H2663L2697 745Z", 43],
-        ["Top 47", "M2524 598L2583 694H2568L2383 606H2363L2299 458H2314L2358 484V465H2370V458H2494V465H2503L2539 521V528H2530L2524 598Z", 47],
-        ["Top 47 Zusatzfläche", "M2282 424L2257 371H2272L2329 400H2452L2468 419L2282 424Z", 47],
+        ["Top 17", "M2002 974V922H2021L2026 974H2002Z", 17],
+        ["Top 36", "M2024 904H2095L2103 973H2024V904Z", 36],
+        ["Top 27", "M2004 859V818H2070L2078 874V903H2021V912H2010L2004 859Z", 27],
+        ["Top 37", "M2002 708H2066L2072 764V802H2010L2002 764V708Z", 37],
+        ["Top 10", "M1834 928V857H1998L2007 913H2021V923L1834 928Z", 10],
+        ["Top 41", "M2488 1311L2967 1304L2801 1040L2812 941H2827V933L2746 817L2737 825L2730 809L2560 817V825H2542L2549 852L2480 809H2464L2528 966H2449L2459 991L2488 1311Z", 41],
+        ["Top 45", "M2488 1311L1767 1325L1774 1003V981L2180 971L2441 817H2463L2527 963H2450L2458 993L2488 1311Z", 45],
+        ["Top 46", "M2338 595L2091 748L2120 935V789H2267V748L2425 740L2358 595H2338Z", 46],
+        ["Top 47", "M2299 461L2359 595H2339L2088 748L2065 600L2281 461H2299Z", 47],
+        ["Top 42", "M2697 745L2450 750H2429L2362 604H2382L2569 694H2583H2663L2697 745Z", 42],
+        ["Top 43", "M2524 598L2583 694H2568L2383 606H2363L2299 458H2314L2358 484V465H2370V458H2494V465H2503L2539 521V528H2530L2524 598Z", 43],
+        ["Top 44", "M2282 424L2257 371H2272L2329 400H2452L2468 419L2282 424Z", 44],
         ["Top 48", "M1835 380L2258 370L2276 415L2171 420V454H2057V542H1830L1835 388V380Z", 48],
-        ["Top 40 Zusatzfläche", "M1830 664V552L2049 544V664H1830Z", 40],
-        ["Top 30 Zusatzfläche", "M2048 665H1831V764H2002V705H2048V665Z", 30],
+        ["Top 40", "M1830 664V552L2049 544V664H1830Z", 40],
+        ["Top 30", "M2048 665H1831V764H2002V705H2048V665Z", 30],
         ["Top 20", "M2002 765H1832V857H2002V821L2056 816V801H2007L2002 765Z", 20]
       ])
     ];
