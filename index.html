@@ -2866,30 +2866,79 @@
       upgradedPathArea("Top 48", "M2531.5 341.5L2444.5 456.5L2494.5 447.5L2513.5 456.5L2577 447.5L2657.5 485.5V494H2665L2856.5 461.5L2553.5 338L2531.5 341.5Z", 48)
     ];
 
+    // Bild 5: vollständig neu aus new 5.svg, aus dem bestätigten Bild 6 fortgeführt.
     FRAME_GRIDS[5] = [
-      upgradedQuadArea("Fassade", [
-        { x: 1733, y: 1335 }, { x: 2764, y: 583 },
-        { x: 2704, y: 1002 }, { x: 1751, y: 1931 }
-      ], 4, 4, frontApartments),
-      upgradedQuadArea("Linke Fassade", [
-        { x: 970, y: 952 }, { x: 1733, y: 1337 },
-        { x: 1751, y: 1931 }, { x: 1062, y: 1498 }
-      ], 4, 3, [
-        [31, 35, 39],
-        [21, 25, 29],
-        [11, 15, 19],
-        [1, 5, 9]
-      ]),
+      {
+        ...upgradedQuadArea("Seitenfassade", [
+          { x:970, y:952 }, { x:1733, y:1337 },
+          { x:1751, y:1931 }, { x:1062, y:1498 }
+        ], 4, 3, [
+          [39, 35, 31],
+          [29, 25, 21],
+          [19, 15, 11],
+          [9, 5, 1]
+        ]),
+        columnFractionsTop:    [0, 0.333, 0.667, 1],
+        columnFractionsBottom: [0, 0.333, 0.667, 1],
+        rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
+        rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1]
+      },
+
+      // Vorderfassade: erste Spalte, oben und unten jeweils zwei Etagen.
+      {
+        ...upgradedQuadArea("Vorderfassade Tops 31 / 21", [
+          { x:1734, y:1335 }, { x:2120, y:1053 },
+          { x:2107, y:1335 }, { x:1742, y:1637 }
+        ], 2, 1, [[31], [21]]),
+        rowFractionsLeft:  [0, 0.5, 1],
+        rowFractionsRight: [0, 0.5, 1]
+      },
+      {
+        ...upgradedQuadArea("Vorderfassade Tops 11 / 1", [
+          { x:1743, y:1636 }, { x:1995, y:1427 },
+          { x:1987, y:1701 }, { x:1752, y:1932 }
+        ], 2, 1, [[11], [1]]),
+        rowFractionsLeft:  [0, 0.5, 1],
+        rowFractionsRight: [0, 0.5, 1]
+      },
+
+      // Vorderfassade: äußerste Spalte, oben zwei Etagen gemeinsam geteilt.
+      {
+        ...upgradedQuadArea("Vorderfassade Tops 34 / 24", [
+          { x:2595, y:709 }, { x:2762, y:587 },
+          { x:2730, y:798 }, { x:2569, y:929 }
+        ], 2, 1, [[34], [24]]),
+        rowFractionsLeft:  [0, 0.5, 1],
+        rowFractionsRight: [0, 0.5, 1]
+      },
+
+      // Dachflächen und hintere sichtbare Wohnung.
       upgradedPathArea("Top 45", "M1084 708L975 946L1394 1152L1515 884L1535 864L1118 694L1084 708Z", 45),
       upgradedPathArea("Top 41", "M1515 885L1396 1152L1732 1323L2083 1067L2053 1028V900H2062V885H2046V872L1900 821L1879 834L1836 782H1822L1597 892L1535 864L1515 885Z", 41),
       upgradedPathArea("Top 41 Zusatzfläche", "M1807 787L1598 891L1566 878L1574 873L1787 781L1807 787Z", 41),
       upgradedPathArea("Top 42", "M2172 612L1921 746L2144 825L2135 1030L2384 848L2172 612Z", 42),
       upgradedPathArea("Top 43", "M2384 849L2174 611L2384 501L2417 530L2436 522L2560 556V565H2571L2555 679L2580 706L2384 849Z", 43),
-      upgradedPathArea("Top 42 Zusatzfläche", "M2140 602L2172 611L1922 745L1888 731L1879 718L1984 666L2140 602Z", 42),
+      upgradedPathArea("Top 46", "M2140 602L2172 611L1922 745L1888 731L1879 718L1984 666L2140 602Z", 46),
       upgradedPathArea("Top 47", "M2383 502L2173 610L2144 602L1984 666L2144 583L2344 495L2360 502L2371 495L2383 502Z", 47),
       upgradedPathArea("Top 44", "M2530 423L2440 471L2632 520L2610 686L2759 577L2530 423Z", 44),
       upgradedPathArea("Top 48", "M2046 481L2111 327L2126 321L2510 415L2417 460L2302 426L2251 453L2200 438L2150 460L2145 511L2046 481Z", 48),
-      upgradedPathArea("Top 40", "M2039 628L2044 492L2144 513V583L2039 628Z", 40)
+      upgradedPathArea("Top 40", "M2039 628L2044 492L2144 513V583L2039 628Z", 40),
+
+      // Vorderfassade: zweite Spalte.
+      upgradedPathArea("Top 32", "M2114 1056V1183L2296 1043L2362 1073L2444 1001V957L2381 933L2386 856L2114 1056Z", 32),
+      upgradedPathArea("Top 22", "M2290 1175L2110 1327V1188L2297 1045L2361 1072L2374 1063L2434 1084V1119L2352 1198L2290 1175Z", 22),
+      upgradedPathArea("Top 12", "M2112 1392V1331L2291 1176L2353 1193L2374 1176V1193L2422 1205V1238L2341 1317L2283 1295L2151 1413L2112 1392Z", 12),
+      upgradedPathArea("Top 2", "M2374 1339V1288L2340 1317L2284 1295L2150 1416L2215 1455L2170 1493V1542L2374 1339Z", 2),
+
+      // Vorderfassade: dritte Spalte.
+      upgradedPathArea("Top 33", "M2485 887L2582 817L2596 705L2382 857V933L2445 956V1001L2518 942V898L2485 887Z", 33),
+      upgradedPathArea("Top 23", "M2462 1006L2571 925L2584 817L2486 886L2519 900V941L2376 1064L2439 1080V1121L2504 1064V1021L2462 1006Z", 23),
+      upgradedPathArea("Top 13", "M2567 991L2572 929L2464 1006L2506 1023V1062L2364 1189L2424 1208V1239L2487 1179L2492 1139L2455 1125L2546 1047V1031L2556 991H2567Z", 13),
+      upgradedPathArea("Top 3", "M2372 1285L2377 1339L2539 1169L2548 1046L2456 1125L2493 1140L2488 1180L2372 1285Z", 3),
+
+      // Vorderfassade: äußerste Spalte unten.
+      upgradedPathArea("Top 14", "M2612 942L2619 890L2728 802L2716 895L2651 948L2619 935L2612 942Z", 14),
+      upgradedPathArea("Top 4", "M2701 979L2670 1011L2665 1035L2706 995L2716 897L2652 949L2701 979Z", 4)
     ];
 
     // Bild 6: vollständig neu aus Frame 1 (10).svg, aus dem bestätigten Bild 7 fortgeführt.
