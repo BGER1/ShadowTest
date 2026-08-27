@@ -1387,6 +1387,73 @@
       .apartment-tooltip.mobile-pinned { position:fixed; }
     }
 
+    /* Final mobile presentation: edge-to-edge viewer/menu with blurred letterbox fill. */
+    @media (max-width:900px) {
+      html,
+      body {
+        width:100%;
+        max-width:none;
+        margin:0 !important;
+        padding:0 !important;
+        overflow-x:hidden;
+      }
+
+      .app {
+        width:100dvw;
+        max-width:none;
+        margin:0;
+        padding:0;
+      }
+
+      .viewer-area,
+      #viewerCanvasWrapper {
+        width:100dvw;
+        max-width:none;
+        margin:0;
+        border-radius:0;
+      }
+
+      .viewer-area,
+      #viewerCanvasWrapper {
+        background:#EDEBE6;
+      }
+
+      .mobile-blur-bg {
+        display:block !important;
+        position:absolute;
+        inset:-42px;
+        width:calc(100% + 84px);
+        height:calc(100% + 84px);
+        max-width:none;
+        object-fit:cover;
+        object-position:center;
+        filter:blur(16px) brightness(.94) saturate(.96);
+        transform:scale(1.06);
+        opacity:1;
+        pointer-events:none;
+        z-index:0;
+      }
+
+      #orbitImage {
+        z-index:2;
+      }
+
+      .panel,
+      .panel-view,
+      #finderView,
+      .finder {
+        width:100dvw;
+        max-width:none;
+        margin-right:0;
+        margin-left:0;
+      }
+
+      .panel {
+        padding-right:0;
+        padding-left:0;
+      }
+    }
+
   </style>
 </head>
 
@@ -1597,7 +1664,7 @@
     const GRID_FRAME_OFFSETS = Object.fromEntries(
       Array.from({ length: TOTAL_FRAMES }, (_, frameIndex) => [frameIndex + 1, { x: 0, y: 0 }])
     );
-    GRID_FRAME_OFFSETS[4] = { x: 0, y: 0 }; // Bild 4
+    GRID_FRAME_OFFSETS[4] = { x: 0, y: 0 }; // Bild 4: finale SVG-Position
 
     const FRAME_GRIDS = {
       1: [
@@ -3087,8 +3154,8 @@
           [19, 15, 11],
           [9, 5, 1]
         ]),
-        columnFractionsTop:    [0, 0.3, 0.6, 1],
-        columnFractionsBottom: [0, 0.3, 0.6, 1],
+        columnFractionsTop:    [0, 0.333, 0.667, 1],
+        columnFractionsBottom: [0, 0.333, 0.667, 1],
         rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
         rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1]
       },
@@ -3241,8 +3308,8 @@
           [19, 15, 11],
           [9, 5, 1]
         ]),
-        columnFractionsTop:    [0, 0.4, 0.7, 1],
-        columnFractionsBottom: [0, 0.4, 0.7, 1],
+        columnFractionsTop:    [0, 0.333, 0.667, 1],
+        columnFractionsBottom: [0, 0.333, 0.667, 1],
         rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
         rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1]
       },
@@ -3283,8 +3350,8 @@
           [19, 15, 11],
           [9, 5, 1]
         ]),
-        columnFractionsTop:    [0, 0.4, 0.7, 1],
-        columnFractionsBottom: [0, 0.4, 0.7, 1],
+        columnFractionsTop:    [0, 0.333, 0.667, 1],
+        columnFractionsBottom: [0, 0.333, 0.667, 1],
         rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
         rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1]
       },
@@ -3332,8 +3399,8 @@
           [9, 5, 1]
         ]),
         // Shot 11: horizontale Wohnungsbreiten entlang der oberen/unteren Kante.
-        columnFractionsTop:    [0, 0.4, 0.7, 1],
-        columnFractionsBottom: [0, 0.4, 0.7, 1],
+        columnFractionsTop:    [0, 0.333, 0.667, 1],
+        columnFractionsBottom: [0, 0.333, 0.667, 1],
         // Shot 11: Etagenhöhen entlang der linken/rechten Kante.
         rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
         rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1]
