@@ -179,7 +179,9 @@
     .facade-grid-area polygon:hover,
     .facade-grid-area path:hover,
     .facade-grid-area polygon.group-hover,
-    .facade-grid-area path.group-hover {
+    .facade-grid-area path.group-hover,
+    .facade-grid-area polygon.focus-selected,
+    .facade-grid-area path.focus-selected {
       fill: rgba(255,255,255,0.72);
       filter: drop-shadow(0 0 9px rgba(255,255,255,0.95));
     }
@@ -943,7 +945,8 @@
     #orbitImage,
     #facadeGrid {
       transform-origin: center center;
-      transition: transform 0.16s ease;
+      transition: transform 0.46s cubic-bezier(.22,.8,.2,1);
+      will-change: transform;
     }
 
     @media (max-width: 900px) {
@@ -4208,15 +4211,40 @@
     const MIN_ZOOM = 1;
     const MAX_ZOOM = 2;
     const ZOOM_STEP = 0.1;
+    const APARTMENT_FOCUS_ZOOM = 1.5;
     let zoomLevel = 1;
+    let zoomTranslateX = 0;
+    let zoomTranslateY = 0;
+    let zoomOriginX = null;
+    let zoomOriginY = null;
+    let focusedApartmentId = null;
     let zoomIndicatorTimer = null;
 
     function applyZoom() {
-      const transform = `scale(${zoomLevel})`;
+      const transformOrigin = (
+        Number.isFinite(zoomOriginX) && Number.isFinite(zoomOriginY)
+      ) ? `${zoomOriginX}px ${zoomOriginY}px` : "center center";
+      const transform = `translate3d(${zoomTranslateX}px, ${zoomTranslateY}px, 0) scale(${zoomLevel})`;
+
+      orbitImage.style.transformOrigin = transformOrigin;
+      facadeGrid.style.transformOrigin = transformOrigin;
       orbitImage.style.transform = transform;
       facadeGrid.style.transform = transform;
       zoomValue.textContent = `${zoomLevel.toFixed(1).replace(".0", "")}×`;
       zoomProgress.style.width = `${(zoomLevel - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM) * 100}%`;
+    }
+
+    function resetApartmentFocus() {
+      facadeGrid.querySelectorAll(".focus-selected").forEach(shape => {
+        shape.classList.remove("focus-selected");
+      });
+      focusedApartmentId = null;
+      zoomLevel = 1;
+      zoomTranslateX = 0;
+      zoomTranslateY = 0;
+      zoomOriginX = null;
+      zoomOriginY = null;
+      applyZoom();
     }
 
     function setZoom(nextZoom) {
@@ -4224,7 +4252,108 @@
         MAX_ZOOM,
         Math.max(MIN_ZOOM, Math.round(nextZoom * 10) / 10)
       );
+
+      if (zoomLevel === MIN_ZOOM) {
+        focusedApartmentId = null;
+        zoomTranslateX = 0;
+        zoomTranslateY = 0;
+        zoomOriginX = null;
+        zoomOriginY = null;
+      }
+
       applyZoom();
+    }
+
+    function getApartmentTopNumber(apartment) {
+      return Number(String(apartment?.id || apartment?.number || "").match(/\d+/)?.[0]) || null;
+    }
+
+    function frameContainsApartment(frameNumber, topNumber) {
+      return (FRAME_GRIDS[frameNumber] || []).some(config => (
+        Array.isArray(config.apartments) &&
+        config.apartments.flat(Infinity).some(value => Number(value) === topNumber)
+      ));
+    }
+
+    function findClosestFrameForApartment(topNumber) {
+      const candidates = Object.keys(FRAME_GRIDS)
+        .map(Number)
+        .filter(frameNumber => frameContainsApartment(frameNumber, topNumber))
+        .map(frameNumber => frameNumber - 1);
+
+      if (!candidates.length) return null;
+
+      return candidates.sort((a, b) => {
+        const distanceA = Math.min(
+          Math.abs(a - currentFrame),
+          TOTAL_FRAMES - Math.abs(a - currentFrame)
+        );
+        const distanceB = Math.min(
+          Math.abs(b - currentFrame),
+          TOTAL_FRAMES - Math.abs(b - currentFrame)
+        );
+        return distanceA - distanceB;
+      })[0];
+    }
+
+    function getVisibleApartmentShape(apartmentId) {
+      const matchingShapes = [...facadeGrid.querySelectorAll("[data-apartment-ids]")]
+        .filter(shape => shape.dataset.apartmentIds.split(" ").includes(apartmentId));
+
+      if (!matchingShapes.length) return null;
+
+      return matchingShapes.sort((a, b) => {
+        const rectA = a.getBoundingClientRect();
+        const rectB = b.getBoundingClientRect();
+        return (rectB.width * rectB.height) - (rectA.width * rectA.height);
+      })[0];
+    }
+
+    function focusApartmentInNavigator(apartment) {
+      // First remove a previous focus without animation so the new SVG bounds
+      // are measured in the untransformed 1x coordinate system.
+      orbitImage.style.transition = "none";
+      facadeGrid.style.transition = "none";
+      resetApartmentFocus();
+
+      let shape = getVisibleApartmentShape(apartment.id);
+      const topNumber = getApartmentTopNumber(apartment);
+
+      if (!shape && topNumber) {
+        const targetFrame = findClosestFrameForApartment(topNumber);
+        if (targetFrame !== null && targetFrame !== currentFrame) {
+          setFrame(targetFrame);
+          shape = getVisibleApartmentShape(apartment.id);
+        }
+      }
+
+      // Force the 1x layout before restoring the smooth focus transition.
+      void wrapper.offsetWidth;
+
+      if (!shape) {
+        orbitImage.style.removeProperty("transition");
+        facadeGrid.style.removeProperty("transition");
+        return false;
+      }
+
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const shapeRect = shape.getBoundingClientRect();
+      const apartmentCenterX = shapeRect.left + shapeRect.width / 2 - wrapperRect.left;
+      const apartmentCenterY = shapeRect.top + shapeRect.height / 2 - wrapperRect.top;
+
+      zoomLevel = APARTMENT_FOCUS_ZOOM;
+      zoomOriginX = apartmentCenterX;
+      zoomOriginY = apartmentCenterY;
+      zoomTranslateX = wrapperRect.width / 2 - apartmentCenterX;
+      zoomTranslateY = wrapperRect.height / 2 - apartmentCenterY;
+      focusedApartmentId = apartment.id;
+      shape.classList.add("focus-selected");
+
+      orbitImage.style.removeProperty("transition");
+      facadeGrid.style.removeProperty("transition");
+      void wrapper.offsetWidth;
+      applyZoom();
+      return true;
     }
 
     wrapper.addEventListener("wheel", event => {
@@ -4250,6 +4379,7 @@
     }
 
     function setFrame(index) {
+      resetApartmentFocus();
       currentFrame = normalizeFrame(index);
 
       const src = imagePaths[currentFrame];
@@ -4525,21 +4655,29 @@
       return [0, 1, 2].map(offset => interiorGalleryPool[(start + offset) % interiorGalleryPool.length]);
     }
 
+    function getFloorLabel(topNumber) {
+      if (topNumber <= 10) return "EG";
+      if (topNumber <= 20) return "1. OG";
+      if (topNumber <= 30) return "2. OG";
+      if (topNumber <= 40) return "3. OG";
+      return "DG";
+    }
+
     const apartments = Array.from({ length: 48 }, (_, index) => {
       const top = index + 1;
-      const row = Math.floor(index / 4);
+      const floor = getFloorLabel(top);
       const col = index % 4;
 
       return {
         id: `Top_${top}`,
         number: `Top ${top}`,
-        floor: row === 0 ? "EG" : `${row}. OG`,
+        floor,
         size: `${58 + ((index * 7) % 38)} m²`,
         price: `€ ${(395000 + index * 18500).toLocaleString("de-DE")}`,
         status: demoStatuses[index % demoStatuses.length],
         rooms: String(2 + (col % 3)),
         orientation: ["Süd", "West", "Ost", "Süd-West"][col],
-        outdoor: row === 0 ? "Terrasse" : "Balkon",
+        outdoor: floor === "EG" ? "Terrasse" : "Balkon",
         plan: `https://placehold.co/900x650/f4f4f4/333333?text=Demo+Grundriss+Top+${top}`,
         gallery: getInteriorGallery(top)
       };
@@ -5141,14 +5279,11 @@
     function closeDetailsPanel() {
       detailsView.classList.remove("is-active");
       finderView.classList.add("is-active");
+      resetApartmentFocus();
     }
 
     function syncMobileSections(firstRun = false) {
       const mobile = window.matchMedia("(max-width: 900px)").matches;
-      if (mobile && zoomLevel !== 1) {
-        setZoom(1);
-        zoomIndicator.classList.remove("is-visible");
-      }
       menuSections.forEach(section => {
         if (firstRun && mobile) {
           section.classList.add("is-collapsed");
@@ -5213,6 +5348,7 @@
 
     function selectApartment(apartment, pointerPosition = null) {
       selectedApartmentId = apartment.id;
+      focusApartmentInNavigator(apartment);
       populateFullDetails(apartment);
 
       if (window.matchMedia("(max-width: 900px)").matches) {
