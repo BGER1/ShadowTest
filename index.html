@@ -4406,14 +4406,7 @@
       updateFacadeGrid();
 
       if (previousFocusedApartmentId && frameChanged) {
-        const focusedTopNumber = Number(previousFocusedApartmentId.match(/\d+/)?.[0]);
-        const focusedApartment = getApartmentByTopNumber(focusedTopNumber);
-
-        focusApartmentInNavigator(focusedApartment, {
-          targetZoom: APARTMENT_FOCUS_ZOOM,
-          allowFrameChange: false,
-          fallbackToCenteredZoom: true
-        });
+        resetApartmentFocus();
       } else {
         applyZoom();
       }
