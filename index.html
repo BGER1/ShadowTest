@@ -1457,138 +1457,6 @@
       }
     }
 
-    /* Navigator fullscreen presentation. */
-    .fullscreen-toggle {
-      position:absolute;
-      top:18px;
-      right:18px;
-      z-index:45;
-      display:grid;
-      place-items:center;
-      width:46px;
-      height:46px;
-      padding:0;
-      border:1px solid rgba(25,27,23,.14);
-      border-radius:50%;
-      color:#22251f;
-      background:rgba(255,255,255,.9);
-      box-shadow:0 5px 18px rgba(20,22,18,.16);
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      cursor:pointer;
-    }
-
-    .fullscreen-toggle:hover {
-      background:#fff;
-      transform:translateY(-1px);
-    }
-
-    .fullscreen-toggle svg {
-      width:20px;
-      height:20px;
-      fill:none;
-      stroke:currentColor;
-      stroke-width:1.8;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-    }
-
-    .fullscreen-toggle .fullscreen-exit-icon,
-    body.navigator-fullscreen .fullscreen-toggle .fullscreen-enter-icon {
-      display:none;
-    }
-
-    body.navigator-fullscreen .fullscreen-toggle .fullscreen-exit-icon {
-      display:block;
-    }
-
-    body.navigator-fullscreen {
-      overflow:hidden !important;
-      background:#EDEBE6;
-    }
-
-    body.navigator-fullscreen .app {
-      position:fixed;
-      inset:0;
-      width:100vw;
-      height:100dvh;
-      overflow:hidden;
-      background:#EDEBE6;
-    }
-
-    body.navigator-fullscreen .viewer-area {
-      position:absolute;
-      inset:0 !important;
-      width:auto;
-      height:auto;
-      min-height:0;
-      border-radius:0;
-      transition:right .4s cubic-bezier(.22,.8,.2,1), height .4s cubic-bezier(.22,.8,.2,1);
-    }
-
-    body.navigator-fullscreen .panel {
-      display:none !important;
-    }
-
-    @media (min-width:901px) {
-      body.navigator-fullscreen.fullscreen-details .viewer-area {
-        right:420px !important;
-      }
-
-      body.navigator-fullscreen.fullscreen-details .panel {
-        position:absolute;
-        top:0;
-        right:0;
-        bottom:0;
-        display:flex !important;
-        width:420px;
-        height:auto;
-        padding:0;
-        border-radius:0;
-        box-shadow:-12px 0 34px rgba(20,22,18,.14);
-      }
-
-      body.navigator-fullscreen.fullscreen-details .panel-view,
-      body.navigator-fullscreen.fullscreen-details #detailsView {
-        border-radius:0;
-      }
-    }
-
-    @media (max-width:900px) {
-      .fullscreen-toggle {
-        top:12px;
-        right:12px;
-        width:42px;
-        height:42px;
-      }
-
-      body.navigator-fullscreen.fullscreen-details .viewer-area {
-        height:56dvh;
-      }
-
-      body.navigator-fullscreen.fullscreen-details .panel {
-        position:fixed;
-        inset:auto 0 0 0;
-        display:flex !important;
-        width:100dvw;
-        height:44dvh;
-        min-height:0;
-        overflow:auto;
-        padding:0;
-        border-radius:0;
-        background:#fff;
-        box-shadow:0 -12px 30px rgba(20,22,18,.14);
-      }
-
-      body.navigator-fullscreen.fullscreen-details .panel-view,
-      body.navigator-fullscreen.fullscreen-details #detailsView,
-      body.navigator-fullscreen.fullscreen-details .panel-content {
-        min-height:0;
-        overflow:auto;
-        border-radius:0;
-      }
-    }
-
   </style>
 </head>
 
@@ -1640,25 +1508,6 @@
         </div>
       </div>
 
-      <button
-        class="fullscreen-toggle"
-        id="fullscreenToggle"
-        type="button"
-        aria-label="Navigator im Vollbild öffnen"
-        aria-pressed="false"
-        title="Vollbild"
-      >
-        <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/>
-        </svg>
-        <svg class="fullscreen-exit-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 3v6H3M15 3v6h6M21 15h-6v6M3 15h6v6"/>
-        </svg>
-      </button>
-
-
-
-      
       <div class="zoom-controls" id="zoomIndicator" aria-live="polite">
         <div class="zoom-track"><span id="zoomProgress"></span></div>
         <span id="zoomValue">1×</span>
@@ -4254,8 +4103,6 @@
        ELEMENTS
     ========================================================= */
 
-    const app = document.querySelector(".app");
-    const viewerArea = document.querySelector(".viewer-area");
     const wrapper = document.getElementById("viewerCanvasWrapper");
     const orbitImage = document.getElementById("orbitImage");
     const mobileBlurImage = document.getElementById("mobileBlurImage");
@@ -4274,7 +4121,6 @@
     const zoomIndicator = document.getElementById("zoomIndicator");
     const zoomProgress = document.getElementById("zoomProgress");
     const zoomValue = document.getElementById("zoomValue");
-    const fullscreenToggle = document.getElementById("fullscreenToggle");
 
     const availabilityToggle = document.getElementById("availabilityToggle");
     const sortBy = document.getElementById("sortBy");
@@ -4295,94 +4141,6 @@
 
     const sidePanel = document.getElementById("sidePanel");
     const panelClose = document.getElementById("panelClose");
-
-    function getFullscreenElement() {
-      return document.fullscreenElement || document.webkitFullscreenElement || null;
-    }
-
-    function refreshNavigatorLayout() {
-      requestAnimationFrame(() => {
-        updateSideFillers();
-        updateFacadeGrid();
-      });
-    }
-
-    function setNavigatorFullscreenState(active) {
-      document.body.classList.toggle("navigator-fullscreen", active);
-      if (!active) document.body.classList.remove("fullscreen-details");
-
-      fullscreenToggle.setAttribute("aria-pressed", String(active));
-      fullscreenToggle.setAttribute(
-        "aria-label",
-        active ? "Vollbild schließen" : "Navigator im Vollbild öffnen"
-      );
-      fullscreenToggle.title = active ? "Vollbild schließen" : "Vollbild";
-
-      if (!active) closeDetailsPanel();
-      refreshNavigatorLayout();
-    }
-
-    async function toggleNavigatorFullscreen() {
-      const active = document.body.classList.contains("navigator-fullscreen");
-
-      if (active) {
-        const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
-        if (getFullscreenElement() && exitFullscreen) {
-          try {
-            await exitFullscreen.call(document);
-          } catch (error) {
-            console.warn("Browser-Vollbild konnte nicht geschlossen werden:", error);
-          }
-        }
-        setNavigatorFullscreenState(false);
-        return;
-      }
-
-      closeDetailsPanel();
-      setNavigatorFullscreenState(true);
-
-      const requestFullscreen = app.requestFullscreen || app.webkitRequestFullscreen;
-      if (requestFullscreen) {
-        try {
-          await requestFullscreen.call(app);
-        } catch (error) {
-          // iOS/Wix may reject the native API. The CSS fullscreen fallback remains active.
-          console.warn("Browser-Vollbild nicht verfügbar; CSS-Vollbild wird verwendet:", error);
-        }
-      }
-    }
-
-    fullscreenToggle.addEventListener("click", event => {
-      event.stopPropagation();
-      toggleNavigatorFullscreen();
-    });
-
-    function syncNativeFullscreenState() {
-      if (!getFullscreenElement() && document.body.classList.contains("navigator-fullscreen")) {
-        setNavigatorFullscreenState(false);
-      }
-    }
-
-    document.addEventListener("fullscreenchange", syncNativeFullscreenState);
-    document.addEventListener("webkitfullscreenchange", syncNativeFullscreenState);
-
-    viewerArea.addEventListener("transitionend", event => {
-      if (event.propertyName !== "right" && event.propertyName !== "height") return;
-
-      updateSideFillers();
-      updateFacadeGrid();
-
-      if (focusedApartmentId) {
-        const focusedTopNumber = Number(focusedApartmentId.match(/\d+/)?.[0]);
-        const focusedApartment = getApartmentByTopNumber(focusedTopNumber);
-        focusApartmentInNavigator(focusedApartment, {
-          targetZoom: zoomLevel,
-          allowFrameChange: false,
-          rotationStep: apartmentFocusRotationStep,
-          fallbackToCenteredZoom: true
-        });
-      }
-    });
 
     /* =========================================================
        PRELOAD
@@ -4457,7 +4215,6 @@
     let zoomOriginX = null;
     let zoomOriginY = null;
     let focusedApartmentId = null;
-    let apartmentFocusRotationStep = 0;
     let zoomIndicatorTimer = null;
 
     function applyZoom() {
@@ -4479,7 +4236,6 @@
         shape.classList.remove("focus-selected");
       });
       focusedApartmentId = null;
-      apartmentFocusRotationStep = 0;
       zoomLevel = 1;
       zoomTranslateX = 0;
       zoomTranslateY = 0;
@@ -4495,11 +4251,8 @@
       );
 
       if (zoomLevel === MIN_ZOOM) {
-        focusedApartmentId = null;
-        zoomTranslateX = 0;
-        zoomTranslateY = 0;
-        zoomOriginX = null;
-        zoomOriginY = null;
+        resetApartmentFocus();
+        return;
       }
 
       applyZoom();
@@ -4553,7 +4306,6 @@
     function focusApartmentInNavigator(apartment, options = {}) {
       const targetZoom = options.targetZoom ?? APARTMENT_FOCUS_ZOOM;
       const allowFrameChange = options.allowFrameChange !== false;
-      const rotationStep = options.rotationStep ?? 0;
       const fallbackToCenteredZoom = options.fallbackToCenteredZoom === true;
 
       // First remove a previous focus without animation so the new SVG bounds
@@ -4587,7 +4339,6 @@
           zoomOriginX = null;
           zoomOriginY = null;
           focusedApartmentId = apartment.id;
-          apartmentFocusRotationStep = rotationStep;
           applyZoom();
         }
 
@@ -4605,7 +4356,6 @@
       zoomTranslateX = wrapperRect.width / 2 - apartmentCenterX;
       zoomTranslateY = wrapperRect.height / 2 - apartmentCenterY;
       focusedApartmentId = apartment.id;
-      apartmentFocusRotationStep = rotationStep;
       shape.classList.add("focus-selected");
 
       orbitImage.style.removeProperty("transition");
@@ -4640,7 +4390,6 @@
     function setFrame(index) {
       const previousFrame = currentFrame;
       const previousFocusedApartmentId = focusedApartmentId;
-      const previousRotationStep = apartmentFocusRotationStep;
       currentFrame = normalizeFrame(index);
       const frameChanged = currentFrame !== previousFrame;
 
@@ -4657,22 +4406,14 @@
       updateFacadeGrid();
 
       if (previousFocusedApartmentId && frameChanged) {
-        const nextRotationStep = Math.min(previousRotationStep + 1, 3);
+        const focusedTopNumber = Number(previousFocusedApartmentId.match(/\d+/)?.[0]);
+        const focusedApartment = getApartmentByTopNumber(focusedTopNumber);
 
-        if (nextRotationStep < 3) {
-          const focusedTopNumber = Number(previousFocusedApartmentId.match(/\d+/)?.[0]);
-          const focusedApartment = getApartmentByTopNumber(focusedTopNumber);
-          const nextZoom = nextRotationStep === 1 ? 1.2 : 1.1;
-
-          focusApartmentInNavigator(focusedApartment, {
-            targetZoom: nextZoom,
-            allowFrameChange: false,
-            rotationStep: nextRotationStep,
-            fallbackToCenteredZoom: true
-          });
-        } else {
-          resetApartmentFocus();
-        }
+        focusApartmentInNavigator(focusedApartment, {
+          targetZoom: APARTMENT_FOCUS_ZOOM,
+          allowFrameChange: false,
+          fallbackToCenteredZoom: true
+        });
       } else {
         applyZoom();
       }
@@ -5556,19 +5297,12 @@
     function openDetailsPanel() {
       finderView.classList.remove("is-active");
       detailsView.classList.add("is-active");
-
-      if (document.body.classList.contains("navigator-fullscreen")) {
-        document.body.classList.add("fullscreen-details");
-        refreshNavigatorLayout();
-      }
     }
 
     function closeDetailsPanel() {
       detailsView.classList.remove("is-active");
       finderView.classList.add("is-active");
-      document.body.classList.remove("fullscreen-details");
       resetApartmentFocus();
-      if (document.body.classList.contains("navigator-fullscreen")) refreshNavigatorLayout();
     }
 
     function syncMobileSections(firstRun = false) {
