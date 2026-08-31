@@ -3151,7 +3151,7 @@
       upgradedPathArea("Top 41", "M1482 1182L1274 999L1433 775L1471 763L1495 781L1756 704L1765 709L1786 704L1798 714L1825 751L1842 746L1945 800V811L1951 817L1945 944L1973 987L1482 1182Z", 41),
       upgradedPathArea("Top 42", "M2236 581L2403 814L2041 957L2046 759L1871 672L2215 569L2236 581Z", 42),
       upgradedPathArea("Top 43", "M2697 695L2406 813L2236 579L2218 568L2498 482L2508 487H2522L2534 493L2557 521L2578 514L2681 551L2690 563L2673 665L2697 695Z", 43),
-      upgradedPathArea("Top 46", "M2330 488L2289 474L2283 547L2330 530V488Z", 46),
+      upgradedPathArea("Top 40", "M2330 488L2289 474L2283 547L2330 530V488Z", 40),
       upgradedPathArea("Top 44", "M2972 587L2743 676L2759 518L2579 460L2696 427H2738L2972 587Z", 44),
       upgradedPathArea("Top 48", "M2291 466L2375 329L2396 324L2736 427H2692L2579 458L2488 422L2433 437L2403 427L2330 447V479L2291 466Z", 48)
     ];
@@ -3651,10 +3651,21 @@
 
     // Bild 16: vollständige Maske aus 16.svg.
     FRAME_GRIDS[16] = [
-      upgradedQuadArea("Schmale Seitenfassade", [
+      {
+        ...upgradedQuadArea("Seitliche Fassade", [
         { x:868, y:776 }, { x:1124, y:1186 },
         { x:1199, y:1763 }, { x:961, y:1271 }
-      ], 4, 1, [[34], [24], [14], [4]]),
+        ], 4, 3, [
+          [34, 38, 40],
+          [24, 28, 30],
+          [14, 18, 20],
+          [4, 8, 10]
+        ]),
+        columnFractionsTop:    [0, 0.333, 0.667, 1],
+        columnFractionsBottom: [0, 0.333, 0.667, 1],
+        rowFractionsLeft:      [0, 0.25, 0.50, 0.75, 1],
+        rowFractionsRight:     [0, 0.25, 0.50, 0.75, 1]
+      },
       ...mappedSvgAreas([
         ["Top 45", "M2902 574L2571 433L2421 460L2473 482V516L2540 549L2534 667L2609 651L2760 728L2908 584L2902 574Z", 45],
         ["Top 41", "M2393 407L2314 418L2385 447H2399L2416 460L2484 447L2393 407Z", 41],
@@ -3958,6 +3969,7 @@
       ["Top 42", "M1801 759L1528 653L1550 628L1543 541L1536 534L1550 525L1670 497L1699 504L1735 475L2019 559L1801 759Z", 42],
       ["Top 41", "M1553 413L1691 451L1466 494L1478 639L1256 554L1534 413H1553Z", 41],
       ["Top 45", "M1940 340L1564 415L1683 445L1807 420L1871 436L1899 428L1968 445V480L2035 464L1959 345L1940 340Z", 45],
+      ["Top 39", "M1969 533V486L2039 470V549L1969 533Z", 39],
       ["Top 33", "M1807 871L1802 764L2167 910V1028L1910 922L1842 945L1732 890L1807 871Z", 33],
       ["Top 23", "M2165 1148L1914 1034L1854 1056L1747 1004L1818 978L1813 932L1848 946L1908 922L2165 1028V1148Z", 23],
       ["Top 13", "M2109 1229L1918 1141L1857 1165L1750 1109L1824 1077L1819 1042L1852 1056L1913 1034L2162 1147V1203L2109 1229Z", 13],
@@ -4408,9 +4420,9 @@
       { shot: 24, tops: [4, 14, 24, 34, 44] },
       { shot: 7,  tops: [5, 15, 25, 35] },
       { shot: 14, tops: [6, 16, 26, 36, 46, 7, 17, 27, 37, 47] },
-      { shot: 19, tops: [8, 18, 28, 38, 48] },
+      { shot: 19, tops: [48] },
       { shot: 9,  tops: [9, 19, 29, 39, 45] },
-      { shot: 20, tops: [10, 20, 30, 40] }
+      { shot: 20, tops: [8, 18, 28, 38, 10, 20, 30, 40] }
     ];
 
     const APARTMENT_TARGET_SHOTS = new Map(
@@ -4423,8 +4435,27 @@
     let smoothShotToken = 0;
     const AUTO_ROTATION_FRAME_DELAY = 65;
 
-    function getApartmentTargetFrame(apartment) {
+    function getApartmentTargetFrame(apartment, selectionContext = {}) {
       const topNumber = getApartmentTopNumber(apartment);
+      const sourceShot = selectionContext.sourceShot || currentFrame + 1;
+      const configName = selectionContext.configName || "";
+
+      if ([10, 20, 30, 40].includes(topNumber)) {
+        if (sourceShot >= 20 && sourceShot <= 25) return 18 - 1;
+        if (sourceShot >= 4 && sourceShot <= 14) return 11 - 1;
+
+        if (sourceShot >= 15 && sourceShot <= 19) {
+          const clickedSideFacade = /Seit.*Fassade/i.test(configName);
+          if (clickedSideFacade) return 18 - 1;
+          if (topNumber === 40 && configName) return 11 - 1;
+        }
+      }
+
+      if ([9, 19, 29, 39].includes(topNumber)) {
+        if (sourceShot >= 3 && sourceShot <= 12) return 9 - 1;
+        if (sourceShot >= 13 && sourceShot <= 24) return 16 - 1;
+      }
+
       const shotNumber = APARTMENT_TARGET_SHOTS.get(topNumber);
       return shotNumber ? shotNumber - 1 : null;
     }
@@ -4696,10 +4727,14 @@
       }
 
       if (!wasDrag && pendingApartmentFromGrid) {
-        const apartmentToOpen = pendingApartmentFromGrid;
+        const pendingSelection = pendingApartmentFromGrid;
         pendingApartmentFromGrid = null;
         suppressNextApartmentClick = true;
-        selectApartment(apartmentToOpen, lastApartmentPointerPosition);
+        selectApartment(
+          pendingSelection.apartment,
+          lastApartmentPointerPosition,
+          pendingSelection.selectionContext
+        );
       } else {
         pendingApartmentFromGrid = null;
       }
@@ -4983,7 +5018,10 @@
           the first apartment named in the Figma layer. All referenced
           apartments still participate in the linked hover.
         */
-        pendingApartmentFromGrid = primaryApartment;
+        pendingApartmentFromGrid = {
+          apartment: primaryApartment,
+          selectionContext: { configName, sourceShot: currentFrame + 1 }
+        };
         lastApartmentPointerPosition = { x: event.clientX, y: event.clientY };
       });
 
@@ -4995,7 +5033,11 @@
           return;
         }
 
-        selectApartment(primaryApartment, { x: event.clientX, y: event.clientY });
+        selectApartment(
+          primaryApartment,
+          { x: event.clientX, y: event.clientY },
+          { configName, sourceShot: currentFrame + 1 }
+        );
       });
     }
 
@@ -5452,7 +5494,7 @@
       detailsCard.classList.remove("is-hidden");
     }
 
-    function selectApartment(apartment, pointerPosition = null) {
+    function selectApartment(apartment, pointerPosition = null, selectionContext = {}) {
       selectedApartmentId = apartment.id;
       populateFullDetails(apartment);
 
@@ -5464,7 +5506,7 @@
 
       openDetailsPanel();
 
-      const targetFrame = getApartmentTargetFrame(apartment);
+      const targetFrame = getApartmentTargetFrame(apartment, selectionContext);
       if (targetFrame !== null) {
         setFrameSmooth(targetFrame);
       } else {
