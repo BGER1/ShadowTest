@@ -1477,6 +1477,44 @@
       }
     }
 
+    @media (max-width:900px) and (orientation:portrait) {
+      .viewer-area {
+        width:100dvw;
+        height:100dvw;
+        min-height:0;
+        aspect-ratio:1 / 1;
+      }
+
+      #orbitImage {
+        inset:auto 0;
+        top:12.5%;
+        width:100%;
+        height:75%;
+        object-fit:cover;
+        object-position:center;
+      }
+    }
+
+    @media (max-width:900px) and (orientation:landscape) {
+      .viewer-area {
+        width:100dvw;
+        height:100dvh;
+        min-height:0;
+      }
+
+      .mobile-blur-bg {
+        display:none !important;
+      }
+
+      #orbitImage {
+        inset:0;
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        object-position:center;
+      }
+    }
+
   </style>
 </head>
 
@@ -4797,7 +4835,7 @@
     };
 
     function getInteriorImagePath(letter) {
-      return `assets/interiors/${letter}.webp`;
+      return `interiors/${letter}.png`;
     }
 
     function getInteriorGallery(topNumber) {
@@ -4816,7 +4854,7 @@
     }
 
     function getFloorplanPath(topNumber) {
-      return `assets/floorplans/top-${String(topNumber).padStart(2, "0")}.webp`;
+      return `floorplans/${topNumber}.png`;
     }
 
     function getFloorLabel(topNumber) {
@@ -5139,13 +5177,26 @@
       let shownWidth, shownHeight, imageLeft, imageTop;
 
       const coverImage = window.matchMedia("(min-width: 901px)").matches;
+      const portraitMobile = window.matchMedia(
+        "(max-width: 900px) and (orientation: portrait)"
+      ).matches;
+      const landscapeMobile = window.matchMedia(
+        "(max-width: 900px) and (orientation: landscape)"
+      ).matches;
 
-      if (coverImage && viewerAspect > imageAspect) {
+      if (portraitMobile) {
+        // Portrait mobile: a sharp 4:3 window centered inside a square viewer.
+        // The 16:9 source is cropped equally on the left and right.
+        shownHeight = viewerWidth * 0.75;
+        shownWidth = shownHeight * imageAspect;
+        imageLeft = (viewerWidth - shownWidth) / 2;
+        imageTop = (viewerHeight - shownHeight) / 2;
+      } else if ((coverImage || landscapeMobile) && viewerAspect > imageAspect) {
         shownWidth = viewerWidth;
         shownHeight = shownWidth / imageAspect;
         imageLeft = 0;
         imageTop = (viewerHeight - shownHeight) / 2;
-      } else if (coverImage) {
+      } else if (coverImage || landscapeMobile) {
         shownHeight = viewerHeight;
         shownWidth = shownHeight * imageAspect;
         imageLeft = (viewerWidth - shownWidth) / 2;
