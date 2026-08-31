@@ -199,6 +199,12 @@
       filter: none;
     }
 
+    .facade-grid-area polygon.apartment-selected,
+    .facade-grid-area path.apartment-selected {
+      fill: rgba(255,255,255,0.82);
+      filter: drop-shadow(0 0 10px rgba(255,255,255,1));
+    }
+
     /* =========================================================
        DRAG HINT
     ========================================================= */
@@ -4419,9 +4425,11 @@
       { shot: 26, tops: [3, 13, 23, 33, 43] },
       { shot: 24, tops: [4, 14, 24, 34, 44] },
       { shot: 7,  tops: [5, 15, 25, 35] },
-      { shot: 14, tops: [6, 16, 26, 36, 46, 7, 17, 27, 37, 47] },
-      { shot: 19, tops: [48] },
-      { shot: 9,  tops: [9, 19, 29, 39, 45] },
+      { shot: 13, tops: [6, 16, 26, 36, 46] },
+      { shot: 14, tops: [7, 17, 27, 37, 47] },
+      { shot: 17, tops: [48] },
+      { shot: 11, tops: [45] },
+      { shot: 9,  tops: [9, 19, 29, 39] },
       { shot: 20, tops: [8, 18, 28, 38, 10, 20, 30, 40] }
     ];
 
@@ -4439,6 +4447,10 @@
       const topNumber = getApartmentTopNumber(apartment);
       const sourceShot = selectionContext.sourceShot || currentFrame + 1;
       const configName = selectionContext.configName || "";
+
+      if ([5, 15, 25, 35].includes(topNumber)) {
+        if (sourceShot >= 12 && sourceShot <= 18) return 16 - 1;
+      }
 
       if ([10, 20, 30, 40].includes(topNumber)) {
         if (sourceShot >= 20 && sourceShot <= 25) return 18 - 1;
@@ -5166,6 +5178,7 @@
 
       facadeGrid.classList.add("is-visible");
       updateGridFilterHighlights();
+      updateSelectedApartmentHighlight();
     }
 
     /* =========================================================
@@ -5330,6 +5343,16 @@
       });
     }
 
+    function updateSelectedApartmentHighlight() {
+      facadeGrid.querySelectorAll("[data-apartment-ids]").forEach(shape => {
+        const ids = shape.dataset.apartmentIds.split(" ");
+        shape.classList.toggle(
+          "apartment-selected",
+          Boolean(selectedApartmentId) && ids.includes(selectedApartmentId)
+        );
+      });
+    }
+
     function openApartmentListOnMobile() {
       if (!window.matchMedia("(max-width: 900px)").matches) return;
       const section = document.querySelector('[data-section="apartments"]');
@@ -5427,7 +5450,10 @@
     function closeDetailsPanel() {
       detailsView.classList.remove("is-active");
       finderView.classList.add("is-active");
+      selectedApartmentId = null;
+      updateSelectedApartmentHighlight();
       resetApartmentFocus();
+      renderApartmentResults();
     }
 
     function syncMobileSections(firstRun = false) {
@@ -5496,6 +5522,7 @@
 
     function selectApartment(apartment, pointerPosition = null, selectionContext = {}) {
       selectedApartmentId = apartment.id;
+      updateSelectedApartmentHighlight();
       populateFullDetails(apartment);
 
       if (window.matchMedia("(max-width: 900px)").matches) {
