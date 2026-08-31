@@ -610,12 +610,12 @@
       align-items: center;
       justify-content: space-between;
       gap: 15px;
-      margin-bottom: 22px;
+      margin-bottom: 16px;
     }
 
     .details-title {
       font-size: 24px;
-      font-weight: 700;
+      font-weight: 500;
     }
 
     .badge {
@@ -645,20 +645,21 @@
     .details-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 18px 12px;
+      gap: 10px 12px;
     }
 
     .detail-label {
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       color: #777;
       font-size: 10px;
+      font-weight: 300;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .detail-value {
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 300;
     }
 
     .document-list {
@@ -1264,6 +1265,28 @@
       font-family:Arial,Helvetica,sans-serif;
       font-weight:400;
     }
+
+    /* Wohnungsdetails use the same typography as the finder */
+    #detailsView {
+      color:var(--finder-ink);
+      font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif;
+      font-weight:300;
+    }
+    #detailsView .panel-header-title,
+    #detailsView .details-title {
+      font-family:'Fahkwang',Georgia,serif;
+      font-weight:500;
+    }
+    #detailsView .panel-header-title { font-size:17px; }
+    #detailsView .panel-close,
+    #detailsView .badge,
+    #detailsView .detail-label,
+    #detailsView .detail-value,
+    #detailsView .document-card {
+      font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif;
+    }
+    #detailsView .panel-close,
+    #detailsView .badge { font-weight:300; }
 
     @media (max-width:900px) {
       .panel { padding:10px; background:#ebe8df; }
