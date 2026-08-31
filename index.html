@@ -661,27 +661,82 @@
       font-weight: 600;
     }
 
-    .plan-wrap {
-      margin-top: 28px;
+    .document-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
     }
 
-    .details-plan {
-      display: block;
+    .document-card {
       width: 100%;
-      height: auto;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 13px;
+      border: 1px solid #deddd9;
+      border-radius: 13px;
+      background: #faf9f6;
+      color: #242320;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .details-plan.is-hidden {
-      display: none;
+    .document-card:hover {
+      border-color: #c7c5bf;
+      background: #f4f2ed;
     }
 
-    #detailsPlanEmpty {
-      margin-top: 10px;
-      color: #888;
+    .document-card:active {
+      transform: scale(0.985);
+    }
+
+    .document-card:focus-visible {
+      outline: 2px solid #8c765d;
+      outline-offset: 2px;
+    }
+
+    .document-type {
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      height: 44px;
+      border-radius: 9px;
+      background: #ded7cd;
+      color: #554a3e;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+    }
+
+    .document-copy {
+      min-width: 0;
+      flex: 1;
+      display: grid;
+      gap: 3px;
+    }
+
+    .document-title {
+      overflow: hidden;
       font-size: 13px;
+      font-weight: 650;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .document-meta {
+      color: #817d75;
+      font-size: 10px;
+      letter-spacing: 0.2px;
+    }
+
+    .document-action {
+      flex: 0 0 auto;
+      color: #6d665d;
+      font-size: 19px;
+      line-height: 1;
     }
 
     .details-gallery {
@@ -1682,18 +1737,24 @@
 
           <div class="details-gallery" id="detailsGallery" aria-label="Innenansichten"></div>
 
-          <div class="plan-wrap">
-            <div class="detail-label">Grundriss</div>
+          <div class="document-list" aria-label="Dokumente">
+            <button class="document-card" id="floorplanDocument" type="button">
+              <span class="document-type" aria-hidden="true">PDF</span>
+              <span class="document-copy">
+                <span class="document-title" id="floorplanDocumentTitle">Grundriss Top 1</span>
+                <span class="document-meta">PDF-Dokument</span>
+              </span>
+              <span class="document-action" aria-hidden="true">&#8595;</span>
+            </button>
 
-            <img
-              id="detailsPlan"
-              class="details-plan is-hidden"
-              alt="Grundriss"
-            >
-
-            <div id="detailsPlanEmpty">
-              Kein Grundriss hinterlegt.
-            </div>
+            <button class="document-card" id="energyDocument" type="button">
+              <span class="document-type" aria-hidden="true">PDF</span>
+              <span class="document-copy">
+                <span class="document-title">Energieeffizienz</span>
+                <span class="document-meta">PDF-Dokument</span>
+              </span>
+              <span class="document-action" aria-hidden="true">&#8595;</span>
+            </button>
           </div>
 
         </div>
@@ -4853,10 +4914,6 @@
       return [living, bedroom, third].map(getInteriorImagePath);
     }
 
-    function getFloorplanPath(topNumber) {
-      return `floorplans/${topNumber}.png`;
-    }
-
     function getFloorLabel(topNumber) {
       if (topNumber <= 10) return "EG";
       if (topNumber <= 20) return "1. OG";
@@ -4880,7 +4937,6 @@
         rooms: String(2 + (col % 3)),
         orientation: ["Süd", "West", "Ost", "Süd-West"][col],
         outdoor: floor === "EG" ? "Terrasse" : "Balkon",
-        plan: getFloorplanPath(top),
         gallery: getInteriorGallery(top)
       };
     });
@@ -4953,7 +5009,6 @@
           rooms: "—",
           orientation: "—",
           outdoor: "—",
-          plan: getFloorplanPath(topNumber),
           gallery: getInteriorGallery(topNumber)
         };
       }
@@ -5498,11 +5553,21 @@
     const detailsGallery =
       document.getElementById("detailsGallery");
 
-    const detailsPlan =
-      document.getElementById("detailsPlan");
+    const floorplanDocument =
+      document.getElementById("floorplanDocument");
 
-    const detailsPlanEmpty =
-      document.getElementById("detailsPlanEmpty");
+    const floorplanDocumentTitle =
+      document.getElementById("floorplanDocumentTitle");
+
+    const energyDocument =
+      document.getElementById("energyDocument");
+
+    [floorplanDocument, energyDocument].forEach(documentButton => {
+      documentButton.addEventListener("click", event => {
+        event.preventDefault();
+        documentButton.blur();
+      });
+    });
 
     function openDetailsPanel() {
       finderView.classList.remove("is-active");
@@ -5569,15 +5634,7 @@
         detailsGallery.appendChild(image);
       });
 
-      if (apartment.plan) {
-        detailsPlan.src = apartment.plan;
-        detailsPlan.classList.remove("is-hidden");
-        detailsPlanEmpty.style.display = "none";
-      } else {
-        detailsPlan.src = "";
-        detailsPlan.classList.add("is-hidden");
-        detailsPlanEmpty.style.display = "block";
-      }
+      floorplanDocumentTitle.textContent = `Grundriss ${apartment.number}`;
 
       detailsCard.classList.remove("is-hidden");
     }
