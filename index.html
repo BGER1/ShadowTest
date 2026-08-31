@@ -534,9 +534,12 @@
         opacity 0.25s ease;
     }
 
-    #viewerCanvasWrapper.is-shot-switching {
-      opacity: 0.12;
+    #viewerCanvasWrapper.is-auto-rotating {
       pointer-events: none;
+    }
+
+    #viewerCanvasWrapper.is-auto-rotating #facadeGrid {
+      opacity: 0;
     }
 
     @media (min-width: 901px) {
@@ -952,6 +955,12 @@
       transform-origin: center center;
       transition: transform 0.46s cubic-bezier(.22,.8,.2,1);
       will-change: transform;
+    }
+
+    #facadeGrid {
+      transition:
+        transform 0.46s cubic-bezier(.22,.8,.2,1),
+        opacity 0.18s ease;
     }
 
     @media (max-width: 900px) {
@@ -4412,6 +4421,7 @@
 
     let smoothShotTimer = null;
     let smoothShotToken = 0;
+    const AUTO_ROTATION_FRAME_DELAY = 65;
 
     function getApartmentTargetFrame(apartment) {
       const topNumber = getApartmentTopNumber(apartment);
@@ -4426,27 +4436,45 @@
       window.clearTimeout(smoothShotTimer);
       resetApartmentFocus();
 
-      if (targetFrame === currentFrame) {
-        wrapper.classList.remove("is-shot-switching");
+      const forwardDistance = normalizeFrame(targetFrame - currentFrame);
+      const backwardDistance = forwardDistance - TOTAL_FRAMES;
+      const frameDelta = (
+        Math.abs(forwardDistance) <= Math.abs(backwardDistance)
+      ) ? forwardDistance : backwardDistance;
+
+      if (frameDelta === 0) {
+        wrapper.classList.remove("is-auto-rotating");
         setFrame(targetFrame);
         return;
       }
 
-      wrapper.classList.add("is-shot-switching");
+      const direction = Math.sign(frameDelta);
+      let remainingSteps = Math.abs(frameDelta);
+      wrapper.classList.add("is-auto-rotating");
 
-      smoothShotTimer = window.setTimeout(() => {
+      function advanceOrbitFrame() {
         if (transitionToken !== smoothShotToken) return;
 
-        setFrame(targetFrame);
+        setFrame(currentFrame + direction);
+        remainingSteps -= 1;
 
+        if (remainingSteps > 0) {
+          smoothShotTimer = window.setTimeout(
+            advanceOrbitFrame,
+            AUTO_ROTATION_FRAME_DELAY
+          );
+          return;
+        }
+
+        smoothShotTimer = null;
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (transitionToken === smoothShotToken) {
-              wrapper.classList.remove("is-shot-switching");
-            }
-          });
+          if (transitionToken === smoothShotToken) {
+            wrapper.classList.remove("is-auto-rotating");
+          }
         });
-      }, 220);
+      }
+
+      smoothShotTimer = window.setTimeout(advanceOrbitFrame, 30);
     }
 
     function setFrame(index) {
