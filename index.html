@@ -1493,17 +1493,23 @@
       html,
       body {
         width:100%;
+        height:auto !important;
+        min-height:0 !important;
         max-width:none;
         margin:0 !important;
         padding:0 !important;
         overflow-x:hidden;
+        overflow-y:visible;
       }
 
       .app {
         width:100dvw;
+        height:auto !important;
+        min-height:0 !important;
         max-width:none;
         margin:0;
         padding:0;
+        overflow:visible;
       }
 
       .viewer-area,
@@ -1550,8 +1556,24 @@
       }
 
       .panel {
+        position:relative;
+        inset:auto;
+        height:auto;
+        min-height:0;
         padding-right:0;
         padding-left:0;
+        overflow:visible;
+      }
+
+      .panel-view,
+      #finderView,
+      .panel-content,
+      .finder,
+      .finder-results {
+        height:auto;
+        min-height:0;
+        max-height:none;
+        overflow:visible;
       }
     }
 
@@ -1576,7 +1598,7 @@
     @media (max-width:900px) and (orientation:landscape) {
       .viewer-area {
         width:100dvw;
-        height:100dvh;
+        height:56.25dvw;
         min-height:0;
       }
 
@@ -5685,6 +5707,44 @@
       renderApartmentResults();
     }
 
+    /* Keep an embedded mobile navigator exactly as tall as its visible content. */
+    const appRoot = document.querySelector(".app");
+    const navigatorPanel = document.querySelector(".panel");
+    const mobileEmbedQuery = window.matchMedia("(max-width: 900px)");
+    let embedHeightFrame = 0;
+    let lastReportedEmbedHeight = 0;
+
+    function reportEmbedHeight() {
+      cancelAnimationFrame(embedHeightFrame);
+      embedHeightFrame = requestAnimationFrame(() => {
+        if (!mobileEmbedQuery.matches || !appRoot) return;
+
+        const height = Math.ceil(appRoot.getBoundingClientRect().height);
+        if (!height || height === lastReportedEmbedHeight) return;
+
+        lastReportedEmbedHeight = height;
+        window.parent.postMessage({
+          source: "immowalker-wohnungsnavigator",
+          type: "content-height",
+          height
+        }, "*");
+      });
+    }
+
+    if ("ResizeObserver" in window && appRoot) {
+      const embedHeightObserver = new ResizeObserver(reportEmbedHeight);
+      embedHeightObserver.observe(appRoot);
+      if (navigatorPanel) embedHeightObserver.observe(navigatorPanel);
+    }
+
+    window.addEventListener("load", reportEmbedHeight);
+    window.addEventListener("resize", reportEmbedHeight);
+    window.addEventListener("orientationchange", reportEmbedHeight);
+    document.addEventListener("load", event => {
+      if (event.target instanceof HTMLImageElement) reportEmbedHeight();
+    }, true);
+    document.fonts?.ready.then(reportEmbedHeight);
+
     /* =========================================================
        INIT
     ========================================================= */
@@ -5701,6 +5761,7 @@
     updateCompass();
     updateSideFillers();
     updateFacadeGrid();
+    reportEmbedHeight();
   </script>
 </body>
 </html>
