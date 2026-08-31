@@ -534,6 +534,11 @@
         opacity 0.25s ease;
     }
 
+    #viewerCanvasWrapper.is-shot-switching {
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
     @media (min-width: 901px) {
       body.panel-open #viewerCanvasWrapper {
         transform: translateX(-150px);
@@ -4387,6 +4392,63 @@
       return ((index % TOTAL_FRAMES) + TOTAL_FRAMES) % TOTAL_FRAMES;
     }
 
+    const APARTMENT_SHOT_GROUPS = [
+      { shot: 4,  tops: [1, 11, 21, 31, 41] },
+      { shot: 2,  tops: [2, 12, 22, 32, 42] },
+      { shot: 26, tops: [3, 13, 23, 33, 43] },
+      { shot: 24, tops: [4, 14, 24, 34, 44] },
+      { shot: 7,  tops: [5, 15, 25, 35] },
+      { shot: 14, tops: [6, 16, 26, 36, 46, 7, 17, 27, 37, 47] },
+      { shot: 19, tops: [8, 18, 28, 38, 48] },
+      { shot: 9,  tops: [9, 19, 29, 39, 45] },
+      { shot: 20, tops: [10, 20, 30, 40] }
+    ];
+
+    const APARTMENT_TARGET_SHOTS = new Map(
+      APARTMENT_SHOT_GROUPS.flatMap(group => (
+        group.tops.map(topNumber => [topNumber, group.shot])
+      ))
+    );
+
+    let smoothShotTimer = null;
+    let smoothShotToken = 0;
+
+    function getApartmentTargetFrame(apartment) {
+      const topNumber = getApartmentTopNumber(apartment);
+      const shotNumber = APARTMENT_TARGET_SHOTS.get(topNumber);
+      return shotNumber ? shotNumber - 1 : null;
+    }
+
+    function setFrameSmooth(index) {
+      const targetFrame = normalizeFrame(index);
+      const transitionToken = ++smoothShotToken;
+
+      window.clearTimeout(smoothShotTimer);
+      resetApartmentFocus();
+
+      if (targetFrame === currentFrame) {
+        wrapper.classList.remove("is-shot-switching");
+        setFrame(targetFrame);
+        return;
+      }
+
+      wrapper.classList.add("is-shot-switching");
+
+      smoothShotTimer = window.setTimeout(() => {
+        if (transitionToken !== smoothShotToken) return;
+
+        setFrame(targetFrame);
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (transitionToken === smoothShotToken) {
+              wrapper.classList.remove("is-shot-switching");
+            }
+          });
+        });
+      }, 220);
+    }
+
     function setFrame(index) {
       const previousFrame = currentFrame;
       const previousFocusedApartmentId = focusedApartmentId;
@@ -5374,9 +5436,12 @@
 
       openDetailsPanel();
 
-      requestAnimationFrame(() => {
-        focusApartmentInNavigator(apartment);
-      });
+      const targetFrame = getApartmentTargetFrame(apartment);
+      if (targetFrame !== null) {
+        setFrameSmooth(targetFrame);
+      } else {
+        resetApartmentFocus();
+      }
 
       renderApartmentResults();
     }
