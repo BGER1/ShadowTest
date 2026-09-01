@@ -4694,7 +4694,7 @@
       return shotNumber ? shotNumber - 1 : null;
     }
 
-    function setFrameSmooth(index) {
+    function setFrameSmooth(index, onComplete = null) {
       const targetFrame = normalizeFrame(index);
       const transitionToken = ++smoothShotToken;
 
@@ -4710,6 +4710,9 @@
       if (frameDelta === 0) {
         wrapper.classList.remove("is-auto-rotating");
         setFrame(targetFrame);
+        requestAnimationFrame(() => {
+          if (transitionToken === smoothShotToken) onComplete?.();
+        });
         return;
       }
 
@@ -4735,6 +4738,7 @@
         requestAnimationFrame(() => {
           if (transitionToken === smoothShotToken) {
             wrapper.classList.remove("is-auto-rotating");
+            onComplete?.();
           }
         });
       }
@@ -4764,6 +4768,15 @@
         resetApartmentFocus();
       } else {
         applyZoom();
+      }
+
+      if (
+        frameChanged &&
+        selectedApartmentId &&
+        window.matchMedia("(max-width: 900px)").matches &&
+        !wrapper.classList.contains("is-auto-rotating")
+      ) {
+        scheduleMobileTooltipAtSelectedApartment();
       }
     }
 
@@ -5205,24 +5218,66 @@
       apartmentTooltip.classList.remove("is-visible");
     }
 
-    function pinMobileApartmentTooltip(apartment, pointerPosition) {
+    let mobileTooltipAnchorFrame = 0;
+
+    function prepareMobileApartmentTooltip(apartment) {
+      fillApartmentTooltip(apartment, true);
+      apartmentTooltip.classList.add("mobile-pinned");
+      apartmentTooltip.classList.remove("is-visible");
+    }
+
+    function getVisibleApartmentBounds(apartmentId) {
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const selector = `[data-apartment-ids~="${apartmentId}"]`;
+      const clippedRects = [...facadeGrid.querySelectorAll(selector)]
+        .map(shape => shape.getBoundingClientRect())
+        .map(rect => ({
+          left: Math.max(rect.left, wrapperRect.left),
+          top: Math.max(rect.top, wrapperRect.top),
+          right: Math.min(rect.right, wrapperRect.right),
+          bottom: Math.min(rect.bottom, wrapperRect.bottom)
+        }))
+        .filter(rect => rect.right - rect.left > 1 && rect.bottom - rect.top > 1);
+
+      if (!clippedRects.length) return null;
+
+      return {
+        left: Math.min(...clippedRects.map(rect => rect.left)),
+        top: Math.min(...clippedRects.map(rect => rect.top)),
+        right: Math.max(...clippedRects.map(rect => rect.right)),
+        bottom: Math.max(...clippedRects.map(rect => rect.bottom))
+      };
+    }
+
+    function pinMobileApartmentTooltipToSelectedApartment(apartmentId) {
+      if (
+        selectedApartmentId !== apartmentId ||
+        !window.matchMedia("(max-width: 900px)").matches
+      ) {
+        return;
+      }
+
+      const apartment = apartments.find(item => item.id === apartmentId);
+      const bounds = getVisibleApartmentBounds(apartmentId);
+
+      if (!apartment || !bounds) {
+        apartmentTooltip.classList.remove("is-visible");
+        return;
+      }
+
       fillApartmentTooltip(apartment, true);
       apartmentTooltip.classList.add("is-visible", "mobile-pinned");
 
-      const fallback = {
-        x: Math.round(window.innerWidth / 2),
-        y: Math.round(window.innerHeight / 2)
-      };
-      const point = pointerPosition || fallback;
       const gap = 10;
       const width = apartmentTooltip.offsetWidth || 50;
       const height = apartmentTooltip.offsetHeight || 22;
 
-      let left = point.x + gap;
-      let top = point.y + gap;
+      let left = bounds.right + gap;
+      let top = ((bounds.top + bounds.bottom) / 2) - (height / 2);
 
-      if (left + width > window.innerWidth - 8) left = point.x - width - gap;
-      if (top + height > window.innerHeight - 8) top = point.y - height - gap;
+      if (left + width > window.innerWidth - 8) {
+        left = bounds.left - width - gap;
+      }
 
       left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
       top = Math.max(8, Math.min(top, window.innerHeight - height - 8));
@@ -5230,6 +5285,17 @@
       apartmentTooltip.style.setProperty("position", "fixed", "important");
       apartmentTooltip.style.setProperty("left", `${left}px`, "important");
       apartmentTooltip.style.setProperty("top", `${top}px`, "important");
+    }
+
+    function scheduleMobileTooltipAtSelectedApartment(apartmentId = selectedApartmentId) {
+      cancelAnimationFrame(mobileTooltipAnchorFrame);
+      if (!apartmentId) return;
+
+      mobileTooltipAnchorFrame = requestAnimationFrame(() => {
+        mobileTooltipAnchorFrame = requestAnimationFrame(() => {
+          pinMobileApartmentTooltipToSelectedApartment(apartmentId);
+        });
+      });
     }
 
     function attachApartmentInteraction(shape, apartmentRefs, configName) {
@@ -5752,6 +5818,7 @@
     }
 
     function closeDetailsPanel() {
+      cancelAnimationFrame(mobileTooltipAnchorFrame);
       detailsView.classList.remove("is-active");
       finderView.classList.add("is-active");
       apartmentTooltip.classList.remove("is-visible", "mobile-pinned");
@@ -5793,6 +5860,9 @@
     window.addEventListener("resize", () => {
       syncMobileSections(false);
       syncDetailsOverflow();
+      if (selectedApartmentId) {
+        scheduleMobileTooltipAtSelectedApartment();
+      }
     });
 
     panelClose.addEventListener("click", closeDetailsPanel);
@@ -5841,8 +5911,9 @@
       updateSelectedApartmentHighlight();
       populateFullDetails(apartment);
 
-      if (window.matchMedia("(max-width: 900px)").matches) {
-        pinMobileApartmentTooltip(apartment, pointerPosition);
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+      if (mobile) {
+        prepareMobileApartmentTooltip(apartment);
       } else {
         apartmentTooltip.classList.remove("mobile-pinned");
       }
@@ -5851,9 +5922,14 @@
 
       const targetFrame = getApartmentTargetFrame(apartment, selectionContext);
       if (targetFrame !== null) {
-        setFrameSmooth(targetFrame);
+        setFrameSmooth(targetFrame, () => {
+          if (mobile && selectedApartmentId === apartment.id) {
+            scheduleMobileTooltipAtSelectedApartment(apartment.id);
+          }
+        });
       } else {
         resetApartmentFocus();
+        if (mobile) scheduleMobileTooltipAtSelectedApartment(apartment.id);
       }
 
       renderApartmentResults();
