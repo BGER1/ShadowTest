@@ -1631,6 +1631,14 @@
         height: 30px;
         min-height: 30px;
       }
+
+      #detailsView .panel-content {
+        overflow-y: hidden;
+      }
+
+      #detailsView .panel-content.is-scrollable {
+        overflow-y: auto;
+      }
     }
 
     @media (max-width:900px) {
@@ -5150,6 +5158,16 @@
     }
 
     function showApartmentTooltip(apartment, event) {
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+
+      if (mobile) {
+        if (apartmentTooltip.classList.contains("mobile-pinned")) return;
+        fillApartmentTooltip(apartment, true);
+        apartmentTooltip.classList.add("is-visible");
+        moveApartmentTooltip(event);
+        return;
+      }
+
       fillApartmentTooltip(apartment);
       apartmentTooltip.classList.remove("mobile-pinned");
       apartmentTooltip.style.removeProperty("position");
@@ -5160,6 +5178,7 @@
     }
 
     function moveApartmentTooltip(event) {
+      if (apartmentTooltip.classList.contains("mobile-pinned")) return;
       const gap = 16;
       const width = apartmentTooltip.offsetWidth || 200;
       const height = apartmentTooltip.offsetHeight || 100;
@@ -5223,12 +5242,18 @@
       );
 
       shape.addEventListener("pointerenter", event => {
-        setApartmentGroupHover(apartmentIds, true);
+        const mobileSelectionIsPinned = (
+          window.matchMedia("(max-width: 900px)").matches &&
+          Boolean(selectedApartmentId)
+        );
+        if (mobileSelectionIsPinned) return;
+
+        setApartmentGroupHover([primaryApartment.id], true);
         showApartmentTooltip(primaryApartment, event);
       });
 
       shape.addEventListener("pointerleave", () => {
-        setApartmentGroupHover(apartmentIds, false);
+        setApartmentGroupHover([primaryApartment.id], false);
         hideApartmentTooltip();
       });
 
@@ -5242,7 +5267,7 @@
         */
         pendingApartmentFromGrid = {
           apartment: primaryApartment,
-          selectionContext: { configName, sourceShot: currentFrame + 1, shape }
+          selectionContext: { configName, sourceShot: currentFrame + 1 }
         };
         lastApartmentPointerPosition = { x: event.clientX, y: event.clientY };
       });
@@ -5258,7 +5283,7 @@
         selectApartment(
           primaryApartment,
           { x: event.clientX, y: event.clientY },
-          { configName, sourceShot: currentFrame + 1, shape }
+          { configName, sourceShot: currentFrame + 1 }
         );
       });
     }
@@ -5458,7 +5483,6 @@
     ========================================================= */
 
     let selectedApartmentId = null;
-    let selectedApartmentShape = null;
 
     let activeSortField = null;
     let activeSortDirection = 1;
@@ -5568,22 +5592,13 @@
     }
 
     function updateSelectedApartmentHighlight() {
-      facadeGrid.querySelectorAll(".apartment-selected").forEach(shape => {
-        shape.classList.remove("apartment-selected");
+      facadeGrid.querySelectorAll("[data-apartment-ids]").forEach(shape => {
+        const ids = shape.dataset.apartmentIds.split(" ");
+        shape.classList.toggle(
+          "apartment-selected",
+          Boolean(selectedApartmentId) && ids.includes(selectedApartmentId)
+        );
       });
-
-      if (!selectedApartmentId) return;
-
-      const preferredShapeIsVisible = (
-        selectedApartmentShape?.isConnected &&
-        selectedApartmentShape.dataset.apartmentIds?.split(" ").includes(selectedApartmentId)
-      );
-      const shapeToHighlight = preferredShapeIsVisible
-        ? selectedApartmentShape
-        : getVisibleApartmentShape(selectedApartmentId);
-
-      selectedApartmentShape = shapeToHighlight || null;
-      selectedApartmentShape?.classList.add("apartment-selected");
     }
 
     function openApartmentListOnMobile() {
@@ -5669,6 +5684,9 @@
     const detailsGallery =
       document.getElementById("detailsGallery");
 
+    const detailsPanelContent =
+      detailsView.querySelector(".panel-content");
+
     const floorplanDocument =
       document.getElementById("floorplanDocument");
 
@@ -5685,16 +5703,40 @@
       });
     });
 
+    let detailsOverflowFrame = 0;
+
+    function syncDetailsOverflow() {
+      cancelAnimationFrame(detailsOverflowFrame);
+      detailsOverflowFrame = requestAnimationFrame(() => {
+        if (window.matchMedia("(max-width: 900px)").matches) {
+          detailsPanelContent.classList.remove("is-scrollable");
+          return;
+        }
+
+        const hasRealOverflow = (
+          detailsPanelContent.scrollHeight > detailsPanelContent.clientHeight + 3
+        );
+        detailsPanelContent.classList.toggle("is-scrollable", hasRealOverflow);
+      });
+    }
+
+    if ("ResizeObserver" in window) {
+      const detailsOverflowObserver = new ResizeObserver(syncDetailsOverflow);
+      detailsOverflowObserver.observe(detailsPanelContent);
+      detailsOverflowObserver.observe(detailsCard);
+    }
+
     function openDetailsPanel() {
       finderView.classList.remove("is-active");
       detailsView.classList.add("is-active");
+      syncDetailsOverflow();
     }
 
     function closeDetailsPanel() {
       detailsView.classList.remove("is-active");
       finderView.classList.add("is-active");
+      apartmentTooltip.classList.remove("is-visible", "mobile-pinned");
       selectedApartmentId = null;
-      selectedApartmentShape = null;
       updateSelectedApartmentHighlight();
       resetApartmentFocus();
       renderApartmentResults();
@@ -5729,7 +5771,10 @@
       });
     });
 
-    window.addEventListener("resize", () => syncMobileSections(false));
+    window.addEventListener("resize", () => {
+      syncMobileSections(false);
+      syncDetailsOverflow();
+    });
 
     panelClose.addEventListener("click", closeDetailsPanel);
 
@@ -5759,17 +5804,18 @@
         image.src = src;
         image.alt = `${apartment.number} Innenansicht ${index + 1}`;
         image.loading = "lazy";
+        image.addEventListener("load", syncDetailsOverflow, { once: true });
         detailsGallery.appendChild(image);
       });
 
       floorplanDocumentTitle.textContent = `Grundriss ${apartment.number}`;
 
       detailsCard.classList.remove("is-hidden");
+      syncDetailsOverflow();
     }
 
     function selectApartment(apartment, pointerPosition = null, selectionContext = {}) {
       selectedApartmentId = apartment.id;
-      selectedApartmentShape = selectionContext.shape || null;
       facadeGrid.querySelectorAll(".group-hover").forEach(shape => {
         shape.classList.remove("group-hover");
       });
