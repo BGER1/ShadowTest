@@ -1677,6 +1677,20 @@
         line-height: 1;
         white-space: nowrap;
       }
+
+      /* A touch browser can keep :hover on the release target. While one
+         apartment is active, every glow except that apartment is suppressed. */
+      #facadeGrid.has-apartment-selection polygon:not(.apartment-selected),
+      #facadeGrid.has-apartment-selection path:not(.apartment-selected) {
+        fill: transparent !important;
+        filter: none !important;
+      }
+
+      #facadeGrid.has-apartment-selection polygon.apartment-selected,
+      #facadeGrid.has-apartment-selection path.apartment-selected {
+        fill: rgba(255,255,255,.82) !important;
+        filter: drop-shadow(0 0 10px rgba(255,255,255,1)) !important;
+      }
     }
 
   </style>
@@ -5592,6 +5606,11 @@
     }
 
     function updateSelectedApartmentHighlight() {
+      facadeGrid.classList.toggle(
+        "has-apartment-selection",
+        Boolean(selectedApartmentId)
+      );
+
       facadeGrid.querySelectorAll("[data-apartment-ids]").forEach(shape => {
         const ids = shape.dataset.apartmentIds.split(" ");
         shape.classList.toggle(
