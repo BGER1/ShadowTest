@@ -1621,6 +1621,56 @@
       }
     }
 
+    /* Final detail and mobile interaction refinements. */
+    @media (min-width:901px) {
+      #detailsView .panel-header {
+        padding: 11px 18px;
+      }
+
+      #detailsView .panel-close {
+        height: 30px;
+        min-height: 30px;
+      }
+    }
+
+    @media (max-width:900px) {
+      #detailsView .detail-label {
+        color: #625f58;
+        opacity: 1;
+        font-weight: 500;
+      }
+
+      #detailsView .detail-value {
+        color: #24271f;
+        opacity: 1;
+        font-weight: 500;
+      }
+
+      #detailsView .badge {
+        opacity: 1;
+        font-weight: 500;
+      }
+
+      .apartment-tooltip.mobile-pinned {
+        min-width: 0;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: rgba(20,20,20,.88);
+        box-shadow: 0 4px 12px rgba(0,0,0,.20);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        line-height: 1;
+      }
+
+      .apartment-tooltip.mobile-pinned .tooltip-title {
+        margin: 0;
+        font-size: 10px;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+      }
+    }
+
   </style>
 </head>
 
@@ -1701,7 +1751,7 @@
           <div class="availability-summary" id="availabilitySummary"></div>
         </div>
         <section class="finder" aria-label="Wohnungssuche">
-          <div class="section-block" data-section="filters">
+          <div class="section-block is-collapsed" data-section="filters">
             <button class="section-toggle" type="button" aria-expanded="true"><span class="section-title"><span class="section-icon">⌕</span> Filter</span><span class="section-chevron">⌃</span></button>
             <div class="section-content finder-controls"><div class="filter-fields">
               <label class="filter-field">Preis bis
@@ -5085,7 +5135,12 @@
       });
     }
 
-    function fillApartmentTooltip(apartment) {
+    function fillApartmentTooltip(apartment, compact = false) {
+      if (compact) {
+        apartmentTooltip.innerHTML = `<div class="tooltip-title">${apartment.number}</div>`;
+        return;
+      }
+
       const statusClass = getStatusClass(apartment.status).replace("status-", "");
       apartmentTooltip.innerHTML = `
         <div class="tooltip-head"><div class="tooltip-title">${apartment.number}</div><div class="tooltip-status ${statusClass}">${apartment.status}</div></div>
@@ -5118,7 +5173,7 @@
     }
 
     function pinMobileApartmentTooltip(apartment, pointerPosition) {
-      fillApartmentTooltip(apartment);
+      fillApartmentTooltip(apartment, true);
       apartmentTooltip.classList.add("is-visible", "mobile-pinned");
 
       const fallback = {
@@ -5126,9 +5181,9 @@
         y: Math.round(window.innerHeight / 2)
       };
       const point = pointerPosition || fallback;
-      const gap = 14;
-      const width = apartmentTooltip.offsetWidth || 175;
-      const height = apartmentTooltip.offsetHeight || 95;
+      const gap = 10;
+      const width = apartmentTooltip.offsetWidth || 50;
+      const height = apartmentTooltip.offsetHeight || 22;
 
       let left = point.x + gap;
       let top = point.y + gap;
@@ -5187,7 +5242,7 @@
         */
         pendingApartmentFromGrid = {
           apartment: primaryApartment,
-          selectionContext: { configName, sourceShot: currentFrame + 1 }
+          selectionContext: { configName, sourceShot: currentFrame + 1, shape }
         };
         lastApartmentPointerPosition = { x: event.clientX, y: event.clientY };
       });
@@ -5203,7 +5258,7 @@
         selectApartment(
           primaryApartment,
           { x: event.clientX, y: event.clientY },
-          { configName, sourceShot: currentFrame + 1 }
+          { configName, sourceShot: currentFrame + 1, shape }
         );
       });
     }
@@ -5403,6 +5458,7 @@
     ========================================================= */
 
     let selectedApartmentId = null;
+    let selectedApartmentShape = null;
 
     let activeSortField = null;
     let activeSortDirection = 1;
@@ -5512,13 +5568,22 @@
     }
 
     function updateSelectedApartmentHighlight() {
-      facadeGrid.querySelectorAll("[data-apartment-ids]").forEach(shape => {
-        const ids = shape.dataset.apartmentIds.split(" ");
-        shape.classList.toggle(
-          "apartment-selected",
-          Boolean(selectedApartmentId) && ids.includes(selectedApartmentId)
-        );
+      facadeGrid.querySelectorAll(".apartment-selected").forEach(shape => {
+        shape.classList.remove("apartment-selected");
       });
+
+      if (!selectedApartmentId) return;
+
+      const preferredShapeIsVisible = (
+        selectedApartmentShape?.isConnected &&
+        selectedApartmentShape.dataset.apartmentIds?.split(" ").includes(selectedApartmentId)
+      );
+      const shapeToHighlight = preferredShapeIsVisible
+        ? selectedApartmentShape
+        : getVisibleApartmentShape(selectedApartmentId);
+
+      selectedApartmentShape = shapeToHighlight || null;
+      selectedApartmentShape?.classList.add("apartment-selected");
     }
 
     function openApartmentListOnMobile() {
@@ -5629,17 +5694,29 @@
       detailsView.classList.remove("is-active");
       finderView.classList.add("is-active");
       selectedApartmentId = null;
+      selectedApartmentShape = null;
       updateSelectedApartmentHighlight();
       resetApartmentFocus();
       renderApartmentResults();
     }
 
+    let lastSectionLayoutMobile = null;
+
     function syncMobileSections(firstRun = false) {
       const mobile = window.matchMedia("(max-width: 900px)").matches;
+
+      if (firstRun || mobile !== lastSectionLayoutMobile) {
+        menuSections.forEach(section => {
+          if (mobile || section.dataset.section === "filters") {
+            section.classList.add("is-collapsed");
+          } else {
+            section.classList.remove("is-collapsed");
+          }
+        });
+      }
+
+      lastSectionLayoutMobile = mobile;
       menuSections.forEach(section => {
-        if (firstRun && mobile) {
-          section.classList.add("is-collapsed");
-        }
         const toggle = section.querySelector(".section-toggle");
         if (toggle) toggle.setAttribute("aria-expanded", String(!section.classList.contains("is-collapsed")));
       });
@@ -5692,6 +5769,10 @@
 
     function selectApartment(apartment, pointerPosition = null, selectionContext = {}) {
       selectedApartmentId = apartment.id;
+      selectedApartmentShape = selectionContext.shape || null;
+      facadeGrid.querySelectorAll(".group-hover").forEach(shape => {
+        shape.classList.remove("group-hover");
+      });
       updateSelectedApartmentHighlight();
       populateFullDetails(apartment);
 
