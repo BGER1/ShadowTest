@@ -176,22 +176,46 @@
       transition: fill 0.16s ease, stroke 0.16s ease, filter 0.16s ease;
     }
 
+    .facade-grid-area polygon.status-verfuegbar,
+    .facade-grid-area path.status-verfuegbar {
+      --apartment-fill: rgba(74,145,88,0.44);
+      --apartment-fill-soft: rgba(74,145,88,0.30);
+      --apartment-stroke: rgba(92,177,111,0.95);
+      --apartment-glow: rgba(67,164,91,0.72);
+    }
+
+    .facade-grid-area polygon.status-reserviert,
+    .facade-grid-area path.status-reserviert {
+      --apartment-fill: rgba(217,157,50,0.42);
+      --apartment-fill-soft: rgba(217,157,50,0.28);
+      --apartment-stroke: rgba(229,176,78,0.96);
+      --apartment-glow: rgba(217,157,50,0.70);
+    }
+
+    .facade-grid-area polygon.status-verkauft,
+    .facade-grid-area path.status-verkauft {
+      --apartment-fill: rgba(202,98,98,0.42);
+      --apartment-fill-soft: rgba(202,98,98,0.28);
+      --apartment-stroke: rgba(218,119,119,0.96);
+      --apartment-glow: rgba(202,98,98,0.68);
+    }
+
     .facade-grid-area polygon:hover,
     .facade-grid-area path:hover,
     .facade-grid-area polygon.group-hover,
     .facade-grid-area path.group-hover,
     .facade-grid-area polygon.focus-selected,
     .facade-grid-area path.focus-selected {
-      fill: rgba(255,255,255,0.72);
-      stroke: rgba(255,255,255,0.96);
+      fill: var(--apartment-fill, rgba(255,255,255,0.72));
+      stroke: var(--apartment-stroke, rgba(255,255,255,0.96));
       stroke-width: 2;
-      filter: drop-shadow(0 0 9px rgba(255,255,255,0.95));
+      filter: drop-shadow(0 0 9px var(--apartment-glow, rgba(255,255,255,0.95)));
     }
 
     .facade-grid-area polygon.filter-match,
     .facade-grid-area path.filter-match {
-      fill: rgba(255,255,255,0.46);
-      filter: drop-shadow(0 0 7px rgba(255,255,255,0.8));
+      fill: var(--apartment-fill-soft, rgba(255,255,255,0.46));
+      filter: drop-shadow(0 0 7px var(--apartment-glow, rgba(255,255,255,0.8)));
     }
 
     .facade-grid-area polygon.filter-hidden,
@@ -203,10 +227,10 @@
 
     .facade-grid-area polygon.apartment-selected,
     .facade-grid-area path.apartment-selected {
-      fill: rgba(255,255,255,0.82);
-      stroke: rgba(255,255,255,1);
+      fill: var(--apartment-fill, rgba(255,255,255,0.82));
+      stroke: var(--apartment-stroke, rgba(255,255,255,1));
       stroke-width: 2;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,1));
+      filter: drop-shadow(0 0 10px var(--apartment-glow, rgba(255,255,255,1)));
     }
 
     /* =========================================================
@@ -1696,13 +1720,15 @@
       #facadeGrid.has-apartment-selection polygon:not(.apartment-selected),
       #facadeGrid.has-apartment-selection path:not(.apartment-selected) {
         fill: transparent !important;
+        stroke: transparent !important;
         filter: none !important;
       }
 
       #facadeGrid.has-apartment-selection polygon.apartment-selected,
       #facadeGrid.has-apartment-selection path.apartment-selected {
-        fill: rgba(255,255,255,.82) !important;
-        filter: drop-shadow(0 0 10px rgba(255,255,255,1)) !important;
+        fill: var(--apartment-fill, rgba(255,255,255,.82)) !important;
+        stroke: var(--apartment-stroke, rgba(255,255,255,1)) !important;
+        filter: drop-shadow(0 0 10px var(--apartment-glow, rgba(255,255,255,1))) !important;
       }
     }
 
@@ -1806,8 +1832,8 @@
             <button id="filterReset" class="filter-reset is-hidden" type="button">Filter zurücksetzen</button>
             </div>
           </div>
-          <div class="section-block" data-section="sorting">
-            <button class="section-toggle" type="button" aria-expanded="true"><span class="section-title"><span class="section-icon sort-icon" aria-hidden="true"></span> Sortierung</span><span class="section-chevron">⌃</span></button>
+          <div class="section-block is-collapsed" data-section="sorting">
+            <button class="section-toggle" type="button" aria-expanded="false"><span class="section-title"><span class="section-icon sort-icon" aria-hidden="true"></span> Sortierung</span><span class="section-chevron">⌃</span></button>
             <div class="section-content sort-section"><div class="sort-buttons" aria-label="Sortierung und Verfügbarkeit">
               <button class="sort-button" type="button" data-sort="price">Preis <span class="arrow"></span></button>
               <button class="sort-button" type="button" data-sort="rooms">Zimmer <span class="arrow"></span></button>
@@ -5855,7 +5881,7 @@
 
       if (firstRun || mobile !== lastSectionLayoutMobile) {
         menuSections.forEach(section => {
-          if (mobile || section.dataset.section === "filters") {
+          if (mobile || section.dataset.section !== "apartments") {
             section.classList.add("is-collapsed");
           } else {
             section.classList.remove("is-collapsed");
