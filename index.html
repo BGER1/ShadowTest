@@ -215,6 +215,9 @@
     .facade-grid-area polygon.filter-match,
     .facade-grid-area path.filter-match {
       fill: var(--apartment-fill-soft, rgba(255,255,255,0.46));
+      stroke: #fff;
+      stroke-width: 1.25;
+      stroke-linejoin: round;
       filter: drop-shadow(0 0 7px var(--apartment-glow, rgba(255,255,255,0.8)));
     }
 
@@ -228,8 +231,9 @@
     .facade-grid-area polygon.apartment-selected,
     .facade-grid-area path.apartment-selected {
       fill: var(--apartment-fill, rgba(255,255,255,0.82));
-      stroke: rgba(20,22,19,.82);
+      stroke: #fff;
       stroke-width: 1.25;
+      stroke-linejoin: round;
       filter: drop-shadow(0 0 10px var(--apartment-glow, rgba(255,255,255,1)));
     }
 
@@ -1806,8 +1810,9 @@
       #facadeGrid.has-apartment-selection polygon.apartment-selected,
       #facadeGrid.has-apartment-selection path.apartment-selected {
         fill: var(--apartment-fill, rgba(255,255,255,.82)) !important;
-        stroke: rgba(20,22,19,.82) !important;
+        stroke: #fff !important;
         stroke-width: 1.25 !important;
+        stroke-linejoin: round !important;
         filter: drop-shadow(0 0 10px var(--apartment-glow, rgba(255,255,255,1))) !important;
       }
     }
@@ -5793,7 +5798,8 @@
         hasActiveFilters() ||
         activeSortField ||
         zoomLevel > MIN_ZOOM + 0.001 ||
-        selectedApartmentId
+        selectedApartmentId ||
+        currentFrame !== 0
       );
     }
 
@@ -5953,6 +5959,7 @@
       resetApartmentFocus();
       renderAvailabilitySummary();
       renderApartmentResults();
+      setFrameSmooth(0);
     }
 
     navigatorReset.addEventListener("click", resetNavigatorState);
