@@ -207,8 +207,9 @@
     .facade-grid-area polygon.focus-selected,
     .facade-grid-area path.focus-selected {
       fill: var(--apartment-fill, rgba(255,255,255,0.72));
-      stroke: var(--apartment-stroke, rgba(255,255,255,0.96));
-      stroke-width: 2;
+      stroke: #fff;
+      stroke-width: 1.25;
+      stroke-linejoin: round;
       filter: drop-shadow(0 0 9px var(--apartment-glow, rgba(255,255,255,0.95)));
     }
 
@@ -274,18 +275,22 @@
       gap:7px;
       min-height:40px;
       padding:0 15px;
-      border:1px solid rgba(25,28,23,.14);
+      border:1px solid rgba(255,255,255,.78);
       border-radius:999px;
-      background:#fff;
-      color:#292c26;
-      box-shadow:0 5px 16px rgba(0,0,0,.15);
-      backdrop-filter:blur(7px);
-      -webkit-backdrop-filter:blur(7px);
+      background:linear-gradient(135deg,rgba(255,255,255,.74),rgba(255,255,255,.42));
+      color:#242722;
+      box-shadow:
+        0 8px 24px rgba(20,25,18,.14),
+        inset 0 1px 0 rgba(255,255,255,.92),
+        inset 0 -1px 0 rgba(255,255,255,.24);
+      backdrop-filter:blur(18px) saturate(150%);
+      -webkit-backdrop-filter:blur(18px) saturate(150%);
       font-family:'Avenir Next','Avenir','Helvetica Neue',Arial,sans-serif;
       font-size:11px;
-      font-weight:500;
+      font-weight:600;
+      letter-spacing:.01em;
       cursor:pointer;
-      transition:opacity .16s ease,transform .16s ease,background .16s ease;
+      transition:opacity .16s ease,transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease;
     }
 
     .navigator-reset-icon {
@@ -295,9 +300,17 @@
     }
 
     .navigator-reset:hover {
-      border-color:rgba(52,73,46,.34);
-      background:#fff;
+      border-color:rgba(255,255,255,.96);
+      background:linear-gradient(135deg,rgba(255,255,255,.86),rgba(255,255,255,.56));
+      box-shadow:
+        0 10px 28px rgba(20,25,18,.18),
+        inset 0 1px 0 #fff,
+        inset 0 -1px 0 rgba(255,255,255,.3);
       transform:translateY(-1px);
+    }
+
+    .navigator-reset:active {
+      transform:translateY(0) scale(.98);
     }
 
     .navigator-reset.is-hidden {
