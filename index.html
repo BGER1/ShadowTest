@@ -228,8 +228,8 @@
     .facade-grid-area polygon.apartment-selected,
     .facade-grid-area path.apartment-selected {
       fill: var(--apartment-fill, rgba(255,255,255,0.82));
-      stroke: var(--apartment-stroke, rgba(255,255,255,1));
-      stroke-width: 2;
+      stroke: rgba(20,22,19,.82);
+      stroke-width: 1.25;
       filter: drop-shadow(0 0 10px var(--apartment-glow, rgba(255,255,255,1)));
     }
 
@@ -262,13 +262,17 @@
     .navigator-reset {
       position:absolute;
       right:18px;
-      bottom:18px;
+      top:18px;
+      bottom:auto;
       z-index:95;
+      display:flex;
+      align-items:center;
+      gap:7px;
       min-height:40px;
       padding:0 15px;
       border:1px solid rgba(25,28,23,.14);
       border-radius:999px;
-      background:rgba(255,255,255,.95);
+      background:#fff;
       color:#292c26;
       box-shadow:0 5px 16px rgba(0,0,0,.15);
       backdrop-filter:blur(7px);
@@ -278,6 +282,12 @@
       font-weight:500;
       cursor:pointer;
       transition:opacity .16s ease,transform .16s ease,background .16s ease;
+    }
+
+    .navigator-reset-icon {
+      font-size:17px;
+      font-weight:500;
+      line-height:1;
     }
 
     .navigator-reset:hover {
@@ -1519,7 +1529,8 @@
 
       .navigator-reset {
         right:12px;
-        bottom:12px;
+        top:12px;
+        bottom:auto;
         min-height:42px;
         padding:0 14px;
       }
@@ -1795,7 +1806,8 @@
       #facadeGrid.has-apartment-selection polygon.apartment-selected,
       #facadeGrid.has-apartment-selection path.apartment-selected {
         fill: var(--apartment-fill, rgba(255,255,255,.82)) !important;
-        stroke: var(--apartment-stroke, rgba(255,255,255,1)) !important;
+        stroke: rgba(20,22,19,.82) !important;
+        stroke-width: 1.25 !important;
         filter: drop-shadow(0 0 10px var(--apartment-glow, rgba(255,255,255,1))) !important;
       }
     }
@@ -1858,7 +1870,10 @@
 
       <div class="drag-hint" id="dragHint" aria-hidden="true"></div>
 
-      <button id="navigatorReset" class="navigator-reset is-hidden" type="button">Filter zurücksetzen</button>
+      <button id="navigatorReset" class="navigator-reset is-hidden" type="button">
+        <span class="navigator-reset-icon" aria-hidden="true">↶</span>
+        <span>Zur Startansicht</span>
+      </button>
 
       <div class="loader" id="loader">
         <div class="loader-text" id="loaderInfo">
