@@ -133,30 +133,6 @@
       -webkit-user-drag: none;
     }
 
-    #orbitImagePrevious {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center center;
-      pointer-events: none;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-user-drag: none;
-      opacity: 0;
-      z-index: 1;
-      will-change: opacity, transform;
-      transition: opacity 105ms linear, transform 0.46s cubic-bezier(.22,.8,.2,1);
-    }
-
-    #orbitImage {
-      z-index: 2;
-      opacity: 1;
-      will-change: opacity, transform;
-      transition: opacity 105ms linear, transform 0.46s cubic-bezier(.22,.8,.2,1);
-    }
-
     /* =========================================================
        APARTMENT GRID OVERLAY
        Multiple independently positioned Figma areas per frame.
@@ -1875,7 +1851,6 @@
         <img id="mobileBlurImage" class="mobile-blur-bg" src="" alt="" draggable="false">
         <img id="desktopBlurImage" class="desktop-blur-bg" src="" alt="" draggable="false">
 
-        <img id="orbitImagePrevious" src="" alt="" draggable="false" aria-hidden="true">
         <img
           id="orbitImage"
           src=""
@@ -4522,7 +4497,6 @@
 
     const wrapper = document.getElementById("viewerCanvasWrapper");
     const orbitImage = document.getElementById("orbitImage");
-    const orbitImagePrevious = document.getElementById("orbitImagePrevious");
     const mobileBlurImage = document.getElementById("mobileBlurImage");
     const desktopBlurImage = document.getElementById("desktopBlurImage");
     const facadeGrid = document.getElementById("facadeGrid");
@@ -4641,10 +4615,8 @@
       const transform = `translate3d(${zoomTranslateX}px, ${zoomTranslateY}px, 0) scale(${zoomLevel})`;
 
       orbitImage.style.transformOrigin = transformOrigin;
-      orbitImagePrevious.style.transformOrigin = transformOrigin;
       facadeGrid.style.transformOrigin = transformOrigin;
       orbitImage.style.transform = transform;
-      orbitImagePrevious.style.transform = transform;
       facadeGrid.style.transform = transform;
       zoomValue.textContent = `${zoomLevel.toFixed(1).replace(".0", "")}×`;
       zoomProgress.style.width = `${(zoomLevel - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM) * 100}%`;
@@ -4921,8 +4893,6 @@
       smoothShotTimer = window.setTimeout(advanceOrbitFrame, 30);
     }
 
-    let orbitFadeToken = 0;
-
     function setFrame(index) {
       const previousFrame = currentFrame;
       const previousFocusedApartmentId = focusedApartmentId;
@@ -4931,29 +4901,7 @@
 
       const src = imagePaths[currentFrame];
 
-      // Very short two-layer crossfade. With only 26 orbit shots this is
-      // intentionally subtle, so perspective differences do not turn into
-      // obvious ghosting.
-      if (frameChanged && orbitImage.src) {
-        const fadeToken = ++orbitFadeToken;
-        orbitImagePrevious.src = orbitImage.src;
-        orbitImagePrevious.style.opacity = "1";
-        orbitImage.style.transition = "none";
-        orbitImage.style.opacity = "0";
-        orbitImage.src = src;
-
-        requestAnimationFrame(() => {
-          if (fadeToken !== orbitFadeToken) return;
-          orbitImage.style.transition = "opacity 105ms linear, transform 0.46s cubic-bezier(.22,.8,.2,1)";
-          orbitImagePrevious.style.opacity = "0";
-          orbitImage.style.opacity = "1";
-        });
-      } else {
-        orbitImage.src = src;
-        orbitImage.style.opacity = "1";
-        orbitImagePrevious.style.opacity = "0";
-      }
-
+      orbitImage.src = src;
       mobileBlurImage.src = src;
       desktopBlurImage.src = src;
       sideFillLeftImage.src = src;
@@ -5075,9 +5023,6 @@
     let gestureAxis = null;
     let dragAccumulator = 0;
     let dragDistance = 0;
-    let dragVelocity = 0; // horizontal pixels per millisecond
-    let lastMoveTime = 0;
-    let inertiaAnimationFrame = null;
     let suppressNextApartmentClick = false;
     let pendingApartmentFromGrid = null;
     let lastApartmentPointerPosition = null;
@@ -5121,55 +5066,6 @@
       applyZoom();
     }
 
-    function consumeDragAccumulator() {
-      while (Math.abs(dragAccumulator) >= PIXELS_PER_FRAME) {
-        if (dragAccumulator < 0) {
-          setFrame(currentFrame - 1);
-          dragAccumulator += PIXELS_PER_FRAME;
-        } else {
-          setFrame(currentFrame + 1);
-          dragAccumulator -= PIXELS_PER_FRAME;
-        }
-      }
-    }
-
-    function stopInertia() {
-      if (inertiaAnimationFrame !== null) {
-        cancelAnimationFrame(inertiaAnimationFrame);
-        inertiaAnimationFrame = null;
-      }
-    }
-
-    function startInertia(initialVelocity) {
-      stopInertia();
-
-      let velocity = Math.max(-1.8, Math.min(1.8, initialVelocity));
-      let previousTime = performance.now();
-
-      function tick(now) {
-        const deltaTime = Math.min(32, Math.max(1, now - previousTime));
-        previousTime = now;
-
-        dragAccumulator += velocity * deltaTime;
-        consumeDragAccumulator();
-
-        // Frame-rate independent damping: ~0.91 per 60 Hz frame.
-        velocity *= Math.pow(0.91, deltaTime / 16.67);
-
-        if (Math.abs(velocity) < 0.025) {
-          inertiaAnimationFrame = null;
-          dragAccumulator = 0;
-          return;
-        }
-
-        inertiaAnimationFrame = requestAnimationFrame(tick);
-      }
-
-      if (Math.abs(velocity) >= 0.06) {
-        inertiaAnimationFrame = requestAnimationFrame(tick);
-      }
-    }
-
     function startDragging(event) {
       if (
         event.pointerType === "mouse" &&
@@ -5190,11 +5086,8 @@
         }
       }
 
-      stopInertia();
       isDragging = true;
       lastX = event.clientX;
-      lastMoveTime = performance.now();
-      dragVelocity = 0;
       gestureStartX = event.clientX;
       gestureStartY = event.clientY;
       gestureAxis = event.pointerType === "mouse" ? "horizontal" : null;
@@ -5249,18 +5142,22 @@
         } catch (error) {}
       }
 
-      const now = performance.now();
       const movement = event.clientX - lastX;
-      const deltaTime = Math.max(1, now - lastMoveTime);
-      const instantVelocity = movement / deltaTime;
-
-      // Smooth noisy pointer samples without making the drag feel delayed.
-      dragVelocity = dragVelocity * 0.68 + instantVelocity * 0.32;
-      lastMoveTime = now;
       lastX = event.clientX;
       dragAccumulator += movement;
       dragDistance += Math.abs(movement);
-      consumeDragAccumulator();
+
+      while (
+        Math.abs(dragAccumulator) >= PIXELS_PER_FRAME
+      ) {
+        if (dragAccumulator < 0) {
+          setFrame(currentFrame - 1);
+          dragAccumulator += PIXELS_PER_FRAME;
+        } else {
+          setFrame(currentFrame + 1);
+          dragAccumulator -= PIXELS_PER_FRAME;
+        }
+      }
     }
 
     function stopDragging(event) {
@@ -5312,7 +5209,6 @@
         );
       } else {
         pendingApartmentFromGrid = null;
-        if (wasDrag) startInertia(dragVelocity);
       }
 
     }
