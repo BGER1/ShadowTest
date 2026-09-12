@@ -2030,7 +2030,9 @@
        SETTINGS
     ========================================================= */
 
-    const TOTAL_FRAMES = 26;
+    const ORIGINAL_TOTAL_FRAMES = 26;
+    const FRAME_SHOTS = [1, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, ...Array.from({ length: 21 }, (_, i) => i + 6)];
+    const TOTAL_FRAMES = FRAME_SHOTS.length;
     const PIXELS_PER_FRAME = 30;
 
     /* =========================================================
@@ -4485,10 +4487,21 @@
        IMAGE PATHS
     ========================================================= */
 
-    const imagePaths = [];
+    const imagePaths = FRAME_SHOTS.map(shot => `models/${shot}.jpg`);
 
-    for (let i = 1; i <= TOTAL_FRAMES; i++) {
-      imagePaths.push(`models/${i}.jpg`);
+    function getShotNumberForFrame(frameIndex = currentFrame) {
+      return FRAME_SHOTS[normalizeFrame(frameIndex)];
+    }
+
+    function getFrameIndexForShot(shotNumber) {
+      const exactIndex = FRAME_SHOTS.indexOf(Number(shotNumber));
+      if (exactIndex !== -1) return exactIndex;
+
+      return FRAME_SHOTS.reduce((bestIndex, shot, index) => (
+        Math.abs(shot - Number(shotNumber)) < Math.abs(FRAME_SHOTS[bestIndex] - Number(shotNumber))
+          ? index
+          : bestIndex
+      ), 0);
     }
 
     /* =========================================================
@@ -4814,31 +4827,31 @@
 
     function getApartmentTargetFrame(apartment, selectionContext = {}) {
       const topNumber = getApartmentTopNumber(apartment);
-      const sourceShot = selectionContext.sourceShot || currentFrame + 1;
+      const sourceShot = selectionContext.sourceShot || getShotNumberForFrame();
       const configName = selectionContext.configName || "";
 
       if ([5, 15, 25, 35].includes(topNumber)) {
-        if (sourceShot >= 12 && sourceShot <= 18) return 16 - 1;
+        if (sourceShot >= 12 && sourceShot <= 18) return getFrameIndexForShot(16);
       }
 
       if ([10, 20, 30, 40].includes(topNumber)) {
-        if (sourceShot >= 20 && sourceShot <= 25) return 18 - 1;
-        if (sourceShot >= 4 && sourceShot <= 14) return 11 - 1;
+        if (sourceShot >= 20 && sourceShot <= 25) return getFrameIndexForShot(18);
+        if (sourceShot >= 4 && sourceShot <= 14) return getFrameIndexForShot(11);
 
         if (sourceShot >= 15 && sourceShot <= 19) {
           const clickedSideFacade = /Seit.*Fassade/i.test(configName);
-          if (clickedSideFacade) return 18 - 1;
-          if (topNumber === 40 && configName) return 11 - 1;
+          if (clickedSideFacade) return getFrameIndexForShot(18);
+          if (topNumber === 40 && configName) return getFrameIndexForShot(11);
         }
       }
 
       if ([9, 19, 29, 39].includes(topNumber)) {
-        if (sourceShot >= 3 && sourceShot <= 12) return 9 - 1;
-        if (sourceShot >= 13 && sourceShot <= 24) return 16 - 1;
+        if (sourceShot >= 3 && sourceShot <= 12) return getFrameIndexForShot(9);
+        if (sourceShot >= 13 && sourceShot <= 24) return getFrameIndexForShot(16);
       }
 
       const shotNumber = APARTMENT_TARGET_SHOTS.get(topNumber);
-      return shotNumber ? shotNumber - 1 : null;
+      return shotNumber ? getFrameIndexForShot(shotNumber) : null;
     }
 
     function setFrameSmooth(index, onComplete = null) {
@@ -4995,11 +5008,11 @@
     ========================================================= */
 
     function updateCompass() {
-      const degreesPerFrame = 360 / TOTAL_FRAMES;
+      const degreesPerFrame = 360 / ORIGINAL_TOTAL_FRAMES;
 
       const heading =
         INITIAL_HEADING_DEG +
-        currentFrame * degreesPerFrame;
+        (getShotNumberForFrame() - 1) * (360 / ORIGINAL_TOTAL_FRAMES);
 
       /*
         Dial rotates opposite to the camera heading,
@@ -5581,7 +5594,7 @@
         */
         pendingApartmentFromGrid = {
           apartment: primaryApartment,
-          selectionContext: { configName, sourceShot: currentFrame + 1 }
+          selectionContext: { configName, sourceShot: getShotNumberForFrame() }
         };
         lastApartmentPointerPosition = { x: event.clientX, y: event.clientY };
       });
@@ -5597,7 +5610,7 @@
         selectApartment(
           primaryApartment,
           { x: event.clientX, y: event.clientY },
-          { configName, sourceShot: currentFrame + 1 }
+          { configName, sourceShot: getShotNumberForFrame() }
         );
       });
     }
@@ -5652,8 +5665,9 @@
     function updateFacadeGrid() {
       facadeGrid.innerHTML = "";
 
-      const shotNumber = currentFrame + 1;
-      const configs = FRAME_GRIDS[shotNumber];
+      const shotNumber = getShotNumberForFrame();
+      // Interpolated .5 frames have no dedicated Figma mask; hide the grid there.
+      const configs = Number.isInteger(shotNumber) ? FRAME_GRIDS[shotNumber] : null;
       if (!configs) {
         facadeGrid.classList.remove("is-visible");
         return;
